@@ -176,11 +176,6 @@ function openGithub() {
     showNotification('Opening GitHub profile...');
 }
 
-function openMentalHealth() {
-    window.open('mental-health.html', '_blank');
-    showNotification('Opening Inner Light - Mental Health Site...');
-}
-
 // Konami code easter egg
 let konamiCode = [];
 const konamiSequence = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65]; // ↑↑↓↓←→←→BA
