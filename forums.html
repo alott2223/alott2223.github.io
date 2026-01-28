@@ -515,107 +515,153 @@
     <script>
         let currentUser = null;
 
-        async function api(path, options = {}) {
-            const res = await fetch(path, {
-                credentials: 'include',
-                headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
-                ...options
-            });
-            if (res.status === 401) { window.location.href = 'index.html'; return null; }
-            const data = await res.json().catch(() => ({}));
-            if (!res.ok) throw new Error(data.error || 'Request failed');
-            return data;
-        }
+        function initApp() {
+            // Check authentication
+            if (sessionStorage.getItem('rnn_auth') !== 'true') {
+                window.location.href = 'index.html';
+                return;
+            }
 
-        async function initApp() {
-            const me = await api('/api/me');
-            if (!me) return;
-            currentUser = me.user;
+            // Get current user
+            currentUser = JSON.parse(sessionStorage.getItem('rnn_user'));
+            if (!currentUser) {
+                logout();
+                return;
+            }
+
             document.getElementById('currentUsername').textContent = currentUser.username;
             loadSettings();
-            await Promise.all([loadMessages(), loadMedia(), loadUsers()]);
+            loadMessages();
+            loadMedia();
+            loadUsers();
         }
 
-        async function logout() {
-            await api('/api/logout', { method: 'POST' });
+        function logout() {
+            sessionStorage.removeItem('rnn_auth');
+            sessionStorage.removeItem('rnn_user');
             window.location.href = 'index.html';
         }
 
         function showTab(tabName) {
-            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remove active class from nav items
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Show selected tab
             document.getElementById('tab-' + tabName).classList.add('active');
             event.currentTarget.classList.add('active');
+            
+            // Load content if needed
             if (tabName === 'media') loadMedia();
             if (tabName === 'users') loadUsers();
         }
 
-        async function sendMessage() {
+        function sendMessage() {
             const messageText = document.getElementById('messageText').value.trim();
             const fileInput = document.getElementById('messageFileInput');
-            if (!messageText && !fileInput.files.length) return;
-
-            let media = null;
-            if (fileInput.files.length) {
-                const file = fileInput.files[0];
-                if (file.size > 5 * 1024 * 1024) { showToast('File too large (max 5MB)'); return; }
-                media = await toBase64(file);
+            
+            if (!messageText && !fileInput.files.length) {
+                return;
             }
 
-            try {
-                await api('/api/messages', {
-                    method: 'POST',
-                    body: JSON.stringify({ text: messageText, media })
-                });
+            const messages = JSON.parse(localStorage.getItem('rnn_messages') || '[]');
+            const message = {
+                id: Date.now(),
+                author: currentUser.username,
+                text: messageText,
+                timestamp: new Date().toISOString(),
+                media: null
+            };
+
+            if (fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                if (file.size > 5 * 1024 * 1024) {
+                    showToast('File too large (max 5MB)');
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    message.media = {
+                        name: file.name,
+                        type: file.type,
+                        data: e.target.result
+                    };
+                    
+                    messages.push(message);
+                    localStorage.setItem('rnn_messages', JSON.stringify(messages.slice(-100)));
+                    
+                    document.getElementById('messageText').value = '';
+                    fileInput.value = '';
+                    loadMessages();
+                };
+                reader.readAsDataURL(file);
+            } else {
+                messages.push(message);
+                localStorage.setItem('rnn_messages', JSON.stringify(messages.slice(-100)));
+                
                 document.getElementById('messageText').value = '';
-                fileInput.value = '';
-                await loadMessages(true);
-            } catch (e) {
-                showToast(e.message || 'Failed to send');
+                loadMessages();
             }
         }
 
-        async function loadMessages(scrollBottom = false) {
-            const data = await api('/api/messages');
-            if (!data) return;
-            const messages = data.messages || [];
+        function loadMessages() {
+            const messages = JSON.parse(localStorage.getItem('rnn_messages') || '[]');
             const container = document.getElementById('messagesContainer');
             const empty = document.getElementById('messagesEmpty');
+            
             if (messages.length === 0) {
                 container.innerHTML = '';
                 container.appendChild(empty);
                 return;
             }
+            
             container.innerHTML = messages.map(msg => `
                 <div class="message">
                     <div class="message-header">
                         <span class="message-author">${msg.author}</span>
                         <span class="message-time">${new Date(msg.timestamp).toLocaleString()}</span>
                     </div>
-                    <div class="message-content">${escapeHtml(msg.text)}</div>
+                    <div class="message-content">${msg.text}</div>
                     ${msg.media ? `
                         <div class="message-media">
-                            ${msg.media.type.startsWith('image/') ?
+                            ${msg.media.type.startsWith('image/') ? 
                                 `<img src="${msg.media.data}" alt="${msg.media.name}">` :
-                                `<video src="${msg.media.data}" controls></video>`}
+                                `<video src="${msg.media.data}" controls></video>`
+                            }
                         </div>
                     ` : ''}
                 </div>
             `).join('');
-            if (scrollBottom) container.scrollTop = container.scrollHeight;
+            
+            // Scroll to bottom
+            container.scrollTop = container.scrollHeight;
         }
 
-        async function loadMedia() {
-            const data = await api('/api/media');
-            if (!data) return;
-            const media = data.media || [];
+        function loadMedia() {
+            const media = JSON.parse(localStorage.getItem('rnn_media') || '[]');
             const grid = document.getElementById('mediaGrid');
             const empty = document.getElementById('mediaEmpty');
-            if (media.length === 0) { grid.innerHTML = ''; empty.style.display = 'block'; return; }
+            
+            if (media.length === 0) {
+                grid.innerHTML = '';
+                empty.style.display = 'block';
+                return;
+            }
+            
             empty.style.display = 'none';
             grid.innerHTML = media.map(item => `
                 <div class="media-item" onclick="window.open('${item.data}')">
-                    ${item.type.startsWith('image/') ? `<img src="${item.data}" alt="${item.name}">` : `<video src="${item.data}"></video>`}
+                    ${item.type.startsWith('image/') ? 
+                        `<img src="${item.data}" alt="${item.name}">` :
+                        `<video src="${item.data}"></video>`
+                    }
                     <div class="media-info">
                         <div class="media-name">${item.name}</div>
                         <div class="media-date">${new Date(item.date).toLocaleDateString()}</div>
@@ -624,17 +670,20 @@
             `).join('');
         }
 
-        async function loadUsers() {
-            const data = await api('/api/users');
-            if (!data) return;
-            const users = data.users || [];
+        function loadUsers() {
+            const users = JSON.parse(localStorage.getItem('rnn_users') || '[]');
             const container = document.getElementById('usersList');
-            if (users.length === 0) { container.innerHTML = '<div class="empty-state"><div class="icon">👥</div><p>No users found</p></div>'; return; }
+            
+            if (users.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="icon">👥</div><p>No users found</p></div>';
+                return;
+            }
+            
             container.innerHTML = users.map(user => `
                 <div class="user-card">
                     <div class="user-header">
                         <span class="user-username">${user.username}</span>
-                        <span class="user-status status-offline">User</span>
+                        <span class="user-status status-offline">Offline</span>
                     </div>
                     <div class="user-meta">Joined: ${new Date(user.createdAt).toLocaleDateString()}</div>
                 </div>
@@ -647,19 +696,39 @@
             document.getElementById('userInviteCode').value = currentUser.inviteCode || 'N/A';
         }
 
-        async function changePassword() {
+        function changePassword() {
             const newPassword = document.getElementById('newPassword').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
-            if (!newPassword || !confirmPassword) return showToast('Please fill in all fields');
-            if (newPassword !== confirmPassword) return showToast('Passwords do not match');
-            if (newPassword.length < 6) return showToast('Password must be at least 6 characters');
-            try {
-                await api('/api/login', { method: 'POST', body: JSON.stringify({ changePassword: true, newPassword }) });
+            
+            if (!newPassword || !confirmPassword) {
+                showToast('Please fill in all fields');
+                return;
+            }
+            
+            if (newPassword !== confirmPassword) {
+                showToast('Passwords do not match');
+                return;
+            }
+            
+            if (newPassword.length < 6) {
+                showToast('Password must be at least 6 characters');
+                return;
+            }
+            
+            // Update password in storage
+            const users = JSON.parse(localStorage.getItem('rnn_users') || '[]');
+            const userIndex = users.findIndex(u => u.username === currentUser.username);
+            if (userIndex !== -1) {
+                users[userIndex].password = newPassword;
+                localStorage.setItem('rnn_users', JSON.stringify(users));
+                
+                // Update current user
+                currentUser.password = newPassword;
+                sessionStorage.setItem('rnn_user', JSON.stringify(currentUser));
+                
+                showToast('Password updated successfully');
                 document.getElementById('newPassword').value = '';
                 document.getElementById('confirmPassword').value = '';
-                showToast('Password updated');
-            } catch (e) {
-                showToast(e.message || 'Failed to update');
             }
         }
 
@@ -670,45 +739,69 @@
             setTimeout(() => toast.classList.remove('show'), 3000);
         }
 
-        async function toBase64(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = e => resolve({ name: file.name, type: file.type, data: e.target.result });
-                reader.onerror = reject;
-                reader.readAsDataURL(file);
-            });
-        }
-
-        function escapeHtml(str) {
-            return str.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c] || c));
-        }
-
         // File upload handlers
         const dropZone = document.getElementById('dropZone');
         const mediaFileInput = document.getElementById('mediaFileInput');
 
-        dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
-        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
-        dropZone.addEventListener('drop', async e => { e.preventDefault(); dropZone.classList.remove('dragover'); await handleMediaFiles(e.dataTransfer.files); });
-        mediaFileInput.addEventListener('change', async e => { await handleMediaFiles(e.target.files); });
-
-        async function handleMediaFiles(files) {
-            let count = 0;
-            for (const file of Array.from(files)) {
-                if (file.size > 10 * 1024 * 1024) { showToast(file.name + ' too large (max 10MB)'); continue; }
-                const media = await toBase64(file);
-                try {
-                    await api('/api/media', { method: 'POST', body: JSON.stringify({ media }) });
-                    count++;
-                } catch (e) { showToast(e.message || 'Upload failed'); }
-            }
-            if (count) { showToast(count + ' file(s) uploaded'); loadMedia(); }
-        }
-
-        document.getElementById('messageText').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+        dropZone.addEventListener('dragover', e => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
         });
 
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+
+        dropZone.addEventListener('drop', e => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            handleMediaFiles(e.dataTransfer.files);
+        });
+
+        mediaFileInput.addEventListener('change', e => {
+            handleMediaFiles(e.target.files);
+        });
+
+        function handleMediaFiles(files) {
+            const media = JSON.parse(localStorage.getItem('rnn_media') || '[]');
+            let count = 0;
+            
+            Array.from(files).forEach(file => {
+                if (file.size > 10 * 1024 * 1024) {
+                    showToast(file.name + ' too large (max 10MB)');
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = e => {
+                    media.push({
+                        name: file.name,
+                        type: file.type,
+                        data: e.target.result,
+                        date: new Date().toISOString(),
+                        uploadedBy: currentUser.username
+                    });
+                    count++;
+                    
+                    if (count === files.length) {
+                        localStorage.setItem('rnn_media', JSON.stringify(media));
+                        loadMedia();
+                        showToast(count + ' file(s) uploaded');
+                    }
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // Enter key to send message
+        document.getElementById('messageText').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // Initialize app
         initApp();
     </script>
 </body>
