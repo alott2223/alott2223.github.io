@@ -407,6 +407,19 @@
                 </div>
             </nav>
             <nav class="nav-section">
+                <div class="nav-label">Users</div>
+                <div class="nav-item" onclick="showPage('users')">
+                    <span class="icon">👥</span>
+                    <span>User Management</span>
+                    <span class="badge" id="usersBadge">0</span>
+                </div>
+                <div class="nav-item" onclick="showPage('invites')">
+                    <span class="icon">🎫</span>
+                    <span>Invite Codes</span>
+                    <span class="badge" id="invitesBadge">0</span>
+                </div>
+            </nav>
+            <nav class="nav-section">
                 <div class="nav-label">Security</div>
                 <div class="nav-item" onclick="showPage('access')">
                     <span class="icon">🔍</span>
@@ -419,7 +432,7 @@
                 </div>
             </nav>
             <div class="quick-links">
-                <a href="index.html">📁 View RNN Page</a>
+                <a href="forums.html">💬 View Forums</a>
                 <a href="#" onclick="logout()">🚪 Logout</a>
             </div>
         </aside>
@@ -439,6 +452,11 @@
                         <div class="value" id="statMedia">0</div>
                         <div class="label">Total Media Files</div>
                     </div>
+                    <div class="stat-card warning">
+                        <div class="icon">👥</div>
+                        <div class="value" id="statUsers">0</div>
+                        <div class="label">Registered Users</div>
+                    </div>
                     <div class="stat-card success">
                         <div class="icon">✅</div>
                         <div class="value" id="statSuccess">0</div>
@@ -449,10 +467,15 @@
                         <div class="value" id="statFailed">0</div>
                         <div class="label">Failed Attempts</div>
                     </div>
-                    <div class="stat-card warning">
+                    <div class="stat-card info">
                         <div class="icon">🖐️</div>
                         <div class="value" id="statFingerprints">0</div>
                         <div class="label">Unique Visitors</div>
+                    </div>
+                    <div class="stat-card warning">
+                        <div class="icon">🎫</div>
+                        <div class="value" id="statInvites">0</div>
+                        <div class="label">Active Invite Codes</div>
                     </div>
                 </div>
                 <div class="panel">
@@ -464,9 +487,10 @@
                             <thead>
                                 <tr>
                                     <th>Time</th>
+                                    <th>User</th>
                                     <th>Status</th>
-                                    <th>Fingerprint</th>
-                                    <th>Location</th>
+                                    <th>IP Address</th>
+                                    <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody id="recentActivity"></tbody>
@@ -563,6 +587,77 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Users Management Page -->
+            <div class="page" id="page-users">
+                <div class="page-header">
+                    <h2>User Management</h2>
+                    <p>Manage registered users and their information</p>
+                </div>
+                <div class="panel">
+                    <div class="panel-header">
+                        <h3>👥 Registered Users</h3>
+                    </div>
+                    <div class="panel-body">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Username</th>
+                                    <th>Created</th>
+                                    <th>Invite Code</th>
+                                    <th>Last Login</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersList"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Invite Codes Page -->
+            <div class="page" id="page-invites">
+                <div class="page-header">
+                    <h2>Invite Code Management</h2>
+                    <p>Generate and manage invitation codes for new users</p>
+                </div>
+                <div class="panel">
+                    <div class="panel-header">
+                        <h3>🎫 Generate New Invite</h3>
+                    </div>
+                    <div class="panel-body" style="padding: 25px;">
+                        <div style="display: flex; gap: 15px; align-items: center; margin-bottom: 20px;">
+                            <input type="text" id="inviteDescription" placeholder="Description (optional)" style="flex: 1; padding: 12px; background: #0a0a0a; border: 1px solid #333; border-radius: 8px; color: #fff; font-family: inherit;">
+                            <button class="upload-btn" onclick="generateInvite()" style="padding: 12px 25px;">Generate Code</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel">
+                    <div class="panel-header">
+                        <h3>💳 Active Invite Codes</h3>
+                        <div class="header-actions">
+                            <button class="btn-clear" onclick="clearUsedInvites()">Clear Used</button>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Code</th>
+                                    <th>Created</th>
+                                    <th>Description</th>
+                                    <th>Status</th>
+                                    <th>Used By</th>
+                                    <th>Used At</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="invitesList"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </main>
     </div>
 
@@ -610,35 +705,46 @@
             if (pageId === 'media') loadMediaGrid();
             if (pageId === 'access') loadAccessLogs();
             if (pageId === 'fingerprints') loadFingerprints();
+            if (pageId === 'users') loadUsersList();
+            if (pageId === 'invites') loadInvitesList();
         }
 
         function initDashboard() {
             const media = JSON.parse(localStorage.getItem('rnn_media') || '[]');
             const logs = JSON.parse(localStorage.getItem('rnn_access_log') || '[]');
+            const users = JSON.parse(localStorage.getItem('rnn_users') || '[]');
+            const invites = JSON.parse(localStorage.getItem('rnn_invite_codes') || '[]');
             
             const successful = logs.filter(l => l.success).length;
             const failed = logs.filter(l => !l.success).length;
             const uniqueFP = [...new Set(logs.map(l => l.fingerprint))].length;
+            const activeInvites = invites.filter(i => !i.used).length;
             
             document.getElementById('statMedia').textContent = media.length;
+            document.getElementById('statUsers').textContent = users.length;
             document.getElementById('statSuccess').textContent = successful;
             document.getElementById('statFailed').textContent = failed;
             document.getElementById('statFingerprints').textContent = uniqueFP;
+            document.getElementById('statInvites').textContent = activeInvites;
+            
             document.getElementById('mediaBadge').textContent = media.length;
+            document.getElementById('usersBadge').textContent = users.length;
+            document.getElementById('invitesBadge').textContent = activeInvites;
             document.getElementById('logsBadge').textContent = logs.length;
             
             // Recent activity
             const recent = logs.slice(-5).reverse();
             const tbody = document.getElementById('recentActivity');
             if (recent.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#555;">No activity yet</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#555;">No activity yet</td></tr>';
             } else {
                 tbody.innerHTML = recent.map(log => `
                     <tr>
                         <td>${new Date(log.timestamp).toLocaleString()}</td>
+                        <td>${log.username || 'Anonymous'}</td>
                         <td><span class="status-badge ${log.success ? 'success' : 'failed'}">${log.success ? 'SUCCESS' : 'FAILED'}</span></td>
-                        <td class="fingerprint-cell" onclick="copyText('${log.fingerprint}')" title="${log.fingerprint}">${log.fingerprint.slice(0,16)}...</td>
-                        <td>${log.timezone || 'Unknown'}</td>
+                        <td>${log.ip || 'Unknown'}</td>
+                        <td>${log.action || 'login'}</td>
                     </tr>
                 `).join('');
             }
@@ -849,6 +955,168 @@
         document.getElementById('detailModal').addEventListener('click', e => {
             if (e.target.id === 'detailModal') closeModal();
         });
+
+        // Users Management
+        function loadUsersList() {
+            const users = JSON.parse(localStorage.getItem('rnn_users') || '[]');
+            const logs = JSON.parse(localStorage.getItem('rnn_access_log') || '[]');
+            const tbody = document.getElementById('usersList');
+            
+            if (users.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#555;">No users registered</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = users.map(user => {
+                // Find last login
+                const userLogs = logs.filter(l => l.username === user.username && l.success).reverse();
+                const lastLogin = userLogs.length > 0 ? new Date(userLogs[0].timestamp).toLocaleString() : 'Never';
+                
+                return `
+                    <tr>
+                        <td>${user.username}</td>
+                        <td>${new Date(user.createdAt).toLocaleDateString()}</td>
+                        <td>${user.inviteCode || 'N/A'}</td>
+                        <td>${lastLogin}</td>
+                        <td><span class="status-badge ${user.isAdmin ? 'warning' : 'success'}">${user.isAdmin ? 'Admin' : 'User'}</span></td>
+                        <td>
+                            <button class="btn-sm btn-view" onclick="viewUserDetails('${user.username}')">Details</button>
+                            <button class="btn-sm btn-delete" onclick="deleteUser('${user.username}')">Delete</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function viewUserDetails(username) {
+            const users = JSON.parse(localStorage.getItem('rnn_users') || '[]');
+            const logs = JSON.parse(localStorage.getItem('rnn_access_log') || '[]');
+            const user = users.find(u => u.username === username);
+            
+            if (!user) return;
+            
+            const userLogs = logs.filter(l => l.username === username);
+            const successfulLogins = userLogs.filter(l => l.success).length;
+            const failedAttempts = userLogs.filter(l => !l.success).length;
+            
+            document.getElementById('modalContent').innerHTML = `
+                <div class="detail-card">
+                    <h4>👤 User Information</h4>
+                    <div class="detail-item"><span class="label">Username</span><span class="value">${user.username}</span></div>
+                    <div class="detail-item"><span class="label">Account Created</span><span class="value">${new Date(user.createdAt).toLocaleString()}</span></div>
+                    <div class="detail-item"><span class="label">Invite Code Used</span><span class="value">${user.inviteCode || 'N/A'}</span></div>
+                    <div class="detail-item"><span class="label">Admin Status</span><span class="value">${user.isAdmin ? 'Yes' : 'No'}</span></div>
+                </div>
+                <div class="detail-card">
+                    <h4>📊 Login Statistics</h4>
+                    <div class="detail-item"><span class="label">Successful Logins</span><span class="value">${successfulLogins}</span></div>
+                    <div class="detail-item"><span class="label">Failed Attempts</span><span class="value">${failedAttempts}</span></div>
+                    <div class="detail-item"><span class="label">Total Attempts</span><span class="value">${userLogs.length}</span></div>
+                </div>
+            `;
+            document.getElementById('detailModal').classList.add('show');
+        }
+
+        function deleteUser(username) {
+            if (!confirm('Delete user "' + username + '"? This action cannot be undone.')) return;
+            
+            const users = JSON.parse(localStorage.getItem('rnn_users') || '[]');
+            const updatedUsers = users.filter(u => u.username !== username);
+            localStorage.setItem('rnn_users', JSON.stringify(updatedUsers));
+            
+            loadUsersList();
+            initDashboard();
+            showToast('User deleted');
+        }
+
+        // Invite Code Management
+        function loadInvitesList() {
+            const invites = JSON.parse(localStorage.getItem('rnn_invite_codes') || '[]').reverse();
+            const tbody = document.getElementById('invitesList');
+            
+            if (invites.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#555;">No invite codes generated</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = invites.map((invite, index) => `
+                <tr>
+                    <td class="fingerprint-cell" onclick="copyText('${invite.code}')" title="Click to copy">${invite.code}</td>
+                    <td>${new Date(invite.createdAt).toLocaleDateString()}</td>
+                    <td>${invite.description || 'No description'}</td>
+                    <td><span class="status-badge ${invite.used ? 'failed' : 'success'}">${invite.used ? 'Used' : 'Active'}</span></td>
+                    <td>${invite.usedBy || '-'}</td>
+                    <td>${invite.usedAt ? new Date(invite.usedAt).toLocaleDateString() : '-'}</td>
+                    <td>
+                        <button class="btn-sm btn-view" onclick="copyText('${invite.code}')">Copy</button>
+                        ${!invite.used ? `<button class="btn-sm btn-delete" onclick="deleteInvite(${invites.length - 1 - index})">Delete</button>` : ''}
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function generateInvite() {
+            const description = document.getElementById('inviteDescription').value.trim();
+            
+            // Generate random invite code
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let code = '';
+            for (let i = 0; i < 8; i++) {
+                code += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            
+            const invites = JSON.parse(localStorage.getItem('rnn_invite_codes') || '[]');
+            
+            // Check if code already exists (very unlikely but possible)
+            if (invites.find(i => i.code === code)) {
+                generateInvite(); // Try again
+                return;
+            }
+            
+            const invite = {
+                code: code,
+                description: description || 'No description',
+                createdAt: new Date().toISOString(),
+                used: false,
+                usedBy: null,
+                usedAt: null
+            };
+            
+            invites.push(invite);
+            localStorage.setItem('rnn_invite_codes', JSON.stringify(invites));
+            
+            document.getElementById('inviteDescription').value = '';
+            loadInvitesList();
+            initDashboard();
+            showToast('Invite code generated: ' + code);
+            
+            // Auto-copy to clipboard
+            copyText(code);
+        }
+
+        function deleteInvite(index) {
+            if (!confirm('Delete this invite code?')) return;
+            
+            const invites = JSON.parse(localStorage.getItem('rnn_invite_codes') || '[]');
+            invites.splice(invites.length - 1 - index, 1);
+            localStorage.setItem('rnn_invite_codes', JSON.stringify(invites));
+            
+            loadInvitesList();
+            initDashboard();
+            showToast('Invite code deleted');
+        }
+
+        function clearUsedInvites() {
+            if (!confirm('Clear all used invite codes?')) return;
+            
+            const invites = JSON.parse(localStorage.getItem('rnn_invite_codes') || '[]');
+            const activeInvites = invites.filter(i => !i.used);
+            localStorage.setItem('rnn_invite_codes', JSON.stringify(activeInvites));
+            
+            loadInvitesList();
+            initDashboard();
+            showToast('Used invite codes cleared');
+        }
     </script>
 </body>
 </html>

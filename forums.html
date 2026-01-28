@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RNN Forums - Shoutbox</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💬</text></svg>">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #0a0a0a 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+        
+        /* Header */
+        .header {
+            background: rgba(15, 15, 25, 0.98);
+            border-bottom: 1px solid #222;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .header h1 {
+            color: #00ff88;
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            color: #666;
+        }
+        .username {
+            color: #00ff88;
+            font-weight: 600;
+        }
+        .logout-btn {
+            padding: 10px 20px;
+            background: rgba(255, 68, 68, 0.2);
+            border: 1px solid #ff4444;
+            border-radius: 8px;
+            color: #ff4444;
+            font-family: inherit;
+            cursor: pointer;
+            transition: background 0.2s;
+            text-decoration: none;
+        }
+        .logout-btn:hover { background: rgba(255, 68, 68, 0.3); }
+
+        /* Main Layout */
+        .main-container {
+            display: flex;
+            height: calc(100vh - 80px);
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: rgba(15, 15, 25, 0.95);
+            border-right: 1px solid #222;
+            padding: 20px 0;
+            overflow-y: auto;
+        }
+        .nav-section {
+            padding: 0 15px;
+            margin-bottom: 25px;
+        }
+        .nav-label {
+            color: #555;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            padding: 0 10px;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 15px;
+            color: #888;
+            text-decoration: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 5px;
+        }
+        .nav-item:hover { background: rgba(0, 255, 136, 0.1); color: #fff; }
+        .nav-item.active { background: rgba(0, 255, 136, 0.2); color: #00ff88; }
+        .nav-item .icon { font-size: 1.2rem; }
+
+        /* Content Area */
+        .content-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .tab-content { display: none; flex: 1; flex-direction: column; }
+        .tab-content.active { display: flex; }
+
+        /* Shoutbox */
+        .shoutbox-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: rgba(10, 10, 10, 0.3);
+        }
+        .message {
+            background: rgba(20, 20, 30, 0.8);
+            border: 1px solid #222;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            transition: border-color 0.2s;
+        }
+        .message:hover { border-color: #333; }
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .message-author {
+            color: #00ff88;
+            font-weight: 600;
+        }
+        .message-time {
+            color: #666;
+            font-size: 0.8rem;
+        }
+        .message-content {
+            color: #ccc;
+            line-height: 1.5;
+        }
+        .message-media {
+            margin-top: 10px;
+        }
+        .message-media img, .message-media video {
+            max-width: 200px;
+            border-radius: 8px;
+        }
+        
+        /* Message Input */
+        .message-input-container {
+            background: rgba(15, 15, 25, 0.98);
+            border-top: 1px solid #222;
+            padding: 20px;
+        }
+        .message-input {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+        .message-input textarea {
+            flex: 1;
+            background: #0a0a0a;
+            border: 1px solid #333;
+            border-radius: 10px;
+            color: #fff;
+            font-family: inherit;
+            font-size: 1rem;
+            padding: 15px;
+            resize: none;
+            height: 60px;
+            transition: border-color 0.3s;
+        }
+        .message-input textarea:focus { outline: none; border-color: #00ff88; }
+        .send-btn, .media-btn {
+            padding: 15px;
+            background: linear-gradient(135deg, #00ff88, #00cc6a);
+            border: none;
+            border-radius: 10px;
+            color: #0a0a0a;
+            font-family: inherit;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .send-btn:hover, .media-btn:hover { transform: translateY(-2px); }
+        .media-btn {
+            background: linear-gradient(135deg, #0088ff, #0066cc);
+        }
+
+        /* Media Grid */
+        .media-section {
+            padding: 20px;
+            overflow-y: auto;
+        }
+        .upload-zone {
+            border: 2px dashed #333;
+            border-radius: 16px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 25px;
+            transition: all 0.3s;
+        }
+        .upload-zone:hover, .upload-zone.dragover { 
+            border-color: #00ff88; 
+            background: rgba(0, 255, 136, 0.05); 
+        }
+        .upload-zone .icon { font-size: 3rem; margin-bottom: 15px; }
+        .upload-zone p { color: #666; margin-bottom: 15px; }
+        .upload-btn {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #00ff88, #00cc6a);
+            border: none;
+            border-radius: 8px;
+            color: #0a0a0a;
+            font-family: inherit;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .file-input { display: none; }
+
+        .media-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        .media-item {
+            background: rgba(20, 20, 30, 0.8);
+            border: 1px solid #222;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: transform 0.2s, border-color 0.2s;
+            cursor: pointer;
+        }
+        .media-item:hover { 
+            transform: translateY(-3px); 
+            border-color: #00ff88; 
+        }
+        .media-item img, .media-item video { 
+            width: 100%; 
+            height: 150px; 
+            object-fit: cover; 
+        }
+        .media-info {
+            padding: 15px;
+        }
+        .media-name {
+            color: #fff;
+            font-size: 0.85rem;
+            margin-bottom: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .media-date {
+            color: #666;
+            font-size: 0.75rem;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #555;
+        }
+        .empty-state .icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        /* Users List */
+        .users-section {
+            padding: 20px;
+        }
+        .user-card {
+            background: rgba(20, 20, 30, 0.8);
+            border: 1px solid #222;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            transition: border-color 0.2s;
+        }
+        .user-card:hover { border-color: #333; }
+        .user-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        .user-username {
+            color: #00ff88;
+            font-weight: 600;
+        }
+        .user-status {
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+        .status-online { background: rgba(0, 255, 136, 0.2); color: #00ff88; }
+        .status-offline { background: rgba(102, 102, 102, 0.2); color: #666; }
+        .user-meta {
+            color: #666;
+            font-size: 0.8rem;
+        }
+
+        /* Settings */
+        .settings-section {
+            padding: 20px;
+            max-width: 600px;
+        }
+        .setting-group {
+            background: rgba(20, 20, 30, 0.8);
+            border: 1px solid #222;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .setting-group h3 {
+            color: #00ff88;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .setting-item {
+            margin-bottom: 15px;
+        }
+        .setting-item label {
+            display: block;
+            color: #ccc;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+        .setting-input {
+            width: 100%;
+            padding: 12px;
+            background: #0a0a0a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            color: #fff;
+            font-family: inherit;
+            font-size: 0.9rem;
+        }
+        .setting-input:focus { outline: none; border-color: #00ff88; }
+        .save-btn {
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #00ff88, #00cc6a);
+            border: none;
+            border-radius: 8px;
+            color: #0a0a0a;
+            font-family: inherit;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0a0a0a; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #444; }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            padding: 15px 25px;
+            background: rgba(0, 255, 136, 0.95);
+            border-radius: 10px;
+            color: #0a0a0a;
+            font-weight: 600;
+            display: none;
+            z-index: 10000;
+        }
+        .toast.show { display: block; animation: slideIn 0.3s ease; }
+        @keyframes slideIn { 
+            from { transform: translateX(100px); opacity: 0; } 
+            to { transform: translateX(0); opacity: 1; } 
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>💬 RNN Forums</h1>
+        <div class="user-info">
+            <span>Welcome, <span class="username" id="currentUsername">User</span></span>
+            <a href="#" class="logout-btn" onclick="logout()">Logout</a>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <aside class="sidebar">
+            <nav class="nav-section">
+                <div class="nav-label">Forums</div>
+                <div class="nav-item active" onclick="showTab('shoutbox')">
+                    <span class="icon">💬</span>
+                    <span>Shoutbox</span>
+                </div>
+            </nav>
+            <nav class="nav-section">
+                <div class="nav-label">Content</div>
+                <div class="nav-item" onclick="showTab('media')">
+                    <span class="icon">📁</span>
+                    <span>Media Gallery</span>
+                </div>
+            </nav>
+            <nav class="nav-section">
+                <div class="nav-label">Community</div>
+                <div class="nav-item" onclick="showTab('users')">
+                    <span class="icon">👥</span>
+                    <span>Users</span>
+                </div>
+            </nav>
+            <nav class="nav-section">
+                <div class="nav-label">Account</div>
+                <div class="nav-item" onclick="showTab('settings')">
+                    <span class="icon">⚙️</span>
+                    <span>Settings</span>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="content-area">
+            <div class="toast" id="toast">Success!</div>
+
+            <!-- Shoutbox Tab -->
+            <div class="tab-content active" id="tab-shoutbox">
+                <div class="shoutbox-container">
+                    <div class="messages-container" id="messagesContainer">
+                        <div class="empty-state" id="messagesEmpty">
+                            <div class="icon">💬</div>
+                            <p>No messages yet. Start the conversation!</p>
+                        </div>
+                    </div>
+                    <div class="message-input-container">
+                        <div class="message-input">
+                            <textarea id="messageText" placeholder="Type your message..."></textarea>
+                            <input type="file" class="file-input" id="messageFileInput" accept="image/*,video/*">
+                            <button class="media-btn" onclick="document.getElementById('messageFileInput').click()">📎</button>
+                            <button class="send-btn" onclick="sendMessage()">Send</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Media Tab -->
+            <div class="tab-content" id="tab-media">
+                <div class="media-section">
+                    <div class="upload-zone" id="dropZone">
+                        <div class="icon">📤</div>
+                        <p>Drag & drop files here or click to browse</p>
+                        <input type="file" class="file-input" id="mediaFileInput" accept="image/*,video/*" multiple>
+                        <button class="upload-btn" onclick="document.getElementById('mediaFileInput').click()">Select Files</button>
+                    </div>
+                    <div class="media-grid" id="mediaGrid"></div>
+                    <div class="empty-state" id="mediaEmpty" style="display:none;">
+                        <div class="icon">📭</div>
+                        <p>No media uploaded yet</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Users Tab -->
+            <div class="tab-content" id="tab-users">
+                <div class="users-section">
+                    <div id="usersList"></div>
+                </div>
+            </div>
+
+            <!-- Settings Tab -->
+            <div class="tab-content" id="tab-settings">
+                <div class="settings-section">
+                    <div class="setting-group">
+                        <h3>🔑 Account Security</h3>
+                        <div class="setting-item">
+                            <label>Change Password</label>
+                            <input type="password" class="setting-input" id="newPassword" placeholder="New password...">
+                        </div>
+                        <div class="setting-item">
+                            <label>Confirm Password</label>
+                            <input type="password" class="setting-input" id="confirmPassword" placeholder="Confirm new password...">
+                        </div>
+                        <button class="save-btn" onclick="changePassword()">Update Password</button>
+                    </div>
+                    <div class="setting-group">
+                        <h3>🎫 Your Invite Code</h3>
+                        <div class="setting-item">
+                            <label>Invite Code Used for Registration</label>
+                            <input type="text" class="setting-input" id="userInviteCode" readonly>
+                        </div>
+                    </div>
+                    <div class="setting-group">
+                        <h3>📊 Account Information</h3>
+                        <div class="setting-item">
+                            <label>Username</label>
+                            <input type="text" class="setting-input" id="accountUsername" readonly>
+                        </div>
+                        <div class="setting-item">
+                            <label>Account Created</label>
+                            <input type="text" class="setting-input" id="accountCreated" readonly>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let currentUser = null;
+
+        function initApp() {
+            // Check authentication
+            if (sessionStorage.getItem('rnn_auth') !== 'true') {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // Get current user
+            currentUser = JSON.parse(sessionStorage.getItem('rnn_user'));
+            if (!currentUser) {
+                logout();
+                return;
+            }
+
+            document.getElementById('currentUsername').textContent = currentUser.username;
+            loadSettings();
+            loadMessages();
+            loadMedia();
+            loadUsers();
+        }
+
+        function logout() {
+            sessionStorage.removeItem('rnn_auth');
+            sessionStorage.removeItem('rnn_user');
+            window.location.href = 'index.html';
+        }
+
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remove active class from nav items
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById('tab-' + tabName).classList.add('active');
+            event.currentTarget.classList.add('active');
+            
+            // Load content if needed
+            if (tabName === 'media') loadMedia();
+            if (tabName === 'users') loadUsers();
+        }
+
+        function sendMessage() {
+            const messageText = document.getElementById('messageText').value.trim();
+            const fileInput = document.getElementById('messageFileInput');
+            
+            if (!messageText && !fileInput.files.length) {
+                return;
+            }
+
+            const messages = JSON.parse(localStorage.getItem('rnn_messages') || '[]');
+            const message = {
+                id: Date.now(),
+                author: currentUser.username,
+                text: messageText,
+                timestamp: new Date().toISOString(),
+                media: null
+            };
+
+            if (fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                if (file.size > 5 * 1024 * 1024) {
+                    showToast('File too large (max 5MB)');
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    message.media = {
+                        name: file.name,
+                        type: file.type,
+                        data: e.target.result
+                    };
+                    
+                    messages.push(message);
+                    localStorage.setItem('rnn_messages', JSON.stringify(messages.slice(-100)));
+                    
+                    document.getElementById('messageText').value = '';
+                    fileInput.value = '';
+                    loadMessages();
+                };
+                reader.readAsDataURL(file);
+            } else {
+                messages.push(message);
+                localStorage.setItem('rnn_messages', JSON.stringify(messages.slice(-100)));
+                
+                document.getElementById('messageText').value = '';
+                loadMessages();
+            }
+        }
+
+        function loadMessages() {
+            const messages = JSON.parse(localStorage.getItem('rnn_messages') || '[]');
+            const container = document.getElementById('messagesContainer');
+            const empty = document.getElementById('messagesEmpty');
+            
+            if (messages.length === 0) {
+                container.innerHTML = '';
+                container.appendChild(empty);
+                return;
+            }
+            
+            container.innerHTML = messages.map(msg => `
+                <div class="message">
+                    <div class="message-header">
+                        <span class="message-author">${msg.author}</span>
+                        <span class="message-time">${new Date(msg.timestamp).toLocaleString()}</span>
+                    </div>
+                    <div class="message-content">${msg.text}</div>
+                    ${msg.media ? `
+                        <div class="message-media">
+                            ${msg.media.type.startsWith('image/') ? 
+                                `<img src="${msg.media.data}" alt="${msg.media.name}">` :
+                                `<video src="${msg.media.data}" controls></video>`
+                            }
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+            
+            // Scroll to bottom
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function loadMedia() {
+            const media = JSON.parse(localStorage.getItem('rnn_media') || '[]');
+            const grid = document.getElementById('mediaGrid');
+            const empty = document.getElementById('mediaEmpty');
+            
+            if (media.length === 0) {
+                grid.innerHTML = '';
+                empty.style.display = 'block';
+                return;
+            }
+            
+            empty.style.display = 'none';
+            grid.innerHTML = media.map(item => `
+                <div class="media-item" onclick="window.open('${item.data}')">
+                    ${item.type.startsWith('image/') ? 
+                        `<img src="${item.data}" alt="${item.name}">` :
+                        `<video src="${item.data}"></video>`
+                    }
+                    <div class="media-info">
+                        <div class="media-name">${item.name}</div>
+                        <div class="media-date">${new Date(item.date).toLocaleDateString()}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function loadUsers() {
+            const users = JSON.parse(localStorage.getItem('rnn_users') || '[]');
+            const container = document.getElementById('usersList');
+            
+            if (users.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="icon">👥</div><p>No users found</p></div>';
+                return;
+            }
+            
+            container.innerHTML = users.map(user => `
+                <div class="user-card">
+                    <div class="user-header">
+                        <span class="user-username">${user.username}</span>
+                        <span class="user-status status-offline">Offline</span>
+                    </div>
+                    <div class="user-meta">Joined: ${new Date(user.createdAt).toLocaleDateString()}</div>
+                </div>
+            `).join('');
+        }
+
+        function loadSettings() {
+            document.getElementById('accountUsername').value = currentUser.username;
+            document.getElementById('accountCreated').value = new Date(currentUser.createdAt).toLocaleString();
+            document.getElementById('userInviteCode').value = currentUser.inviteCode || 'N/A';
+        }
+
+        function changePassword() {
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (!newPassword || !confirmPassword) {
+                showToast('Please fill in all fields');
+                return;
+            }
+            
+            if (newPassword !== confirmPassword) {
+                showToast('Passwords do not match');
+                return;
+            }
+            
+            if (newPassword.length < 6) {
+                showToast('Password must be at least 6 characters');
+                return;
+            }
+            
+            // Update password in storage
+            const users = JSON.parse(localStorage.getItem('rnn_users') || '[]');
+            const userIndex = users.findIndex(u => u.username === currentUser.username);
+            if (userIndex !== -1) {
+                users[userIndex].password = newPassword;
+                localStorage.setItem('rnn_users', JSON.stringify(users));
+                
+                // Update current user
+                currentUser.password = newPassword;
+                sessionStorage.setItem('rnn_user', JSON.stringify(currentUser));
+                
+                showToast('Password updated successfully');
+                document.getElementById('newPassword').value = '';
+                document.getElementById('confirmPassword').value = '';
+            }
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        // File upload handlers
+        const dropZone = document.getElementById('dropZone');
+        const mediaFileInput = document.getElementById('mediaFileInput');
+
+        dropZone.addEventListener('dragover', e => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+
+        dropZone.addEventListener('drop', e => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            handleMediaFiles(e.dataTransfer.files);
+        });
+
+        mediaFileInput.addEventListener('change', e => {
+            handleMediaFiles(e.target.files);
+        });
+
+        function handleMediaFiles(files) {
+            const media = JSON.parse(localStorage.getItem('rnn_media') || '[]');
+            let count = 0;
+            
+            Array.from(files).forEach(file => {
+                if (file.size > 10 * 1024 * 1024) {
+                    showToast(file.name + ' too large (max 10MB)');
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = e => {
+                    media.push({
+                        name: file.name,
+                        type: file.type,
+                        data: e.target.result,
+                        date: new Date().toISOString(),
+                        uploadedBy: currentUser.username
+                    });
+                    count++;
+                    
+                    if (count === files.length) {
+                        localStorage.setItem('rnn_media', JSON.stringify(media));
+                        loadMedia();
+                        showToast(count + ' file(s) uploaded');
+                    }
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // Enter key to send message
+        document.getElementById('messageText').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // Initialize app
+        initApp();
+    </script>
+</body>
+</html>

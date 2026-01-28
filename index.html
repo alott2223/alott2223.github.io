@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RNN</title>
+    <title>RNN - Login</title>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔒</text></svg>">
     <style>
@@ -16,7 +16,7 @@
             align-items: center;
             justify-content: center;
         }
-        .login-box {
+        .auth-container {
             background: rgba(20, 20, 30, 0.95);
             border: 1px solid #00ff88;
             border-radius: 16px;
@@ -42,7 +42,7 @@
             transition: border-color 0.3s;
         }
         .input-field:focus { outline: none; border-color: #00ff88; }
-        .login-btn {
+        .auth-btn {
             width: 100%;
             padding: 16px;
             background: linear-gradient(135deg, #00ff88, #00cc6a);
@@ -54,82 +54,68 @@
             font-weight: 600;
             cursor: pointer;
             transition: transform 0.2s, box-shadow 0.2s;
+            margin-bottom: 15px;
         }
-        .login-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0, 255, 136, 0.4); }
+        .auth-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0, 255, 136, 0.4); }
         .error-msg { color: #ff4444; margin-top: 15px; display: none; }
         .error-msg.show { display: block; }
-        
-        /* Media Section */
-        .media-section { display: none; }
-        .media-section.visible { display: block; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0a0a0a; overflow-y: auto; }
-        .media-header {
-            padding: 30px;
-            background: rgba(15, 15, 25, 0.98);
-            border-bottom: 1px solid #222;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .media-header h1 { color: #00ff88; font-size: 1.5rem; }
-        .logout-btn {
-            padding: 10px 20px;
-            background: rgba(255, 68, 68, 0.2);
-            border: 1px solid #ff4444;
-            border-radius: 8px;
-            color: #ff4444;
-            font-family: inherit;
+        .success-msg { color: #00ff88; margin-top: 15px; display: none; }
+        .success-msg.show { display: block; }
+        .form-toggle {
+            color: #666;
+            margin-top: 20px;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: color 0.2s;
         }
-        .logout-btn:hover { background: rgba(255, 68, 68, 0.3); }
-        .media-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 20px;
-            padding: 30px;
-        }
-        .media-item {
-            background: rgba(20, 20, 30, 0.8);
-            border: 1px solid #222;
-            border-radius: 12px;
-            overflow: hidden;
-            transition: transform 0.2s, border-color 0.2s;
-        }
-        .media-item:hover { transform: translateY(-3px); border-color: #00ff88; }
-        .media-item img, .media-item video { width: 100%; height: 200px; object-fit: cover; }
-        .media-info { padding: 15px; }
-        .media-title { color: #fff; font-size: 0.9rem; margin-bottom: 5px; }
-        .media-date { color: #555; font-size: 0.8rem; }
-        .empty-state { text-align: center; padding: 80px 20px; color: #555; }
-        .empty-state .icon { font-size: 5rem; margin-bottom: 20px; opacity: 0.5; }
+        .form-toggle:hover { color: #00ff88; }
+        .register-form { display: none; }
+        .register-form.active { display: block; }
+        .login-form.active { display: block; }
+        .hidden { display: none; }
+
     </style>
 </head>
 <body>
-    <!-- Login -->
-    <div class="login-box" id="loginBox">
-        <div class="lock-icon">🔒</div>
-        <h2>RNN</h2>
-        <p class="subtitle">Enter password to access</p>
-        <input type="password" class="input-field" id="passwordInput" placeholder="Password..." onkeypress="if(event.key==='Enter')login()">
-        <button class="login-btn" onclick="login()">Access</button>
-        <p class="error-msg" id="errorMsg">Invalid password</p>
-    </div>
-
-    <!-- Media Section -->
-    <div class="media-section" id="mediaSection">
-        <div class="media-header">
-            <h1>📁 RNN Media</h1>
-            <button class="logout-btn" onclick="logout()">Logout</button>
+    <div class="auth-container">
+        <!-- Login Form -->
+        <div class="login-form active" id="loginForm">
+            <div class="lock-icon">🔒</div>
+            <h2>Welcome Back</h2>
+            <p class="subtitle">Sign in to access RNN</p>
+            <input type="text" class="input-field" id="loginUsername" placeholder="Username...">
+            <input type="password" class="input-field" id="loginPassword" placeholder="Password..." onkeypress="if(event.key==='Enter')login()">
+            <button class="auth-btn" onclick="login()">Sign In</button>
+            <p class="error-msg" id="loginError">Invalid credentials</p>
+            <p class="form-toggle" onclick="toggleForm()">Don't have an account? Register here</p>
         </div>
-        <div class="media-grid" id="mediaGrid"></div>
-        <div class="empty-state" id="emptyState">
-            <div class="icon">📭</div>
-            <p>No media uploaded yet</p>
+
+        <!-- Registration Form -->
+        <div class="register-form" id="registerForm">
+            <div class="lock-icon">✨</div>
+            <h2>Join RNN</h2>
+            <p class="subtitle">Create your account</p>
+            <input type="text" class="input-field" id="regUsername" placeholder="Username...">
+            <input type="password" class="input-field" id="regPassword" placeholder="Password...">
+            <input type="password" class="input-field" id="regPasswordConfirm" placeholder="Confirm Password...">
+            <input type="text" class="input-field" id="inviteCode" placeholder="Invite Code..." onkeypress="if(event.key==='Enter')register()">
+            <button class="auth-btn" onclick="register()">Create Account</button>
+            <p class="error-msg" id="registerError">Registration failed</p>
+            <p class="success-msg" id="registerSuccess">Account created successfully!</p>
+            <p class="form-toggle" onclick="toggleForm()">Already have an account? Sign in here</p>
         </div>
     </div>
 
     <script>
-        const PASSWORD = 'rnn2026secure';
+        // User management
+        function initUsers() {
+            if (!localStorage.getItem('rnn_users')) {
+                const defaultUsers = [];
+                localStorage.setItem('rnn_users', JSON.stringify(defaultUsers));
+            }
+            if (!localStorage.getItem('rnn_invite_codes')) {
+                localStorage.setItem('rnn_invite_codes', JSON.stringify([]));
+            }
+        }
 
         // Browser Fingerprinting
         async function generateFingerprint() {
@@ -157,72 +143,170 @@
             return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
         }
 
-        async function logAccess(success) {
+        function getClientIP() {
+            return new Promise((resolve) => {
+                fetch('https://api.ipify.org?format=json')
+                    .then(response => response.json())
+                    .then(data => resolve(data.ip))
+                    .catch(() => resolve('Unknown'));
+            });
+        }
+
+        async function logAccess(success, username = null, action = 'login') {
             const fp = await generateFingerprint();
+            const ip = await getClientIP();
             const logs = JSON.parse(localStorage.getItem('rnn_access_log') || '[]');
             logs.push({
+                username: username,
                 fingerprint: fp,
+                ip: ip,
                 timestamp: new Date().toISOString(),
                 success: success,
+                action: action,
                 userAgent: navigator.userAgent,
                 screen: screen.width + 'x' + screen.height,
                 timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
                 language: navigator.language
             });
-            localStorage.setItem('rnn_access_log', JSON.stringify(logs.slice(-100)));
+            localStorage.setItem('rnn_access_log', JSON.stringify(logs.slice(-500)));
         }
 
         async function login() {
-            const input = document.getElementById('passwordInput').value;
-            if (input === PASSWORD) {
-                await logAccess(true);
-                document.getElementById('loginBox').style.display = 'none';
-                document.getElementById('mediaSection').classList.add('visible');
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            
+            if (!username || !password) {
+                showError('loginError', 'Please fill in all fields');
+                return;
+            }
+
+            const users = JSON.parse(localStorage.getItem('rnn_users') || '[]');
+            const user = users.find(u => u.username === username && u.password === password);
+            
+            if (user) {
+                await logAccess(true, username, 'login');
                 sessionStorage.setItem('rnn_auth', 'true');
-                loadMedia();
+                sessionStorage.setItem('rnn_user', JSON.stringify(user));
+                window.location.href = 'forums.html';
             } else {
-                await logAccess(false);
-                document.getElementById('errorMsg').classList.add('show');
-                document.getElementById('passwordInput').value = '';
-                setTimeout(() => document.getElementById('errorMsg').classList.remove('show'), 3000);
+                await logAccess(false, username, 'login');
+                showError('loginError', 'Invalid username or password');
+                document.getElementById('loginPassword').value = '';
             }
         }
 
-        function logout() {
-            sessionStorage.removeItem('rnn_auth');
-            location.reload();
-        }
-
-        function loadMedia() {
-            const media = JSON.parse(localStorage.getItem('rnn_media') || '[]');
-            const grid = document.getElementById('mediaGrid');
-            const empty = document.getElementById('emptyState');
+        async function register() {
+            const username = document.getElementById('regUsername').value.trim();
+            const password = document.getElementById('regPassword').value;
+            const confirmPassword = document.getElementById('regPasswordConfirm').value;
+            const inviteCode = document.getElementById('inviteCode').value.trim();
             
-            if (media.length === 0) {
-                grid.innerHTML = '';
-                empty.style.display = 'block';
+            if (!username || !password || !confirmPassword || !inviteCode) {
+                showError('registerError', 'Please fill in all fields');
                 return;
             }
             
-            empty.style.display = 'none';
-            grid.innerHTML = media.map(item => `
-                <div class="media-item">
-                    ${item.type.startsWith('image/') 
-                        ? `<img src="${item.data}" alt="${item.name}">`
-                        : `<video src="${item.data}" controls></video>`}
-                    <div class="media-info">
-                        <div class="media-title">${item.name}</div>
-                        <div class="media-date">${new Date(item.date).toLocaleDateString()}</div>
-                    </div>
-                </div>
-            `).join('');
+            if (password !== confirmPassword) {
+                showError('registerError', 'Passwords do not match');
+                return;
+            }
+            
+            if (password.length < 6) {
+                showError('registerError', 'Password must be at least 6 characters');
+                return;
+            }
+
+            const users = JSON.parse(localStorage.getItem('rnn_users') || '[]');
+            const inviteCodes = JSON.parse(localStorage.getItem('rnn_invite_codes') || '[]');
+            
+            if (users.find(u => u.username === username)) {
+                showError('registerError', 'Username already exists');
+                return;
+            }
+            
+            const validCode = inviteCodes.find(c => c.code === inviteCode && !c.used);
+            if (!validCode) {
+                showError('registerError', 'Invalid or expired invite code');
+                await logAccess(false, username, 'register');
+                return;
+            }
+
+            // Mark invite code as used
+            validCode.used = true;
+            validCode.usedBy = username;
+            validCode.usedAt = new Date().toISOString();
+            localStorage.setItem('rnn_invite_codes', JSON.stringify(inviteCodes));
+
+            // Create user
+            const user = {
+                id: Date.now(),
+                username: username,
+                password: password,
+                createdAt: new Date().toISOString(),
+                inviteCode: inviteCode,
+                isAdmin: false
+            };
+            
+            users.push(user);
+            localStorage.setItem('rnn_users', JSON.stringify(users));
+            
+            await logAccess(true, username, 'register');
+            showSuccess('registerSuccess', 'Account created successfully!');
+            
+            // Clear form
+            document.getElementById('regUsername').value = '';
+            document.getElementById('regPassword').value = '';
+            document.getElementById('regPasswordConfirm').value = '';
+            document.getElementById('inviteCode').value = '';
+            
+            setTimeout(() => {
+                toggleForm();
+            }, 2000);
         }
 
-        if (sessionStorage.getItem('rnn_auth') === 'true') {
-            document.getElementById('loginBox').style.display = 'none';
-            document.getElementById('mediaSection').classList.add('visible');
-            loadMedia();
+        function toggleForm() {
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+            
+            if (loginForm.classList.contains('active')) {
+                loginForm.classList.remove('active');
+                loginForm.style.display = 'none';
+                registerForm.style.display = 'block';
+                registerForm.classList.add('active');
+            } else {
+                registerForm.classList.remove('active');
+                registerForm.style.display = 'none';
+                loginForm.style.display = 'block';
+                loginForm.classList.add('active');
+            }
+            
+            // Clear error messages
+            document.querySelectorAll('.error-msg, .success-msg').forEach(msg => {
+                msg.classList.remove('show');
+            });
         }
+
+        function showError(id, message) {
+            const elem = document.getElementById(id);
+            elem.textContent = message;
+            elem.classList.add('show');
+            setTimeout(() => elem.classList.remove('show'), 3000);
+        }
+
+        function showSuccess(id, message) {
+            const elem = document.getElementById(id);
+            elem.textContent = message;
+            elem.classList.add('show');
+            setTimeout(() => elem.classList.remove('show'), 3000);
+        }
+
+        // Check if already logged in
+        if (sessionStorage.getItem('rnn_auth') === 'true') {
+            window.location.href = 'forums.html';
+        }
+
+        // Initialize
+        initUsers();
     </script>
 </body>
 </html>
