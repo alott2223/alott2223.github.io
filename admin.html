@@ -673,26 +673,38 @@
     </div>
 
     <script>
-        const ADMIN_USER = 'alott';
-        const ADMIN_PASSWORD = 'Alott@1234*';
+        async function api(path, options = {}) {
+            const res = await fetch(path, {
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+                ...options
+            });
+            if (res.status === 401) { window.location.href = 'index.html'; return null; }
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok) throw new Error(data.error || 'Request failed');
+            return data;
+        }
 
-        function checkAdminPassword() {
-            const user = document.getElementById('adminUsername').value;
+        async function checkAdminPassword() {
+            const user = document.getElementById('adminUsername').value.trim();
             const pass = document.getElementById('adminPassword').value;
-            if (user === ADMIN_USER && pass === ADMIN_PASSWORD) {
+            try {
+                await api('/api/login', { method: 'POST', body: JSON.stringify({ username: user, password: pass }) });
+                const me = await api('/api/me');
+                if (!me || !me.user?.isAdmin) throw new Error('Not authorized');
                 document.getElementById('adminGate').classList.add('hidden');
                 document.getElementById('adminContent').classList.add('visible');
-                sessionStorage.setItem('admin_auth', 'true');
                 initDashboard();
-            } else {
+            } catch (e) {
+                document.getElementById('errorMsg').textContent = e.message || 'Invalid credentials';
                 document.getElementById('errorMsg').classList.add('show');
                 document.getElementById('adminPassword').value = '';
                 setTimeout(() => document.getElementById('errorMsg').classList.remove('show'), 3000);
             }
         }
 
-        function logout() {
-            sessionStorage.removeItem('admin_auth');
+        async function logout() {
+            await api('/api/logout', { method: 'POST' });
             location.reload();
         }
 
@@ -701,7 +713,6 @@
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             document.getElementById('page-' + pageId).classList.add('active');
             event.currentTarget.classList.add('active');
-            
             if (pageId === 'media') loadMediaGrid();
             if (pageId === 'access') loadAccessLogs();
             if (pageId === 'fingerprints') loadFingerprints();
@@ -709,130 +720,105 @@
             if (pageId === 'invites') loadInvitesList();
         }
 
-        function initDashboard() {
-            const media = JSON.parse(localStorage.getItem('rnn_media') || '[]');
-            const logs = JSON.parse(localStorage.getItem('rnn_access_log') || '[]');
-            const users = JSON.parse(localStorage.getItem('rnn_users') || '[]');
-            const invites = JSON.parse(localStorage.getItem('rnn_invite_codes') || '[]');
-            
-            const successful = logs.filter(l => l.success).length;
-            const failed = logs.filter(l => !l.success).length;
-            const uniqueFP = [...new Set(logs.map(l => l.fingerprint))].length;
-            const activeInvites = invites.filter(i => !i.used).length;
-            
-            document.getElementById('statMedia').textContent = media.length;
-            document.getElementById('statUsers').textContent = users.length;
-            document.getElementById('statSuccess').textContent = successful;
-            document.getElementById('statFailed').textContent = failed;
-            document.getElementById('statFingerprints').textContent = uniqueFP;
-            document.getElementById('statInvites').textContent = activeInvites;
-            
-            document.getElementById('mediaBadge').textContent = media.length;
-            document.getElementById('usersBadge').textContent = users.length;
-            document.getElementById('invitesBadge').textContent = activeInvites;
-            document.getElementById('logsBadge').textContent = logs.length;
-            
-            // Recent activity
-            const recent = logs.slice(-5).reverse();
-            const tbody = document.getElementById('recentActivity');
-            if (recent.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#555;">No activity yet</td></tr>';
-            } else {
-                tbody.innerHTML = recent.map(log => `
-                    <tr>
-                        <td>${new Date(log.timestamp).toLocaleString()}</td>
-                        <td>${log.username || 'Anonymous'}</td>
-                        <td><span class="status-badge ${log.success ? 'success' : 'failed'}">${log.success ? 'SUCCESS' : 'FAILED'}</span></td>
-                        <td>${log.ip || 'Unknown'}</td>
-                        <td>${log.action || 'login'}</td>
-                    </tr>
-                `).join('');
-            }
+        async function initDashboard() {
+            try {
+                const stats = await api('/api/admin/stats');
+                if (!stats) return;
+                const { mediaCount, userCount, successCount, failedCount, uniqueFingerprints, inviteActive, messageCount, logsCount } = stats;
+                document.getElementById('statMedia').textContent = mediaCount;
+                document.getElementById('statUsers').textContent = userCount;
+                document.getElementById('statSuccess').textContent = successCount;
+                document.getElementById('statFailed').textContent = failedCount;
+                document.getElementById('statFingerprints').textContent = uniqueFingerprints;
+                document.getElementById('statInvites').textContent = inviteActive;
+                document.getElementById('mediaBadge').textContent = mediaCount;
+                document.getElementById('usersBadge').textContent = userCount;
+                document.getElementById('invitesBadge').textContent = inviteActive;
+                document.getElementById('logsBadge').textContent = logsCount;
+                const recent = stats.recent || [];
+                const tbody = document.getElementById('recentActivity');
+                if (recent.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#555;">No activity yet</td></tr>';
+                } else {
+                    tbody.innerHTML = recent.map(log => `
+                        <tr>
+                            <td>${new Date(log.timestamp).toLocaleString()}</td>
+                            <td>${log.username || 'Anonymous'}</td>
+                            <td><span class="status-badge ${log.success ? 'success' : 'failed'}">${log.success ? 'SUCCESS' : 'FAILED'}</span></td>
+                            <td>${log.ip || 'Unknown'}</td>
+                            <td>${log.action || 'login'}</td>
+                        </tr>
+                    `).join('');
+                }
+            } catch (e) { showToast(e.message || 'Failed to load stats'); }
         }
 
-        function loadMediaGrid() {
-            const media = JSON.parse(localStorage.getItem('rnn_media') || '[]');
+        async function loadMediaGrid() {
+            const data = await api('/api/media');
+            if (!data) return;
+            const media = data.media || [];
             const grid = document.getElementById('mediaGrid');
             const empty = document.getElementById('mediaEmpty');
-            
-            if (media.length === 0) {
-                grid.innerHTML = '';
-                empty.style.display = 'block';
-                return;
-            }
-            
+            if (media.length === 0) { grid.innerHTML = ''; empty.style.display = 'block'; return; }
             empty.style.display = 'none';
-            grid.innerHTML = media.map((item, i) => `
+            grid.innerHTML = media.map(item => `
                 <div class="media-card">
-                    ${item.type.startsWith('image/') 
-                        ? `<img src="${item.data}" alt="${item.name}">`
-                        : `<video src="${item.data}"></video>`}
+                    ${item.type.startsWith('image/') ? `<img src="${item.data}" alt="${item.name}">` : `<video src="${item.data}"></video>`}
                     <div class="media-card-info">
                         <div class="media-card-name">${item.name}</div>
                         <div class="media-card-meta">${item.type.split('/')[0]} • ${new Date(item.date).toLocaleDateString()}</div>
                         <div class="media-card-actions">
                             <button class="btn-sm btn-view" onclick="window.open('${item.data}')">View</button>
-                            <button class="btn-sm btn-delete" onclick="deleteMedia(${i})">Delete</button>
+                            <button class="btn-sm btn-delete" onclick="deleteMedia('${item.id}')">Delete</button>
                         </div>
                     </div>
                 </div>
             `).join('');
         }
 
-        function deleteMedia(index) {
-            if (confirm('Delete this media?')) {
-                const media = JSON.parse(localStorage.getItem('rnn_media') || '[]');
-                media.splice(index, 1);
-                localStorage.setItem('rnn_media', JSON.stringify(media));
+        async function deleteMedia(id) {
+            if (!confirm('Delete this media?')) return;
+            try {
+                await api('/api/media', { method: 'DELETE', body: JSON.stringify({ id }) });
                 loadMediaGrid();
                 initDashboard();
                 showToast('Media deleted');
-            }
+            } catch (e) { showToast(e.message || 'Failed to delete'); }
         }
 
-        function loadAccessLogs() {
-            const logs = JSON.parse(localStorage.getItem('rnn_access_log') || '[]').reverse();
+        async function loadAccessLogs() {
+            const data = await api('/api/admin/logs');
+            if (!data) return;
+            const logs = data.logs || [];
             const tbody = document.getElementById('accessLogs');
-            
-            if (logs.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#555;">No access logs</td></tr>';
-                return;
-            }
-            
+            if (logs.length === 0) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#555;">No access logs</td></tr>'; return; }
             tbody.innerHTML = logs.map((log, i) => `
                 <tr>
                     <td>${new Date(log.timestamp).toLocaleString()}</td>
                     <td><span class="status-badge ${log.success ? 'success' : 'failed'}">${log.success ? 'SUCCESS' : 'FAILED'}</span></td>
-                    <td class="fingerprint-cell" onclick="copyText('${log.fingerprint}')" title="Click to copy">${log.fingerprint.slice(0,12)}...</td>
+                    <td class="fingerprint-cell" onclick="copyText('${log.fingerprint}')" title="Click to copy">${(log.fingerprint || '').slice(0,12)}...</td>
                     <td>${log.screen || '-'}</td>
                     <td>${log.timezone || '-'}</td>
                     <td>${log.language || '-'}</td>
-                    <td><button class="btn-sm btn-view" onclick="showLogDetail(${logs.length - 1 - i})">Details</button></td>
+                    <td><button class="btn-sm btn-view" onclick="showLogDetail(${i})">Details</button></td>
                 </tr>
             `).join('');
+            window.__latestLogs = logs;
         }
 
         function loadFingerprints() {
-            const logs = JSON.parse(localStorage.getItem('rnn_access_log') || '[]');
+            const logs = window.__latestLogs || [];
             const fpMap = {};
-            
             logs.forEach(log => {
-                if (!fpMap[log.fingerprint]) {
-                    fpMap[log.fingerprint] = { first: log.timestamp, last: log.timestamp, attempts: 0, success: 0 };
-                }
+                if (!log.fingerprint) return;
+                if (!fpMap[log.fingerprint]) { fpMap[log.fingerprint] = { first: log.timestamp, last: log.timestamp, attempts: 0, success: 0 }; }
                 fpMap[log.fingerprint].last = log.timestamp;
                 fpMap[log.fingerprint].attempts++;
                 if (log.success) fpMap[log.fingerprint].success++;
             });
-            
             const tbody = document.getElementById('fingerprintList');
             const fps = Object.entries(fpMap);
-            
-            if (fps.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#555;">No fingerprints recorded</td></tr>';
-                return;
-            }
-            
+            if (fps.length === 0) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#555;">No fingerprints recorded</td></tr>'; return; }
             tbody.innerHTML = fps.map(([fp, data]) => {
                 const rate = Math.round((data.success / data.attempts) * 100);
                 return `
@@ -849,10 +835,9 @@
         }
 
         function showLogDetail(index) {
-            const logs = JSON.parse(localStorage.getItem('rnn_access_log') || '[]');
+            const logs = window.__latestLogs || [];
             const log = logs[index];
             if (!log) return;
-            
             document.getElementById('modalContent').innerHTML = `
                 <div class="detail-card">
                     <h4>📅 Timestamp</h4>
@@ -861,7 +846,7 @@
                 </div>
                 <div class="detail-card">
                     <h4>🖐️ Fingerprint</h4>
-                    <div class="detail-item"><span class="label">Hash</span><span class="value" style="font-size:0.7rem;">${log.fingerprint}</span></div>
+                    <div class="detail-item"><span class="label">Hash</span><span class="value" style="font-size:0.7rem;">${log.fingerprint || '-'}</span></div>
                 </div>
                 <div class="detail-card">
                     <h4>🖥️ Device Info</h4>
@@ -881,18 +866,17 @@
             document.getElementById('detailModal').classList.remove('show');
         }
 
-        function clearLogs() {
-            if (confirm('Clear all access logs?')) {
-                localStorage.removeItem('rnn_access_log');
-                loadAccessLogs();
-                loadFingerprints();
-                initDashboard();
-                showToast('Logs cleared');
-            }
+        async function clearLogs() {
+            if (!confirm('Clear all access logs?')) return;
+            await api('/api/admin/logs', { method: 'POST', body: JSON.stringify({ action: 'clear' }) });
+            await loadAccessLogs();
+            loadFingerprints();
+            initDashboard();
+            showToast('Logs cleared');
         }
 
         function exportLogs() {
-            const logs = JSON.parse(localStorage.getItem('rnn_access_log') || '[]');
+            const logs = window.__latestLogs || [];
             const blob = new Blob([JSON.stringify(logs, null, 2)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -915,90 +899,58 @@
             setTimeout(() => toast.classList.remove('show'), 2500);
         }
 
-        // File upload
+        // File upload for admin upload page
         const dropZone = document.getElementById('dropZone');
         const fileInput = document.getElementById('fileInput');
 
         dropZone?.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
         dropZone?.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
-        dropZone?.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('dragover'); handleFiles(e.dataTransfer.files); });
+        dropZone?.addEventListener('drop', async e => { e.preventDefault(); dropZone.classList.remove('dragover'); await handleFiles(e.dataTransfer.files); });
         fileInput?.addEventListener('change', e => handleFiles(e.target.files));
 
-        function handleFiles(files) {
-            const media = JSON.parse(localStorage.getItem('rnn_media') || '[]');
+        async function handleFiles(files) {
             let count = 0;
-            
-            Array.from(files).forEach(file => {
-                if (file.size > 5 * 1024 * 1024) { alert(file.name + ' too large (max 5MB)'); return; }
+            for (const file of Array.from(files)) {
+                if (file.size > 5 * 1024 * 1024) { alert(file.name + ' too large (max 5MB)'); continue; }
                 const reader = new FileReader();
-                reader.onload = e => {
-                    media.push({ name: file.name, type: file.type, data: e.target.result, date: new Date().toISOString() });
-                    count++;
-                    if (count === files.length) {
-                        localStorage.setItem('rnn_media', JSON.stringify(media));
-                        initDashboard();
-                        showToast(count + ' file(s) uploaded');
-                    }
+                reader.onload = async e => {
+                    try {
+                        await api('/api/media', { method: 'POST', body: JSON.stringify({ media: { name: file.name, type: file.type, data: e.target.result } }) });
+                        count++;
+                        if (count === files.length) { initDashboard(); loadMediaGrid(); showToast(count + ' file(s) uploaded'); }
+                    } catch (err) { showToast(err.message || 'Upload failed'); }
                 };
                 reader.readAsDataURL(file);
-            });
+            }
         }
-
-        // Init
-        if (sessionStorage.getItem('admin_auth') === 'true') {
-            document.getElementById('adminGate').classList.add('hidden');
-            document.getElementById('adminContent').classList.add('visible');
-            initDashboard();
-        }
-
-        // Close modal on outside click
-        document.getElementById('detailModal').addEventListener('click', e => {
-            if (e.target.id === 'detailModal') closeModal();
-        });
 
         // Users Management
-        function loadUsersList() {
-            const users = JSON.parse(localStorage.getItem('rnn_users') || '[]');
-            const logs = JSON.parse(localStorage.getItem('rnn_access_log') || '[]');
+        async function loadUsersList() {
+            const data = await api('/api/admin/users');
+            if (!data) return;
+            const users = data.users || [];
             const tbody = document.getElementById('usersList');
-            
-            if (users.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#555;">No users registered</td></tr>';
-                return;
-            }
-            
-            tbody.innerHTML = users.map(user => {
-                // Find last login
-                const userLogs = logs.filter(l => l.username === user.username && l.success).reverse();
-                const lastLogin = userLogs.length > 0 ? new Date(userLogs[0].timestamp).toLocaleString() : 'Never';
-                
-                return `
-                    <tr>
-                        <td>${user.username}</td>
-                        <td>${new Date(user.createdAt).toLocaleDateString()}</td>
-                        <td>${user.inviteCode || 'N/A'}</td>
-                        <td>${lastLogin}</td>
-                        <td><span class="status-badge ${user.isAdmin ? 'warning' : 'success'}">${user.isAdmin ? 'Admin' : 'User'}</span></td>
-                        <td>
-                            <button class="btn-sm btn-view" onclick="viewUserDetails('${user.username}')">Details</button>
-                            <button class="btn-sm btn-delete" onclick="deleteUser('${user.username}')">Delete</button>
-                        </td>
-                    </tr>
-                `;
-            }).join('');
+            if (users.length === 0) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#555;">No users registered</td></tr>'; return; }
+            tbody.innerHTML = users.map(user => `
+                <tr>
+                    <td>${user.username}</td>
+                    <td>${new Date(user.createdAt).toLocaleDateString()}</td>
+                    <td>${user.inviteCode || 'N/A'}</td>
+                    <td>${user.lastLogin ? new Date(user.lastLogin).toLocaleString() : 'Never'}</td>
+                    <td><span class="status-badge ${user.isAdmin ? 'warning' : 'success'}">${user.isAdmin ? 'Admin' : 'User'}</span></td>
+                    <td>
+                        <button class="btn-sm btn-view" onclick="viewUserDetails('${user.username}')">Details</button>
+                        <button class="btn-sm btn-delete" onclick="deleteUser('${user.username}')">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+            window.__latestUsers = users;
         }
 
         function viewUserDetails(username) {
-            const users = JSON.parse(localStorage.getItem('rnn_users') || '[]');
-            const logs = JSON.parse(localStorage.getItem('rnn_access_log') || '[]');
+            const users = window.__latestUsers || [];
             const user = users.find(u => u.username === username);
-            
             if (!user) return;
-            
-            const userLogs = logs.filter(l => l.username === username);
-            const successfulLogins = userLogs.filter(l => l.success).length;
-            const failedAttempts = userLogs.filter(l => !l.success).length;
-            
             document.getElementById('modalContent').innerHTML = `
                 <div class="detail-card">
                     <h4>👤 User Information</h4>
@@ -1006,40 +958,28 @@
                     <div class="detail-item"><span class="label">Account Created</span><span class="value">${new Date(user.createdAt).toLocaleString()}</span></div>
                     <div class="detail-item"><span class="label">Invite Code Used</span><span class="value">${user.inviteCode || 'N/A'}</span></div>
                     <div class="detail-item"><span class="label">Admin Status</span><span class="value">${user.isAdmin ? 'Yes' : 'No'}</span></div>
-                </div>
-                <div class="detail-card">
-                    <h4>📊 Login Statistics</h4>
-                    <div class="detail-item"><span class="label">Successful Logins</span><span class="value">${successfulLogins}</span></div>
-                    <div class="detail-item"><span class="label">Failed Attempts</span><span class="value">${failedAttempts}</span></div>
-                    <div class="detail-item"><span class="label">Total Attempts</span><span class="value">${userLogs.length}</span></div>
+                    <div class="detail-item"><span class="label">Last Login</span><span class="value">${user.lastLogin ? new Date(user.lastLogin).toLocaleString() : 'Never'}</span></div>
                 </div>
             `;
             document.getElementById('detailModal').classList.add('show');
         }
 
-        function deleteUser(username) {
+        async function deleteUser(username) {
             if (!confirm('Delete user "' + username + '"? This action cannot be undone.')) return;
-            
-            const users = JSON.parse(localStorage.getItem('rnn_users') || '[]');
-            const updatedUsers = users.filter(u => u.username !== username);
-            localStorage.setItem('rnn_users', JSON.stringify(updatedUsers));
-            
-            loadUsersList();
+            await api('/api/admin/users', { method: 'DELETE', body: JSON.stringify({ username }) });
+            await loadUsersList();
             initDashboard();
             showToast('User deleted');
         }
 
         // Invite Code Management
-        function loadInvitesList() {
-            const invites = JSON.parse(localStorage.getItem('rnn_invite_codes') || '[]').reverse();
+        async function loadInvitesList() {
+            const data = await api('/api/invite');
+            if (!data) return;
+            const invites = (data.invites || []).slice().reverse();
             const tbody = document.getElementById('invitesList');
-            
-            if (invites.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#555;">No invite codes generated</td></tr>';
-                return;
-            }
-            
-            tbody.innerHTML = invites.map((invite, index) => `
+            if (invites.length === 0) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#555;">No invite codes generated</td></tr>'; return; }
+            tbody.innerHTML = invites.map(invite => `
                 <tr>
                     <td class="fingerprint-cell" onclick="copyText('${invite.code}')" title="Click to copy">${invite.code}</td>
                     <td>${new Date(invite.createdAt).toLocaleDateString()}</td>
@@ -1049,74 +989,47 @@
                     <td>${invite.usedAt ? new Date(invite.usedAt).toLocaleDateString() : '-'}</td>
                     <td>
                         <button class="btn-sm btn-view" onclick="copyText('${invite.code}')">Copy</button>
-                        ${!invite.used ? `<button class="btn-sm btn-delete" onclick="deleteInvite(${invites.length - 1 - index})">Delete</button>` : ''}
+                        ${!invite.used ? `<button class="btn-sm btn-delete" onclick="deleteInvite('${invite.code}')">Delete</button>` : ''}
                     </td>
                 </tr>
             `).join('');
         }
 
-        function generateInvite() {
+        async function generateInvite() {
             const description = document.getElementById('inviteDescription').value.trim();
-            
-            // Generate random invite code
-            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-            let code = '';
-            for (let i = 0; i < 8; i++) {
-                code += chars.charAt(Math.floor(Math.random() * chars.length));
-            }
-            
-            const invites = JSON.parse(localStorage.getItem('rnn_invite_codes') || '[]');
-            
-            // Check if code already exists (very unlikely but possible)
-            if (invites.find(i => i.code === code)) {
-                generateInvite(); // Try again
-                return;
-            }
-            
-            const invite = {
-                code: code,
-                description: description || 'No description',
-                createdAt: new Date().toISOString(),
-                used: false,
-                usedBy: null,
-                usedAt: null
-            };
-            
-            invites.push(invite);
-            localStorage.setItem('rnn_invite_codes', JSON.stringify(invites));
-            
+            const data = await api('/api/invite', { method: 'POST', body: JSON.stringify({ description }) });
             document.getElementById('inviteDescription').value = '';
-            loadInvitesList();
+            await loadInvitesList();
             initDashboard();
-            showToast('Invite code generated: ' + code);
-            
-            // Auto-copy to clipboard
-            copyText(code);
+            copyText(data.code);
+            showToast('Invite code generated: ' + data.code);
         }
 
-        function deleteInvite(index) {
-            if (!confirm('Delete this invite code?')) return;
-            
-            const invites = JSON.parse(localStorage.getItem('rnn_invite_codes') || '[]');
-            invites.splice(invites.length - 1 - index, 1);
-            localStorage.setItem('rnn_invite_codes', JSON.stringify(invites));
-            
-            loadInvitesList();
+        async function deleteInvite(code) {
+            if (!confirm('Delete invite code?')) return;
+            await api('/api/invite', { method: 'DELETE', body: JSON.stringify({ code }) });
+            await loadInvitesList();
             initDashboard();
-            showToast('Invite code deleted');
+            showToast('Invite deleted');
         }
 
-        function clearUsedInvites() {
+        async function clearUsedInvites() {
             if (!confirm('Clear all used invite codes?')) return;
-            
-            const invites = JSON.parse(localStorage.getItem('rnn_invite_codes') || '[]');
-            const activeInvites = invites.filter(i => !i.used);
-            localStorage.setItem('rnn_invite_codes', JSON.stringify(activeInvites));
-            
-            loadInvitesList();
+            await api('/api/invite', { method: 'POST', body: JSON.stringify({ action: 'clearUsed' }) });
+            await loadInvitesList();
             initDashboard();
             showToast('Used invite codes cleared');
         }
+
+        document.getElementById('detailModal').addEventListener('click', e => { if (e.target.id === 'detailModal') closeModal(); });
+
+        (async function bootstrap() {
+            const me = await api('/api/me');
+            if (!me || !me.user?.isAdmin) { window.location.href = 'index.html'; return; }
+            document.getElementById('adminGate').classList.add('hidden');
+            document.getElementById('adminContent').classList.add('visible');
+            await initDashboard();
+        })();
     </script>
 </body>
 </html>

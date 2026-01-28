@@ -106,19 +106,7 @@
     </div>
 
     <script>
-        // User management
-        function initUsers() {
-            if (!localStorage.getItem('rnn_users')) {
-                const defaultUsers = [];
-                localStorage.setItem('rnn_users', JSON.stringify(defaultUsers));
-            }
-            if (!localStorage.getItem('rnn_invite_codes')) {
-                localStorage.setItem('rnn_invite_codes', JSON.stringify([]));
-            }
-        }
-
-        // Browser Fingerprinting
-        async function generateFingerprint() {
+        async function fingerprint() {
             const c = [];
             c.push(screen.width + 'x' + screen.height, screen.colorDepth, window.devicePixelRatio || 1);
             c.push(Intl.DateTimeFormat().resolvedOptions().timeZone, new Date().getTimezoneOffset());
@@ -138,60 +126,40 @@
                 ctx.textBaseline = 'top'; ctx.font = '14px Arial'; ctx.fillText('fp', 2, 2);
                 c.push(canvas.toDataURL().slice(-50));
             } catch(e){}
-            const str = c.join('|');
-            const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+            const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(c.join('|')));
             return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
         }
 
-        function getClientIP() {
-            return new Promise((resolve) => {
-                fetch('https://api.ipify.org?format=json')
-                    .then(response => response.json())
-                    .then(data => resolve(data.ip))
-                    .catch(() => resolve('Unknown'));
+        async function api(path, payload) {
+            const res = await fetch(path, {
+                method: 'POST',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
             });
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({ error: 'Request failed' }));
+                throw new Error(err.error || 'Request failed');
+            }
+            return res.json();
         }
 
-        async function logAccess(success, username = null, action = 'login') {
-            const fp = await generateFingerprint();
-            const ip = await getClientIP();
-            const logs = JSON.parse(localStorage.getItem('rnn_access_log') || '[]');
-            logs.push({
-                username: username,
-                fingerprint: fp,
-                ip: ip,
-                timestamp: new Date().toISOString(),
-                success: success,
-                action: action,
-                userAgent: navigator.userAgent,
-                screen: screen.width + 'x' + screen.height,
-                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-                language: navigator.language
-            });
-            localStorage.setItem('rnn_access_log', JSON.stringify(logs.slice(-500)));
+        async function checkSession() {
+            const res = await fetch('/api/me', { credentials: 'include' });
+            if (res.ok) {
+                window.location.href = 'forums.html';
+            }
         }
 
         async function login() {
             const username = document.getElementById('loginUsername').value.trim();
             const password = document.getElementById('loginPassword').value;
-            
-            if (!username || !password) {
-                showError('loginError', 'Please fill in all fields');
-                return;
-            }
-
-            const users = JSON.parse(localStorage.getItem('rnn_users') || '[]');
-            const user = users.find(u => u.username === username && u.password === password);
-            
-            if (user) {
-                await logAccess(true, username, 'login');
-                sessionStorage.setItem('rnn_auth', 'true');
-                sessionStorage.setItem('rnn_user', JSON.stringify(user));
+            if (!username || !password) { return showError('loginError', 'Please fill in all fields'); }
+            try {
+                await api('/api/login', { username, password, fingerprint: await fingerprint() });
                 window.location.href = 'forums.html';
-            } else {
-                await logAccess(false, username, 'login');
-                showError('loginError', 'Invalid username or password');
-                document.getElementById('loginPassword').value = '';
+            } catch (e) {
+                showError('loginError', e.message || 'Invalid credentials');
             }
         }
 
@@ -200,90 +168,27 @@
             const password = document.getElementById('regPassword').value;
             const confirmPassword = document.getElementById('regPasswordConfirm').value;
             const inviteCode = document.getElementById('inviteCode').value.trim();
-            
-            if (!username || !password || !confirmPassword || !inviteCode) {
-                showError('registerError', 'Please fill in all fields');
-                return;
+            if (!username || !password || !confirmPassword || !inviteCode) { return showError('registerError', 'Please fill in all fields'); }
+            if (password !== confirmPassword) { return showError('registerError', 'Passwords do not match'); }
+            if (password.length < 6) { return showError('registerError', 'Password must be at least 6 characters'); }
+            try {
+                await api('/api/register', { username, password, inviteCode, fingerprint: await fingerprint() });
+                showSuccess('registerSuccess', 'Account created! Redirecting...');
+                setTimeout(() => window.location.href = 'forums.html', 800);
+            } catch (e) {
+                showError('registerError', e.message || 'Registration failed');
             }
-            
-            if (password !== confirmPassword) {
-                showError('registerError', 'Passwords do not match');
-                return;
-            }
-            
-            if (password.length < 6) {
-                showError('registerError', 'Password must be at least 6 characters');
-                return;
-            }
-
-            const users = JSON.parse(localStorage.getItem('rnn_users') || '[]');
-            const inviteCodes = JSON.parse(localStorage.getItem('rnn_invite_codes') || '[]');
-            
-            if (users.find(u => u.username === username)) {
-                showError('registerError', 'Username already exists');
-                return;
-            }
-            
-            const validCode = inviteCodes.find(c => c.code === inviteCode && !c.used);
-            if (!validCode) {
-                showError('registerError', 'Invalid or expired invite code');
-                await logAccess(false, username, 'register');
-                return;
-            }
-
-            // Mark invite code as used
-            validCode.used = true;
-            validCode.usedBy = username;
-            validCode.usedAt = new Date().toISOString();
-            localStorage.setItem('rnn_invite_codes', JSON.stringify(inviteCodes));
-
-            // Create user
-            const user = {
-                id: Date.now(),
-                username: username,
-                password: password,
-                createdAt: new Date().toISOString(),
-                inviteCode: inviteCode,
-                isAdmin: false
-            };
-            
-            users.push(user);
-            localStorage.setItem('rnn_users', JSON.stringify(users));
-            
-            await logAccess(true, username, 'register');
-            showSuccess('registerSuccess', 'Account created successfully!');
-            
-            // Clear form
-            document.getElementById('regUsername').value = '';
-            document.getElementById('regPassword').value = '';
-            document.getElementById('regPasswordConfirm').value = '';
-            document.getElementById('inviteCode').value = '';
-            
-            setTimeout(() => {
-                toggleForm();
-            }, 2000);
         }
 
         function toggleForm() {
             const loginForm = document.getElementById('loginForm');
             const registerForm = document.getElementById('registerForm');
-            
-            if (loginForm.classList.contains('active')) {
-                loginForm.classList.remove('active');
-                loginForm.style.display = 'none';
-                registerForm.style.display = 'block';
-                registerForm.classList.add('active');
-            } else {
-                registerForm.classList.remove('active');
-                registerForm.style.display = 'none';
-                loginForm.style.display = 'block';
-                loginForm.classList.add('active');
-            }
-            
-            // Clear error messages
-            document.querySelectorAll('.error-msg, .success-msg').forEach(msg => {
-                msg.classList.remove('show');
-            });
+            const isLogin = loginForm.classList.contains('active');
+            loginForm.classList.toggle('active', !isLogin);
+            registerForm.classList.toggle('active', isLogin);
+            loginForm.style.display = isLogin ? 'none' : 'block';
+            registerForm.style.display = isLogin ? 'block' : 'none';
+            document.querySelectorAll('.error-msg, .success-msg').forEach(msg => msg.classList.remove('show'));
         }
 
         function showError(id, message) {
@@ -300,13 +205,7 @@
             setTimeout(() => elem.classList.remove('show'), 3000);
         }
 
-        // Check if already logged in
-        if (sessionStorage.getItem('rnn_auth') === 'true') {
-            window.location.href = 'forums.html';
-        }
-
-        // Initialize
-        initUsers();
+        checkSession();
     </script>
 </body>
 </html>
