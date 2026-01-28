@@ -373,7 +373,8 @@
             <div class="lock-icon">🔐</div>
             <h2>Admin Access</h2>
             <p>Authentication required</p>
-            <input type="password" class="password-input" id="adminPassword" placeholder="Enter admin password..." onkeypress="if(event.key==='Enter')checkAdminPassword()">
+            <input type="text" class="password-input" id="adminUsername" placeholder="Username..." style="margin-bottom:10px;">
+            <input type="password" class="password-input" id="adminPassword" placeholder="Password..." onkeypress="if(event.key==='Enter')checkAdminPassword()">
             <button class="password-btn" onclick="checkAdminPassword()">Authenticate</button>
             <p class="error-msg" id="errorMsg">Invalid credentials</p>
         </div>
@@ -418,8 +419,7 @@
                 </div>
             </nav>
             <div class="quick-links">
-                <a href="index.html">← Back to Site</a>
-                <a href="rnn.html">📁 View RNN Page</a>
+                <a href="index.html">📁 View RNN Page</a>
                 <a href="#" onclick="logout()">🚪 Logout</a>
             </div>
         </aside>
@@ -578,11 +578,13 @@
     </div>
 
     <script>
+        const ADMIN_USER = 'alott';
         const ADMIN_PASSWORD = 'Alott@1234*';
 
         function checkAdminPassword() {
-            const input = document.getElementById('adminPassword').value;
-            if (input === ADMIN_PASSWORD) {
+            const user = document.getElementById('adminUsername').value;
+            const pass = document.getElementById('adminPassword').value;
+            if (user === ADMIN_USER && pass === ADMIN_PASSWORD) {
                 document.getElementById('adminGate').classList.add('hidden');
                 document.getElementById('adminContent').classList.add('visible');
                 sessionStorage.setItem('admin_auth', 'true');

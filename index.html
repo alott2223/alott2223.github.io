@@ -3,272 +3,226 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>alott - Bio</title>
-    <link rel="stylesheet" href="bio-styles.css">
+    <title>RNN</title>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💀</text></svg>">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔒</text></svg>">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #0a0a0a 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .login-box {
+            background: rgba(20, 20, 30, 0.95);
+            border: 1px solid #00ff88;
+            border-radius: 16px;
+            padding: 50px;
+            text-align: center;
+            box-shadow: 0 0 60px rgba(0, 255, 136, 0.2);
+            max-width: 420px;
+            width: 90%;
+        }
+        .lock-icon { font-size: 4rem; margin-bottom: 20px; }
+        h2 { color: #00ff88; margin-bottom: 10px; font-size: 2rem; }
+        .subtitle { color: #666; margin-bottom: 30px; }
+        .input-field {
+            width: 100%;
+            padding: 16px;
+            background: #0a0a0a;
+            border: 1px solid #333;
+            border-radius: 10px;
+            color: #00ff88;
+            font-family: inherit;
+            font-size: 1rem;
+            margin-bottom: 15px;
+            transition: border-color 0.3s;
+        }
+        .input-field:focus { outline: none; border-color: #00ff88; }
+        .login-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #00ff88, #00cc6a);
+            border: none;
+            border-radius: 10px;
+            color: #0a0a0a;
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .login-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0, 255, 136, 0.4); }
+        .error-msg { color: #ff4444; margin-top: 15px; display: none; }
+        .error-msg.show { display: block; }
+        
+        /* Media Section */
+        .media-section { display: none; }
+        .media-section.visible { display: block; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0a0a0a; overflow-y: auto; }
+        .media-header {
+            padding: 30px;
+            background: rgba(15, 15, 25, 0.98);
+            border-bottom: 1px solid #222;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .media-header h1 { color: #00ff88; font-size: 1.5rem; }
+        .logout-btn {
+            padding: 10px 20px;
+            background: rgba(255, 68, 68, 0.2);
+            border: 1px solid #ff4444;
+            border-radius: 8px;
+            color: #ff4444;
+            font-family: inherit;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .logout-btn:hover { background: rgba(255, 68, 68, 0.3); }
+        .media-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            padding: 30px;
+        }
+        .media-item {
+            background: rgba(20, 20, 30, 0.8);
+            border: 1px solid #222;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        .media-item:hover { transform: translateY(-3px); border-color: #00ff88; }
+        .media-item img, .media-item video { width: 100%; height: 200px; object-fit: cover; }
+        .media-info { padding: 15px; }
+        .media-title { color: #fff; font-size: 0.9rem; margin-bottom: 5px; }
+        .media-date { color: #555; font-size: 0.8rem; }
+        .empty-state { text-align: center; padding: 80px 20px; color: #555; }
+        .empty-state .icon { font-size: 5rem; margin-bottom: 20px; opacity: 0.5; }
+    </style>
 </head>
 <body>
-    <div class="matrix-bg"></div>
-    
-    <nav class="navbar">
-        <div class="nav-brand">
-            <span class="skull">💀</span>
-            <span class="brand-text">alott.bio</span>
+    <!-- Login -->
+    <div class="login-box" id="loginBox">
+        <div class="lock-icon">🔒</div>
+        <h2>RNN</h2>
+        <p class="subtitle">Enter password to access</p>
+        <input type="password" class="input-field" id="passwordInput" placeholder="Password..." onkeypress="if(event.key==='Enter')login()">
+        <button class="login-btn" onclick="login()">Access</button>
+        <p class="error-msg" id="errorMsg">Invalid password</p>
+    </div>
+
+    <!-- Media Section -->
+    <div class="media-section" id="mediaSection">
+        <div class="media-header">
+            <h1>📁 RNN Media</h1>
+            <button class="logout-btn" onclick="logout()">Logout</button>
         </div>
-        <div class="nav-links">
-            <a href="#about" class="nav-link">about</a>
-            <a href="#projects" class="nav-link">projects</a>
-            <a href="#contact" class="nav-link">contact</a>
-            <a href="rnn.html" class="nav-link">rnn 🔒</a>
+        <div class="media-grid" id="mediaGrid"></div>
+        <div class="empty-state" id="emptyState">
+            <div class="icon">📭</div>
+            <p>No media uploaded yet</p>
         </div>
-    </nav>
+    </div>
 
-    <main>
-        <section class="hero">
-            <div class="terminal-window">
-                <div class="terminal-header">
-                    <div class="terminal-buttons">
-                        <span class="btn red"></span>
-                        <span class="btn yellow"></span>
-                        <span class="btn green"></span>
-                    </div>
-                    <div class="terminal-title">alott@terminal:~$</div>
-                </div>
-                <div class="terminal-body">
-                    <div class="terminal-line">
-                        <span class="prompt">user@system:~$</span>
-                        <span class="command">whoami</span>
-                    </div>
-                    <div class="terminal-output">
-                        <div class="ascii-art">
-     ██████╗ ██╗      ██████╗ ████████╗████████╗
-    ██╔══██╗██║     ██╔═══██╗╚══██╔══╝╚══██╔══╝
-    ██████╔╝██║     ██║   ██║   ██║      ██║   
-    ██╔══██╗██║     ██║   ██║   ██║      ██║   
-    ██║  ██║███████╗╚██████╔╝   ██║      ██║   
-    ╚═╝  ╚═╝╚══════╝ ╚═════╝    ╚═╝      ╚═╝   
-                        </div>
-                        <div class="bio-info">
-                            <p><span class="key">name:</span> <span class="value">alott</span></p>
-                            <p><span class="key">status:</span> <span class="value typing-effect">developer • creator • digital architect</span></p>
-                            <p><span class="key">location:</span> <span class="value">cyberspace</span></p>
-                            <p><span class="key">interests:</span> <span class="value">code, mental health, innovation</span></p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
+    <script>
+        const PASSWORD = 'rnn2026secure';
 
-        <section id="about" class="section">
-            <div class="container">
-                <h2 class="section-title">
-                    <span class="bracket">[</span>
-                    <span class="title-text">about.me</span>
-                    <span class="bracket">]</span>
-                </h2>
-                
-                <div class="about-grid">
-                    <div class="about-card">
-                        <div class="card-header">
-                            <span class="icon">👨‍💻</span>
-                            <h3>Developer</h3>
-                        </div>
-                        <p>Building innovative solutions and exploring the boundaries of technology. From multilang programming languages to consciousness networks.</p>
-                    </div>
-                    
-                    <div class="about-card">
-                        <div class="card-header">
-                            <span class="icon">🧠</span>
-                            <h3>Mental Health Advocate</h3>
-                        </div>
-                        <p>Creating resources and platforms to support mental wellness and spiritual growth. Technology for healing and consciousness expansion.</p>
-                    </div>
-                    
-                    <div class="about-card">
-                        <div class="card-header">
-                            <span class="icon">🎯</span>
-                            <h3>Digital Architect</h3>
-                        </div>
-                        <p>Designing experiences that bridge the gap between human consciousness and digital reality. Building the future, one line of code at a time.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
+        // Browser Fingerprinting
+        async function generateFingerprint() {
+            const c = [];
+            c.push(screen.width + 'x' + screen.height, screen.colorDepth, window.devicePixelRatio || 1);
+            c.push(Intl.DateTimeFormat().resolvedOptions().timeZone, new Date().getTimezoneOffset());
+            c.push(navigator.language, navigator.platform, navigator.userAgent);
+            c.push(navigator.hardwareConcurrency || 0, navigator.maxTouchPoints || 0);
+            try {
+                const canvas = document.createElement('canvas');
+                const gl = canvas.getContext('webgl');
+                if (gl) {
+                    const d = gl.getExtension('WEBGL_debug_renderer_info');
+                    if (d) { c.push(gl.getParameter(d.UNMASKED_VENDOR_WEBGL), gl.getParameter(d.UNMASKED_RENDERER_WEBGL)); }
+                }
+            } catch(e){}
+            try {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                ctx.textBaseline = 'top'; ctx.font = '14px Arial'; ctx.fillText('fp', 2, 2);
+                c.push(canvas.toDataURL().slice(-50));
+            } catch(e){}
+            const str = c.join('|');
+            const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+            return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
+        }
 
-        <section id="projects" class="section">
-            <div class="container">
-                <h2 class="section-title">
-                    <span class="bracket">[</span>
-                    <span class="title-text">projects.exe</span>
-                    <span class="bracket">]</span>
-                </h2>
-                
-                <div class="projects-grid">
-                    <div class="project-card featured">
-                        <div class="project-header">
-                            <h3>clowncode- 🤡</h3>
-                            <div class="project-status">
-                                <span class="status-dot"></span>
-                                <span>dev</span>
-                            </div>
-                        </div>
-                        <p>A multifunctional programming language similar to brainfuck but with emojis. Because why not make code more expressive?</p>
-                        <div class="project-tags">
-                            <span class="tag">python</span>
-                            <span class="tag">interpreter</span>
-                            <span class="tag">esoteric</span>
-                        </div>
-                        <div class="project-links">
-                            <a href="https://github.com/alott2223/clowncode-" class="project-link" target="_blank">
-                                <span>github</span>
-                                <span class="arrow">→</span>
-                            </a>
-                        </div>
-                    </div>
-                    
-                    <div class="project-card">
-                        <div class="project-header">
-                            <h3>conciousnet 🧠</h3>
-                            <div class="project-status">
-                                <span class="status-dot active"></span>
-                                <span>research</span>
-                            </div>
-                        </div>
-                        <p>Adaptive neural architecture that can restructure itself. Advanced AI with logging, checkpointing, and self-modification capabilities.</p>
-                        <div class="project-tags">
-                            <span class="tag">python</span>
-                            <span class="tag">ai</span>
-                            <span class="tag">neural-networks</span>
-                        </div>
-                        <div class="project-links">
-                            <a href="https://github.com/alott2223/conciousnet" class="project-link" target="_blank">
-                                <span>github</span>
-                                <span class="arrow">→</span>
-                            </a>
-                        </div>
-                    </div>
-                    
-                    <div class="project-card">
-                        <div class="project-header">
-                            <h3>multilang 🌐</h3>
-                            <div class="project-status">
-                                <span class="status-dot"></span>
-                                <span>experimental</span>
-                            </div>
-                        </div>
-                        <p>Multi-language programming environment. Exploring the boundaries of language interoperability and code expression.</p>
-                        <div class="project-tags">
-                            <span class="tag">experimental</span>
-                            <span class="tag">compiler</span>
-                            <span class="tag">multi-lang</span>
-                        </div>
-                        <div class="project-links">
-                            <a href="https://github.com/alott2223/multilang" class="project-link" target="_blank">
-                                <span>github</span>
-                                <span class="arrow">→</span>
-                            </a>
-                        </div>
+        async function logAccess(success) {
+            const fp = await generateFingerprint();
+            const logs = JSON.parse(localStorage.getItem('rnn_access_log') || '[]');
+            logs.push({
+                fingerprint: fp,
+                timestamp: new Date().toISOString(),
+                success: success,
+                userAgent: navigator.userAgent,
+                screen: screen.width + 'x' + screen.height,
+                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                language: navigator.language
+            });
+            localStorage.setItem('rnn_access_log', JSON.stringify(logs.slice(-100)));
+        }
+
+        async function login() {
+            const input = document.getElementById('passwordInput').value;
+            if (input === PASSWORD) {
+                await logAccess(true);
+                document.getElementById('loginBox').style.display = 'none';
+                document.getElementById('mediaSection').classList.add('visible');
+                sessionStorage.setItem('rnn_auth', 'true');
+                loadMedia();
+            } else {
+                await logAccess(false);
+                document.getElementById('errorMsg').classList.add('show');
+                document.getElementById('passwordInput').value = '';
+                setTimeout(() => document.getElementById('errorMsg').classList.remove('show'), 3000);
+            }
+        }
+
+        function logout() {
+            sessionStorage.removeItem('rnn_auth');
+            location.reload();
+        }
+
+        function loadMedia() {
+            const media = JSON.parse(localStorage.getItem('rnn_media') || '[]');
+            const grid = document.getElementById('mediaGrid');
+            const empty = document.getElementById('emptyState');
+            
+            if (media.length === 0) {
+                grid.innerHTML = '';
+                empty.style.display = 'block';
+                return;
+            }
+            
+            empty.style.display = 'none';
+            grid.innerHTML = media.map(item => `
+                <div class="media-item">
+                    ${item.type.startsWith('image/') 
+                        ? `<img src="${item.data}" alt="${item.name}">`
+                        : `<video src="${item.data}" controls></video>`}
+                    <div class="media-info">
+                        <div class="media-title">${item.name}</div>
+                        <div class="media-date">${new Date(item.date).toLocaleDateString()}</div>
                     </div>
                 </div>
-            </div>
-        </section>
+            `).join('');
+        }
 
-        <section id="contact" class="section">
-            <div class="container">
-                <h2 class="section-title">
-                    <span class="bracket">[</span>
-                    <span class="title-text">contact.init</span>
-                    <span class="bracket">]</span>
-                </h2>
-                
-                <div class="contact-grid">
-                    <div class="contact-terminal">
-                        <div class="terminal-header">
-                            <div class="terminal-buttons">
-                                <span class="btn red"></span>
-                                <span class="btn yellow"></span>
-                                <span class="btn green"></span>
-                            </div>
-                            <div class="terminal-title">connection.established</div>
-                        </div>
-                        <div class="terminal-body">
-                            <div class="contact-info">
-                                <div class="contact-line">
-                                    <span class="prompt">discord:</span>
-                                    <a href="#" class="contact-link" onclick="copyToClipboard('onlywock_')">
-                                        <span>onlywock_</span>
-                                        <span class="copy-icon">📋</span>
-                                    </a>
-                                </div>
-                                <div class="contact-line">
-                                    <span class="prompt">email:</span>
-                                    <a href="mailto:business.discord.co@gmail.com" class="contact-link">
-                                        <span>business.discord.co@gmail.com</span>
-                                        <span class="arrow">→</span>
-                                    </a>
-                                </div>
-                                <div class="contact-line">
-                                    <span class="prompt">github:</span>
-                                    <a href="https://github.com/alott2223" class="contact-link" target="_blank">
-                                        <span>@alott2223</span>
-                                        <span class="arrow">→</span>
-                                    </a>
-                                </div>
-                                <div class="contact-line">
-                                    <span class="prompt">status:</span>
-                                    <span class="status-indicator">
-                                        <span class="status-dot active pulse"></span>
-                                        <span>online & available</span>
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="quick-actions">
-                        <h3>Quick Actions</h3>
-                        <div class="action-buttons">
-                            <button class="action-btn" onclick="openDiscord()">
-                                <span class="btn-icon">💬</span>
-                                <span>Message on Discord</span>
-                            </button>
-                            <button class="action-btn" onclick="openEmail()">
-                                <span class="btn-icon">📧</span>
-                                <span>Send Email</span>
-                            </button>
-                            <button class="action-btn" onclick="openGithub()">
-                                <span class="btn-icon">👨‍💻</span>
-                                <span>View GitHub</span>
-                            </button>
-
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-left">
-                    <span class="skull">💀</span>
-                    <span>alott.bio</span>
-                </div>
-                <div class="footer-right">
-                    <span class="footer-text">built with</span>
-                    <span class="heart">❤️</span>
-                    <span class="footer-text">and</span>
-                    <span class="code">code</span>
-                </div>
-            </div>
-        </div>
-    </footer>
-
-    <div class="cursor-glow"></div>
-    <div class="notification" id="notification"></div>
-
-    <script src="bio-script.js"></script>
+        if (sessionStorage.getItem('rnn_auth') === 'true') {
+            document.getElementById('loginBox').style.display = 'none';
+            document.getElementById('mediaSection').classList.add('visible');
+            loadMedia();
+        }
+    </script>
 </body>
 </html>
