@@ -513,67 +513,78 @@
     </div>
 
     <script>
+        const API_URL = 'http://158.94.211.125:5000';
         let currentUser = null;
+        let authToken = null;
+
+        function getAuthHeaders() {
+            return {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
+            };
+        }
 
         function initApp() {
             // Check authentication
-            if (sessionStorage.getItem('rnn_auth') !== 'true') {
+            authToken = localStorage.getItem('rnn_token');
+            if (!authToken || sessionStorage.getItem('rnn_auth') !== 'true') {
                 window.location.href = 'index.html';
                 return;
             }
 
-            // Get current user
-            currentUser = JSON.parse(sessionStorage.getItem('rnn_user'));
+            currentUser = JSON.parse(localStorage.getItem('rnn_user'));
             if (!currentUser) {
                 logout();
                 return;
             }
 
-            document.getElementById('currentUsername').textContent = currentUser.username;
-            loadSettings();
+            document.getElementById('currentUsername').textContent = currentUser.displayName || currentUser.username;
+            loadCategories();
             loadMessages();
             loadMedia();
             loadUsers();
         }
 
         function logout() {
+            localStorage.removeItem('rnn_token');
+            localStorage.removeItem('rnn_user');
             sessionStorage.removeItem('rnn_auth');
-            sessionStorage.removeItem('rnn_user');
             window.location.href = 'index.html';
         }
 
         function showTab(tabName) {
-            // Hide all tabs
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            
-            // Remove active class from nav items
-            document.querySelectorAll('.nav-item').forEach(item => {
-                item.classList.remove('active');
-            });
-            
-            // Show selected tab
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
             document.getElementById('tab-' + tabName).classList.add('active');
             event.currentTarget.classList.add('active');
             
-            // Load content if needed
             if (tabName === 'media') loadMedia();
             if (tabName === 'users') loadUsers();
         }
 
-        function sendMessage() {
+        async function loadCategories() {
+            try {
+                const response = await fetch(`${API_URL}/api/forum/categories`);
+                if (response.ok) {
+                    const categories = await response.json();
+                    console.log('Categories loaded:', categories);
+                }
+            } catch (err) {
+                console.error('Failed to load categories:', err);
+            }
+        }
+
+        async function sendMessage() {
             const messageText = document.getElementById('messageText').value.trim();
             const fileInput = document.getElementById('messageFileInput');
             
-            if (!messageText && !fileInput.files.length) {
-                return;
-            }
+            if (!messageText && !fileInput.files.length) return;
 
+            // For now, store messages locally (you can add a messages endpoint later)
             const messages = JSON.parse(localStorage.getItem('rnn_messages') || '[]');
             const message = {
                 id: Date.now(),
-                author: currentUser.username,
+                author: currentUser.displayName || currentUser.username,
                 text: messageText,
                 timestamp: new Date().toISOString(),
                 media: null
@@ -586,29 +597,36 @@
                     return;
                 }
                 
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    message.media = {
-                        name: file.name,
-                        type: file.type,
-                        data: e.target.result
-                    };
+                // Upload to server
+                try {
+                    const formData = new FormData();
+                    formData.append('file', file);
                     
-                    messages.push(message);
-                    localStorage.setItem('rnn_messages', JSON.stringify(messages.slice(-100)));
+                    const uploadResponse = await fetch(`${API_URL}/api/media/upload`, {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${authToken}` },
+                        body: formData
+                    });
                     
-                    document.getElementById('messageText').value = '';
-                    fileInput.value = '';
-                    loadMessages();
-                };
-                reader.readAsDataURL(file);
-            } else {
-                messages.push(message);
-                localStorage.setItem('rnn_messages', JSON.stringify(messages.slice(-100)));
-                
-                document.getElementById('messageText').value = '';
-                loadMessages();
+                    if (uploadResponse.ok) {
+                        const uploadData = await uploadResponse.json();
+                        message.media = {
+                            name: file.name,
+                            type: file.type,
+                            url: `${API_URL}${uploadData.url}`
+                        };
+                    }
+                } catch (err) {
+                    console.error('Upload failed:', err);
+                }
             }
+
+            messages.push(message);
+            localStorage.setItem('rnn_messages', JSON.stringify(messages.slice(-100)));
+            
+            document.getElementById('messageText').value = '';
+            fileInput.value = '';
+            loadMessages();
         }
 
         function loadMessages() {
@@ -631,23 +649,24 @@
                     <div class="message-content">${msg.text}</div>
                     ${msg.media ? `
                         <div class="message-media">
-                            ${msg.media.type.startsWith('image/') ? 
-                                `<img src="${msg.media.data}" alt="${msg.media.name}">` :
-                                `<video src="${msg.media.data}" controls></video>`
+                            ${msg.media.type && msg.media.type.startsWith('image/') ? 
+                                `<img src="${msg.media.url || msg.media.data}" alt="${msg.media.name}">` :
+                                `<video src="${msg.media.url || msg.media.data}" controls></video>`
                             }
                         </div>
                     ` : ''}
                 </div>
             `).join('');
             
-            // Scroll to bottom
             container.scrollTop = container.scrollHeight;
         }
 
-        function loadMedia() {
-            const media = JSON.parse(localStorage.getItem('rnn_media') || '[]');
+        async function loadMedia() {
             const grid = document.getElementById('mediaGrid');
             const empty = document.getElementById('mediaEmpty');
+            
+            // Load from localStorage for now
+            const media = JSON.parse(localStorage.getItem('rnn_media') || '[]');
             
             if (media.length === 0) {
                 grid.innerHTML = '';
@@ -657,10 +676,10 @@
             
             empty.style.display = 'none';
             grid.innerHTML = media.map(item => `
-                <div class="media-item" onclick="window.open('${item.data}')">
+                <div class="media-item" onclick="window.open('${item.url || item.data}')">
                     ${item.type.startsWith('image/') ? 
-                        `<img src="${item.data}" alt="${item.name}">` :
-                        `<video src="${item.data}"></video>`
+                        `<img src="${item.url || item.data}" alt="${item.name}">` :
+                        `<video src="${item.url || item.data}"></video>`
                     }
                     <div class="media-info">
                         <div class="media-name">${item.name}</div>
@@ -670,33 +689,43 @@
             `).join('');
         }
 
-        function loadUsers() {
-            const users = JSON.parse(localStorage.getItem('rnn_users') || '[]');
+        async function loadUsers() {
             const container = document.getElementById('usersList');
             
-            if (users.length === 0) {
-                container.innerHTML = '<div class="empty-state"><div class="icon">👥</div><p>No users found</p></div>';
-                return;
+            try {
+                // Try to get users from API (admin only)
+                const response = await fetch(`${API_URL}/api/admin/users`, {
+                    headers: getAuthHeaders()
+                });
+                
+                if (response.ok) {
+                    const users = await response.json();
+                    container.innerHTML = users.map(user => `
+                        <div class="user-card">
+                            <div class="user-header">
+                                <span class="user-username">${user.displayName || user.userName}</span>
+                                <span class="user-status ${user.isBanned ? 'status-offline' : 'status-online'}">
+                                    ${user.isBanned ? 'Banned' : 'Active'}
+                                </span>
+                            </div>
+                            <div class="user-meta">Joined: ${new Date(user.createdAt).toLocaleDateString()}</div>
+                        </div>
+                    `).join('');
+                } else {
+                    container.innerHTML = '<div class="empty-state"><div class="icon">🔒</div><p>Admin access required</p></div>';
+                }
+            } catch (err) {
+                container.innerHTML = '<div class="empty-state"><div class="icon">👥</div><p>Could not load users</p></div>';
             }
-            
-            container.innerHTML = users.map(user => `
-                <div class="user-card">
-                    <div class="user-header">
-                        <span class="user-username">${user.username}</span>
-                        <span class="user-status status-offline">Offline</span>
-                    </div>
-                    <div class="user-meta">Joined: ${new Date(user.createdAt).toLocaleDateString()}</div>
-                </div>
-            `).join('');
         }
 
         function loadSettings() {
-            document.getElementById('accountUsername').value = currentUser.username;
-            document.getElementById('accountCreated').value = new Date(currentUser.createdAt).toLocaleString();
-            document.getElementById('userInviteCode').value = currentUser.inviteCode || 'N/A';
+            document.getElementById('accountUsername').value = currentUser.displayName || currentUser.username;
+            document.getElementById('accountCreated').value = 'N/A';
+            document.getElementById('userInviteCode').value = 'N/A';
         }
 
-        function changePassword() {
+        async function changePassword() {
             const newPassword = document.getElementById('newPassword').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
             
@@ -715,21 +744,9 @@
                 return;
             }
             
-            // Update password in storage
-            const users = JSON.parse(localStorage.getItem('rnn_users') || '[]');
-            const userIndex = users.findIndex(u => u.username === currentUser.username);
-            if (userIndex !== -1) {
-                users[userIndex].password = newPassword;
-                localStorage.setItem('rnn_users', JSON.stringify(users));
-                
-                // Update current user
-                currentUser.password = newPassword;
-                sessionStorage.setItem('rnn_user', JSON.stringify(currentUser));
-                
-                showToast('Password updated successfully');
-                document.getElementById('newPassword').value = '';
-                document.getElementById('confirmPassword').value = '';
-            }
+            showToast('Password update feature coming soon');
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmPassword').value = '';
         }
 
         function showToast(message) {
@@ -762,35 +779,45 @@
             handleMediaFiles(e.target.files);
         });
 
-        function handleMediaFiles(files) {
+        async function handleMediaFiles(files) {
             const media = JSON.parse(localStorage.getItem('rnn_media') || '[]');
             let count = 0;
             
-            Array.from(files).forEach(file => {
+            for (const file of Array.from(files)) {
                 if (file.size > 10 * 1024 * 1024) {
                     showToast(file.name + ' too large (max 10MB)');
-                    return;
+                    continue;
                 }
                 
-                const reader = new FileReader();
-                reader.onload = e => {
-                    media.push({
-                        name: file.name,
-                        type: file.type,
-                        data: e.target.result,
-                        date: new Date().toISOString(),
-                        uploadedBy: currentUser.username
-                    });
-                    count++;
+                try {
+                    const formData = new FormData();
+                    formData.append('file', file);
                     
-                    if (count === files.length) {
-                        localStorage.setItem('rnn_media', JSON.stringify(media));
-                        loadMedia();
-                        showToast(count + ' file(s) uploaded');
+                    const response = await fetch(`${API_URL}/api/media/upload`, {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${authToken}` },
+                        body: formData
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        media.push({
+                            name: file.name,
+                            type: file.type,
+                            url: `${API_URL}${data.url}`,
+                            date: new Date().toISOString(),
+                            uploadedBy: currentUser.username
+                        });
+                        count++;
                     }
-                };
-                reader.readAsDataURL(file);
-            });
+                } catch (err) {
+                    console.error('Upload failed:', err);
+                }
+            }
+            
+            localStorage.setItem('rnn_media', JSON.stringify(media));
+            loadMedia();
+            if (count > 0) showToast(count + ' file(s) uploaded');
         }
 
         // Enter key to send message
