@@ -674,21 +674,55 @@
 
     <script>
         const API_URL = 'https://api.alott.me';
-        const ADMIN_USER = 'alott';
-        const ADMIN_PASSWORD = 'Alott@1234*';
 
-        function checkAdminPassword() {
-            const user = document.getElementById('adminUsername').value;
-            const pass = document.getElementById('adminPassword').value;
-            if (user === ADMIN_USER && pass === ADMIN_PASSWORD) {
-                document.getElementById('adminGate').classList.add('hidden');
-                document.getElementById('adminContent').classList.add('visible');
-                sessionStorage.setItem('admin_auth', 'true');
-                initDashboard();
-            } else {
-                document.getElementById('errorMsg').classList.add('show');
-                document.getElementById('adminPassword').value = '';
-                setTimeout(() => document.getElementById('errorMsg').classList.remove('show'), 3000);
+        async function checkAdminPassword() {
+            const username = document.getElementById('adminUsername').value.trim();
+            const password = document.getElementById('adminPassword').value;
+            
+            if (!username || !password) {
+                showToast('Please enter credentials');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/api/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    // Simple check - let's see if we can hit an admin endpoint to verify role
+                    const testAdmin = await fetch(`${API_URL}/api/admin/invites`, {
+                        headers: { 'Authorization': `Bearer ${data.token}` }
+                    });
+
+                    if (testAdmin.ok) {
+                        localStorage.setItem('rnn_token', data.token);
+                        localStorage.setItem('rnn_user', JSON.stringify({
+                            username: data.username,
+                            displayName: data.displayName
+                        }));
+                        document.getElementById('adminGate').classList.add('hidden');
+                        document.getElementById('adminContent').classList.add('visible');
+                        sessionStorage.setItem('admin_auth', 'true');
+                        initDashboard();
+                    } else {
+                        document.getElementById('errorMsg').textContent = 'Access Denied: Admin role required';
+                        document.getElementById('errorMsg').classList.add('show');
+                        setTimeout(() => document.getElementById('errorMsg').classList.remove('show'), 3000);
+                    }
+                } else {
+                    document.getElementById('errorMsg').textContent = 'Invalid username or password';
+                    document.getElementById('errorMsg').classList.add('show');
+                    document.getElementById('adminPassword').value = '';
+                    setTimeout(() => document.getElementById('errorMsg').classList.remove('show'), 3000);
+                }
+            } catch (err) {
+                console.error('Auth error:', err);
+                showToast('Connection error');
             }
         }
 
