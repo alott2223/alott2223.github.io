@@ -95,9 +95,10 @@
             <h2>Join RNN</h2>
             <p class="subtitle">Create your account</p>
             <input type="text" class="input-field" id="regUsername" placeholder="Username...">
+            <input type="email" class="input-field" id="regEmail" placeholder="Email...">
             <input type="password" class="input-field" id="regPassword" placeholder="Password...">
             <input type="password" class="input-field" id="regPasswordConfirm" placeholder="Confirm Password...">
-            <input type="email" class="input-field" id="inviteCode" placeholder="Email..." onkeypress="if(event.key==='Enter')register()">
+            <input type="text" class="input-field" id="inviteCode" placeholder="Invite Code..." onkeypress="if(event.key==='Enter')register()">
             <button class="auth-btn" onclick="register()">Create Account</button>
             <p class="error-msg" id="registerError">Registration failed</p>
             <p class="success-msg" id="registerSuccess">Account created successfully!</p>
@@ -146,11 +147,12 @@
 
         async function register() {
             const username = document.getElementById('regUsername').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
             const password = document.getElementById('regPassword').value;
             const confirmPassword = document.getElementById('regPasswordConfirm').value;
-            const email = document.getElementById('inviteCode').value.trim(); // Using invite code field as email
+            const inviteCode = document.getElementById('inviteCode').value.trim();
             
-            if (!username || !password || !confirmPassword || !email) {
+            if (!username || !email || !password || !confirmPassword || !inviteCode) {
                 showError('registerError', 'Please fill in all fields');
                 return;
             }
@@ -173,21 +175,28 @@
                         username,
                         password,
                         email,
-                        displayName: username
+                        displayName: username,
+                        inviteCode
                     })
                 });
 
                 if (response.ok) {
                     showSuccess('registerSuccess', 'Account created successfully!');
                     document.getElementById('regUsername').value = '';
+                    document.getElementById('regEmail').value = '';
                     document.getElementById('regPassword').value = '';
                     document.getElementById('regPasswordConfirm').value = '';
                     document.getElementById('inviteCode').value = '';
                     setTimeout(() => toggleForm(), 2000);
                 } else {
-                    const errors = await response.json();
-                    const errorMsg = errors.map ? errors.map(e => e.description).join(', ') : 'Registration failed';
-                    showError('registerError', errorMsg);
+                    const errorText = await response.text();
+                    try {
+                        const errors = JSON.parse(errorText);
+                        const errorMsg = errors.map ? errors.map(e => e.description).join(', ') : errorText;
+                        showError('registerError', errorMsg);
+                    } catch {
+                        showError('registerError', errorText || 'Registration failed');
+                    }
                 }
             } catch (err) {
                 showError('registerError', 'Connection error. Please try again.');
