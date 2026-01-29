@@ -592,8 +592,8 @@
 
             if (fileInput.files.length > 0) {
                 const file = fileInput.files[0];
-                if (file.size > 5 * 1024 * 1024) {
-                    showToast('File too large (max 5MB)');
+                if (file.size > 10 * 1024 * 1024 * 1024) {
+                    showToast('File too large (max 10GB)');
                     return;
                 }
                 
@@ -784,8 +784,8 @@
             let count = 0;
             
             for (const file of Array.from(files)) {
-                if (file.size > 10 * 1024 * 1024) {
-                    showToast(file.name + ' too large (max 10MB)');
+                if (file.size > 10 * 1024 * 1024 * 1024) {
+                    showToast(file.name + ' too large (max 10GB)');
                     continue;
                 }
                 
