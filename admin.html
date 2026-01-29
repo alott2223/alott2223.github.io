@@ -523,7 +523,7 @@
                     <p>Drag & drop files here or click to browse</p>
                     <input type="file" class="file-input" id="fileInput" accept="image/*,video/*" multiple>
                     <button class="upload-btn" onclick="document.getElementById('fileInput').click()">Select Files</button>
-                    <p style="color:#555;margin-top:20px;font-size:0.85rem;">Supports images & videos • Max 5MB per file</p>
+                    <p style="color:#555;margin-top:20px;font-size:0.85rem;">Supports images & videos • Max 10GB per file</p>
                 </div>
             </div>
 
@@ -673,6 +673,7 @@
     </div>
 
     <script>
+        const API_URL = 'https://api.alott.me';
         const ADMIN_USER = 'alott';
         const ADMIN_PASSWORD = 'Alott@1234*';
 
@@ -924,24 +925,51 @@
         dropZone?.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('dragover'); handleFiles(e.dataTransfer.files); });
         fileInput?.addEventListener('change', e => handleFiles(e.target.files));
 
-        function handleFiles(files) {
-            const media = JSON.parse(localStorage.getItem('rnn_media') || '[]');
+        async function handleFiles(files) {
+            const authToken = localStorage.getItem('rnn_token');
             let count = 0;
             
-            Array.from(files).forEach(file => {
-                if (file.size > 5 * 1024 * 1024) { alert(file.name + ' too large (max 5MB)'); return; }
-                const reader = new FileReader();
-                reader.onload = e => {
-                    media.push({ name: file.name, type: file.type, data: e.target.result, date: new Date().toISOString() });
-                    count++;
-                    if (count === files.length) {
+            for (const file of Array.from(files)) {
+                if (file.size > 10 * 1024 * 1024 * 1024) {
+                    showToast(file.name + ' too large (max 10GB)');
+                    continue;
+                }
+                
+                try {
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    
+                    const response = await fetch(`${API_URL}/api/media/upload`, {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${authToken}` },
+                        body: formData
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        const media = JSON.parse(localStorage.getItem('rnn_media') || '[]');
+                        media.push({
+                            name: file.name,
+                            type: file.type,
+                            url: `${API_URL}${data.url}`,
+                            data: `${API_URL}${data.url}`,
+                            date: new Date().toISOString()
+                        });
                         localStorage.setItem('rnn_media', JSON.stringify(media));
-                        initDashboard();
-                        showToast(count + ' file(s) uploaded');
+                        count++;
+                    } else {
+                        showToast('Upload failed: ' + file.name);
                     }
-                };
-                reader.readAsDataURL(file);
-            });
+                } catch (err) {
+                    console.error('Upload failed:', err);
+                    showToast('Upload error: ' + file.name);
+                }
+            }
+            
+            if (count > 0) {
+                initDashboard();
+                showToast(count + ' file(s) uploaded');
+            }
         }
 
         // Init

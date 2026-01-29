@@ -442,8 +442,6 @@
                     <div class="message-input-container">
                         <div class="message-input">
                             <textarea id="messageText" placeholder="Type your message..."></textarea>
-                            <input type="file" class="file-input" id="messageFileInput" accept="image/*,video/*">
-                            <button class="media-btn" onclick="document.getElementById('messageFileInput').click()">📎</button>
                             <button class="send-btn" onclick="sendMessage()">Send</button>
                         </div>
                     </div>
@@ -453,12 +451,6 @@
             <!-- Media Tab -->
             <div class="tab-content" id="tab-media">
                 <div class="media-section">
-                    <div class="upload-zone" id="dropZone">
-                        <div class="icon">📤</div>
-                        <p>Drag & drop files here or click to browse</p>
-                        <input type="file" class="file-input" id="mediaFileInput" accept="image/*,video/*" multiple>
-                        <button class="upload-btn" onclick="document.getElementById('mediaFileInput').click()">Select Files</button>
-                    </div>
                     <div class="media-grid" id="mediaGrid"></div>
                     <div class="empty-state" id="mediaEmpty" style="display:none;">
                         <div class="icon">📭</div>
@@ -576,56 +568,21 @@
 
         async function sendMessage() {
             const messageText = document.getElementById('messageText').value.trim();
-            const fileInput = document.getElementById('messageFileInput');
             
-            if (!messageText && !fileInput.files.length) return;
+            if (!messageText) return;
 
-            // For now, store messages locally (you can add a messages endpoint later)
             const messages = JSON.parse(localStorage.getItem('rnn_messages') || '[]');
             const message = {
                 id: Date.now(),
                 author: currentUser.displayName || currentUser.username,
                 text: messageText,
-                timestamp: new Date().toISOString(),
-                media: null
+                timestamp: new Date().toISOString()
             };
-
-            if (fileInput.files.length > 0) {
-                const file = fileInput.files[0];
-                if (file.size > 10 * 1024 * 1024 * 1024) {
-                    showToast('File too large (max 10GB)');
-                    return;
-                }
-                
-                // Upload to server
-                try {
-                    const formData = new FormData();
-                    formData.append('file', file);
-                    
-                    const uploadResponse = await fetch(`${API_URL}/api/media/upload`, {
-                        method: 'POST',
-                        headers: { 'Authorization': `Bearer ${authToken}` },
-                        body: formData
-                    });
-                    
-                    if (uploadResponse.ok) {
-                        const uploadData = await uploadResponse.json();
-                        message.media = {
-                            name: file.name,
-                            type: file.type,
-                            url: `${API_URL}${uploadData.url}`
-                        };
-                    }
-                } catch (err) {
-                    console.error('Upload failed:', err);
-                }
-            }
 
             messages.push(message);
             localStorage.setItem('rnn_messages', JSON.stringify(messages.slice(-100)));
             
             document.getElementById('messageText').value = '';
-            fileInput.value = '';
             loadMessages();
         }
 
@@ -647,14 +604,6 @@
                         <span class="message-time">${new Date(msg.timestamp).toLocaleString()}</span>
                     </div>
                     <div class="message-content">${msg.text}</div>
-                    ${msg.media ? `
-                        <div class="message-media">
-                            ${msg.media.type && msg.media.type.startsWith('image/') ? 
-                                `<img src="${msg.media.url || msg.media.data}" alt="${msg.media.name}">` :
-                                `<video src="${msg.media.url || msg.media.data}" controls></video>`
-                            }
-                        </div>
-                    ` : ''}
                 </div>
             `).join('');
             
@@ -754,70 +703,6 @@
             toast.textContent = message;
             toast.classList.add('show');
             setTimeout(() => toast.classList.remove('show'), 3000);
-        }
-
-        // File upload handlers
-        const dropZone = document.getElementById('dropZone');
-        const mediaFileInput = document.getElementById('mediaFileInput');
-
-        dropZone.addEventListener('dragover', e => {
-            e.preventDefault();
-            dropZone.classList.add('dragover');
-        });
-
-        dropZone.addEventListener('dragleave', () => {
-            dropZone.classList.remove('dragover');
-        });
-
-        dropZone.addEventListener('drop', e => {
-            e.preventDefault();
-            dropZone.classList.remove('dragover');
-            handleMediaFiles(e.dataTransfer.files);
-        });
-
-        mediaFileInput.addEventListener('change', e => {
-            handleMediaFiles(e.target.files);
-        });
-
-        async function handleMediaFiles(files) {
-            const media = JSON.parse(localStorage.getItem('rnn_media') || '[]');
-            let count = 0;
-            
-            for (const file of Array.from(files)) {
-                if (file.size > 10 * 1024 * 1024 * 1024) {
-                    showToast(file.name + ' too large (max 10GB)');
-                    continue;
-                }
-                
-                try {
-                    const formData = new FormData();
-                    formData.append('file', file);
-                    
-                    const response = await fetch(`${API_URL}/api/media/upload`, {
-                        method: 'POST',
-                        headers: { 'Authorization': `Bearer ${authToken}` },
-                        body: formData
-                    });
-                    
-                    if (response.ok) {
-                        const data = await response.json();
-                        media.push({
-                            name: file.name,
-                            type: file.type,
-                            url: `${API_URL}${data.url}`,
-                            date: new Date().toISOString(),
-                            uploadedBy: currentUser.username
-                        });
-                        count++;
-                    }
-                } catch (err) {
-                    console.error('Upload failed:', err);
-                }
-            }
-            
-            localStorage.setItem('rnn_media', JSON.stringify(media));
-            loadMedia();
-            if (count > 0) showToast(count + ' file(s) uploaded');
         }
 
         // Enter key to send message
