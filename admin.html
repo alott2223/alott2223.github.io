@@ -744,440 +744,242 @@
             if (pageId === 'invites') loadInvitesList();
         }
 
-        function initDashboard() {
-            const media = JSON.parse(localStorage.getItem('rnn_media') || '[]');
-            const logs = JSON.parse(localStorage.getItem('rnn_access_log') || '[]');
-            const users = JSON.parse(localStorage.getItem('rnn_users') || '[]');
-            const invites = JSON.parse(localStorage.getItem('rnn_invite_codes') || '[]');
-            
-            const successful = logs.filter(l => l.success).length;
-            const failed = logs.filter(l => !l.success).length;
-            const uniqueFP = [...new Set(logs.map(l => l.fingerprint))].length;
-            const activeInvites = invites.filter(i => !i.used).length;
-            
-            document.getElementById('statMedia').textContent = media.length;
-            document.getElementById('statUsers').textContent = users.length;
-            document.getElementById('statSuccess').textContent = successful;
-            document.getElementById('statFailed').textContent = failed;
-            document.getElementById('statFingerprints').textContent = uniqueFP;
-            document.getElementById('statInvites').textContent = activeInvites;
-            
-            document.getElementById('mediaBadge').textContent = media.length;
-            document.getElementById('usersBadge').textContent = users.length;
-            document.getElementById('invitesBadge').textContent = activeInvites;
-            document.getElementById('logsBadge').textContent = logs.length;
-            
-            // Recent activity
-            const recent = logs.slice(-5).reverse();
-            const tbody = document.getElementById('recentActivity');
-            if (recent.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#555;">No activity yet</td></tr>';
-            } else {
-                tbody.innerHTML = recent.map(log => `
-                    <tr>
-                        <td>${new Date(log.timestamp).toLocaleString()}</td>
-                        <td>${log.username || 'Anonymous'}</td>
-                        <td><span class="status-badge ${log.success ? 'success' : 'failed'}">${log.success ? 'SUCCESS' : 'FAILED'}</span></td>
-                        <td>${log.ip || 'Unknown'}</td>
-                        <td>${log.action || 'login'}</td>
-                    </tr>
-                `).join('');
+        async function initDashboard() {
+            const authToken = localStorage.getItem('rnn_token');
+            try {
+                const response = await fetch(`${API_URL}/api/admin/stats`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                
+                if (response.ok) {
+                    const stats = await response.json();
+                    document.getElementById('statMedia').textContent = stats.totalMedia;
+                    document.getElementById('statUsers').textContent = stats.totalUsers;
+                    document.getElementById('statSuccess').textContent = 'N/A';
+                    document.getElementById('statFailed').textContent = 'N/A';
+                    document.getElementById('statFingerprints').textContent = 'N/A';
+                    document.getElementById('statInvites').textContent = '-'; // We'll update this in loadInvitesList
+                    
+                    document.getElementById('mediaBadge').textContent = stats.totalMedia;
+                    document.getElementById('usersBadge').textContent = stats.totalUsers;
+                }
+            } catch (err) {
+                console.error('Stats load failed:', err);
             }
         }
 
-        function loadMediaGrid() {
-            const media = JSON.parse(localStorage.getItem('rnn_media') || '[]');
+        async function loadMediaGrid() {
+            const authToken = localStorage.getItem('rnn_token');
             const grid = document.getElementById('mediaGrid');
             const empty = document.getElementById('mediaEmpty');
             
-            if (media.length === 0) {
-                grid.innerHTML = '';
-                empty.style.display = 'block';
-                return;
-            }
-            
-            empty.style.display = 'none';
-            grid.innerHTML = media.map((item, i) => `
-                <div class="media-card">
-                    ${item.type.startsWith('image/') 
-                        ? `<img src="${item.data}" alt="${item.name}">`
-                        : `<video src="${item.data}"></video>`}
-                    <div class="media-card-info">
-                        <div class="media-card-name">${item.name}</div>
-                        <div class="media-card-meta">${item.type.split('/')[0]} • ${new Date(item.date).toLocaleDateString()}</div>
-                        <div class="media-card-actions">
-                            <button class="btn-sm btn-view" onclick="window.open('${item.data}')">View</button>
-                            <button class="btn-sm btn-delete" onclick="deleteMedia(${i})">Delete</button>
+            try {
+                const response = await fetch(`${API_URL}/api/admin/media`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                
+                if (response.ok) {
+                    const media = await response.json();
+                    if (media.length === 0) {
+                        grid.innerHTML = '';
+                        empty.style.display = 'block';
+                        return;
+                    }
+                    
+                    empty.style.display = 'none';
+                    grid.innerHTML = media.map((item) => `
+                        <div class="media-card">
+                            ${item.contentType.startsWith('image/') 
+                                ? `<img src="${API_URL}/api/media/${item.id}" alt="${item.fileName}">`
+                                : `<video src="${API_URL}/api/media/${item.id}"></video>`}
+                            <div class="media-card-info">
+                                <div class="media-card-name">${item.fileName}</div>
+                                <div class="media-card-meta">${item.contentType.split('/')[0]} • ${new Date(item.createdAt).toLocaleDateString()}</div>
+                                <div class="media-card-actions">
+                                    <button class="btn-sm btn-view" onclick="window.open('${API_URL}/api/media/${item.id}')">View</button>
+                                    <button class="btn-sm btn-delete" onclick="deleteMedia(${item.id})">Delete</button>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                </div>
-            `).join('');
+                    `).join('');
+                }
+            } catch (err) {
+                console.error('Media load failed:', err);
+            }
         }
 
-        function deleteMedia(index) {
+        async function deleteMedia(id) {
             if (confirm('Delete this media?')) {
-                const media = JSON.parse(localStorage.getItem('rnn_media') || '[]');
-                media.splice(index, 1);
-                localStorage.setItem('rnn_media', JSON.stringify(media));
-                loadMediaGrid();
-                initDashboard();
-                showToast('Media deleted');
+                const authToken = localStorage.getItem('rnn_token');
+                try {
+                    const response = await fetch(`${API_URL}/api/admin/media/${id}`, {
+                        method: 'DELETE',
+                        headers: { 'Authorization': `Bearer ${authToken}` }
+                    });
+                    
+                    if (response.ok) {
+                        loadMediaGrid();
+                        initDashboard();
+                        showToast('Media deleted');
+                    }
+                } catch (err) {
+                    showToast('Delete failed');
+                }
             }
         }
 
         function loadAccessLogs() {
-            const logs = JSON.parse(localStorage.getItem('rnn_access_log') || '[]').reverse();
             const tbody = document.getElementById('accessLogs');
-            
-            if (logs.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#555;">No access logs</td></tr>';
-                return;
-            }
-            
-            tbody.innerHTML = logs.map((log, i) => `
-                <tr>
-                    <td>${new Date(log.timestamp).toLocaleString()}</td>
-                    <td><span class="status-badge ${log.success ? 'success' : 'failed'}">${log.success ? 'SUCCESS' : 'FAILED'}</span></td>
-                    <td class="fingerprint-cell" onclick="copyText('${log.fingerprint}')" title="Click to copy">${log.fingerprint.slice(0,12)}...</td>
-                    <td>${log.screen || '-'}</td>
-                    <td>${log.timezone || '-'}</td>
-                    <td>${log.language || '-'}</td>
-                    <td><button class="btn-sm btn-view" onclick="showLogDetail(${logs.length - 1 - i})">Details</button></td>
-                </tr>
-            `).join('');
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#555;">Server-side logging coming soon</td></tr>';
         }
 
         function loadFingerprints() {
-            const logs = JSON.parse(localStorage.getItem('rnn_access_log') || '[]');
-            const fpMap = {};
-            
-            logs.forEach(log => {
-                if (!fpMap[log.fingerprint]) {
-                    fpMap[log.fingerprint] = { first: log.timestamp, last: log.timestamp, attempts: 0, success: 0 };
-                }
-                fpMap[log.fingerprint].last = log.timestamp;
-                fpMap[log.fingerprint].attempts++;
-                if (log.success) fpMap[log.fingerprint].success++;
-            });
-            
             const tbody = document.getElementById('fingerprintList');
-            const fps = Object.entries(fpMap);
-            
-            if (fps.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#555;">No fingerprints recorded</td></tr>';
-                return;
-            }
-            
-            tbody.innerHTML = fps.map(([fp, data]) => {
-                const rate = Math.round((data.success / data.attempts) * 100);
-                return `
-                    <tr>
-                        <td class="fingerprint-cell" onclick="copyText('${fp}')" title="${fp}">${fp.slice(0,20)}...</td>
-                        <td>${new Date(data.first).toLocaleString()}</td>
-                        <td>${new Date(data.last).toLocaleString()}</td>
-                        <td>${data.attempts}</td>
-                        <td><span class="status-badge ${rate >= 50 ? 'success' : 'failed'}">${rate}%</span></td>
-                        <td><button class="btn-sm btn-view" onclick="copyText('${fp}')">Copy</button></td>
-                    </tr>
-                `;
-            }).join('');
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#555;">Fingerprinting restricted to active sessions</td></tr>';
         }
 
-        function showLogDetail(index) {
-            const logs = JSON.parse(localStorage.getItem('rnn_access_log') || '[]');
-            const log = logs[index];
-            if (!log) return;
-            
-            document.getElementById('modalContent').innerHTML = `
-                <div class="detail-card">
-                    <h4>📅 Timestamp</h4>
-                    <div class="detail-item"><span class="label">Date</span><span class="value">${new Date(log.timestamp).toLocaleString()}</span></div>
-                    <div class="detail-item"><span class="label">Status</span><span class="value">${log.success ? '✅ Success' : '❌ Failed'}</span></div>
-                </div>
-                <div class="detail-card">
-                    <h4>🖐️ Fingerprint</h4>
-                    <div class="detail-item"><span class="label">Hash</span><span class="value" style="font-size:0.7rem;">${log.fingerprint}</span></div>
-                </div>
-                <div class="detail-card">
-                    <h4>🖥️ Device Info</h4>
-                    <div class="detail-item"><span class="label">Screen</span><span class="value">${log.screen || '-'}</span></div>
-                    <div class="detail-item"><span class="label">Timezone</span><span class="value">${log.timezone || '-'}</span></div>
-                    <div class="detail-item"><span class="label">Language</span><span class="value">${log.language || '-'}</span></div>
-                </div>
-                <div class="detail-card" style="grid-column: 1 / -1;">
-                    <h4>🌐 User Agent</h4>
-                    <div class="detail-item"><span class="value" style="max-width:100%;font-size:0.75rem;">${log.userAgent || '-'}</span></div>
-                </div>
-            `;
-            document.getElementById('detailModal').classList.add('show');
-        }
-
-        function closeModal() {
-            document.getElementById('detailModal').classList.remove('show');
-        }
-
-        function clearLogs() {
-            if (confirm('Clear all access logs?')) {
-                localStorage.removeItem('rnn_access_log');
-                loadAccessLogs();
-                loadFingerprints();
-                initDashboard();
-                showToast('Logs cleared');
-            }
-        }
-
-        function exportLogs() {
-            const logs = JSON.parse(localStorage.getItem('rnn_access_log') || '[]');
-            const blob = new Blob([JSON.stringify(logs, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'rnn_access_logs_' + new Date().toISOString().split('T')[0] + '.json';
-            a.click();
-            URL.revokeObjectURL(url);
-            showToast('Logs exported');
-        }
-
-        function copyText(text) {
-            navigator.clipboard.writeText(text);
-            showToast('Copied to clipboard');
-        }
-
-        function showToast(msg) {
-            const toast = document.getElementById('toast');
-            toast.textContent = msg;
-            toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), 2500);
-        }
-
-        // File upload
-        const dropZone = document.getElementById('dropZone');
-        const fileInput = document.getElementById('fileInput');
-
-        dropZone?.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
-        dropZone?.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
-        dropZone?.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('dragover'); handleFiles(e.dataTransfer.files); });
-        fileInput?.addEventListener('change', e => handleFiles(e.target.files));
-
-        async function handleFiles(files) {
+        async function loadUsersList() {
             const authToken = localStorage.getItem('rnn_token');
-            let count = 0;
-            
-            for (const file of Array.from(files)) {
-                if (file.size > 10 * 1024 * 1024 * 1024) {
-                    showToast(file.name + ' too large (max 10GB)');
-                    continue;
-                }
-                
-                try {
-                    const formData = new FormData();
-                    formData.append('file', file);
-                    
-                    const response = await fetch(`${API_URL}/api/media/upload`, {
-                        method: 'POST',
-                        headers: { 'Authorization': `Bearer ${authToken}` },
-                        body: formData
-                    });
-                    
-                    if (response.ok) {
-                        const data = await response.json();
-                        const media = JSON.parse(localStorage.getItem('rnn_media') || '[]');
-                        media.push({
-                            name: file.name,
-                            type: file.type,
-                            url: `${API_URL}${data.url}`,
-                            data: `${API_URL}${data.url}`,
-                            date: new Date().toISOString()
-                        });
-                        localStorage.setItem('rnn_media', JSON.stringify(media));
-                        count++;
-                    } else {
-                        showToast('Upload failed: ' + file.name);
-                    }
-                } catch (err) {
-                    console.error('Upload failed:', err);
-                    showToast('Upload error: ' + file.name);
-                }
-            }
-            
-            if (count > 0) {
-                initDashboard();
-                showToast(count + ' file(s) uploaded');
-            }
-        }
-
-        // Init
-        if (sessionStorage.getItem('admin_auth') === 'true') {
-            document.getElementById('adminGate').classList.add('hidden');
-            document.getElementById('adminContent').classList.add('visible');
-            initDashboard();
-        }
-
-        // Close modal on outside click
-        document.getElementById('detailModal').addEventListener('click', e => {
-            if (e.target.id === 'detailModal') closeModal();
-        });
-
-        // Users Management
-        function loadUsersList() {
-            const users = JSON.parse(localStorage.getItem('rnn_users') || '[]');
-            const logs = JSON.parse(localStorage.getItem('rnn_access_log') || '[]');
             const tbody = document.getElementById('usersList');
             
-            if (users.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#555;">No users registered</td></tr>';
-                return;
-            }
-            
-            tbody.innerHTML = users.map(user => {
-                // Find last login
-                const userLogs = logs.filter(l => l.username === user.username && l.success).reverse();
-                const lastLogin = userLogs.length > 0 ? new Date(userLogs[0].timestamp).toLocaleString() : 'Never';
+            try {
+                const response = await fetch(`${API_URL}/api/admin/users`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
                 
-                return `
-                    <tr>
-                        <td>${user.username}</td>
-                        <td>${new Date(user.createdAt).toLocaleDateString()}</td>
-                        <td>${user.inviteCode || 'N/A'}</td>
-                        <td>${lastLogin}</td>
-                        <td><span class="status-badge ${user.isAdmin ? 'warning' : 'success'}">${user.isAdmin ? 'Admin' : 'User'}</span></td>
-                        <td>
-                            <button class="btn-sm btn-view" onclick="viewUserDetails('${user.username}')">Details</button>
-                            <button class="btn-sm btn-delete" onclick="deleteUser('${user.username}')">Delete</button>
-                        </td>
-                    </tr>
-                `;
-            }).join('');
+                if (response.ok) {
+                    const users = await response.json();
+                    if (users.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#555;">No users found</td></tr>';
+                        return;
+                    }
+                    
+                    tbody.innerHTML = users.map(user => `
+                        <tr>
+                            <td>${user.userName}</td>
+                            <td>${new Date(user.createdAt).toLocaleDateString()}</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td><span class="status-badge ${user.isAdmin ? 'warning' : 'success'}">${user.isAdmin ? 'Admin' : 'User'}</span></td>
+                            <td>
+                                <button class="btn-sm btn-view" onclick="promoteToAdmin('${user.id}')">Make Admin</button>
+                                <button class="btn-sm btn-delete" onclick="banUser('${user.id}')">Ban</button>
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+            } catch (err) {
+                console.error('Users load failed:', err);
+            }
         }
 
-        function viewUserDetails(username) {
-            const users = JSON.parse(localStorage.getItem('rnn_users') || '[]');
-            const logs = JSON.parse(localStorage.getItem('rnn_access_log') || '[]');
-            const user = users.find(u => u.username === username);
-            
-            if (!user) return;
-            
-            const userLogs = logs.filter(l => l.username === username);
-            const successfulLogins = userLogs.filter(l => l.success).length;
-            const failedAttempts = userLogs.filter(l => !l.success).length;
-            
-            document.getElementById('modalContent').innerHTML = `
-                <div class="detail-card">
-                    <h4>👤 User Information</h4>
-                    <div class="detail-item"><span class="label">Username</span><span class="value">${user.username}</span></div>
-                    <div class="detail-item"><span class="label">Account Created</span><span class="value">${new Date(user.createdAt).toLocaleString()}</span></div>
-                    <div class="detail-item"><span class="label">Invite Code Used</span><span class="value">${user.inviteCode || 'N/A'}</span></div>
-                    <div class="detail-item"><span class="label">Admin Status</span><span class="value">${user.isAdmin ? 'Yes' : 'No'}</span></div>
-                </div>
-                <div class="detail-card">
-                    <h4>📊 Login Statistics</h4>
-                    <div class="detail-item"><span class="label">Successful Logins</span><span class="value">${successfulLogins}</span></div>
-                    <div class="detail-item"><span class="label">Failed Attempts</span><span class="value">${failedAttempts}</span></div>
-                    <div class="detail-item"><span class="label">Total Attempts</span><span class="value">${userLogs.length}</span></div>
-                </div>
-            `;
-            document.getElementById('detailModal').classList.add('show');
+        async function promoteToAdmin(userId) {
+            if (!confirm('Make this user an Admin?')) return;
+            const authToken = localStorage.getItem('rnn_token');
+            try {
+                const response = await fetch(`${API_URL}/api/admin/users/${userId}/role`, {
+                    method: 'POST',
+                    headers: { 
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify('Admin')
+                });
+                
+                if (response.ok) {
+                    showToast('User promoted to Admin');
+                    loadUsersList();
+                } else {
+                    showToast('Promotion failed');
+                }
+            } catch (err) {
+                showToast('Error promoting user');
+            }
         }
 
-        function deleteUser(username) {
-            if (!confirm('Delete user "' + username + '"? This action cannot be undone.')) return;
-            
-            const users = JSON.parse(localStorage.getItem('rnn_users') || '[]');
-            const updatedUsers = users.filter(u => u.username !== username);
-            localStorage.setItem('rnn_users', JSON.stringify(updatedUsers));
-            
-            loadUsersList();
-            initDashboard();
-            showToast('User deleted');
-        }
-
-        // Invite Code Management
-        function loadInvitesList() {
-            const invites = JSON.parse(localStorage.getItem('rnn_invite_codes') || '[]').reverse();
+        async function loadInvitesList() {
+            const authToken = localStorage.getItem('rnn_token');
             const tbody = document.getElementById('invitesList');
             
-            if (invites.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#555;">No invite codes generated</td></tr>';
-                return;
+            try {
+                const response = await fetch(`${API_URL}/api/admin/invites`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                
+                if (response.ok) {
+                    const invites = await response.json();
+                    document.getElementById('invitesBadge').textContent = invites.filter(i => !i.isUsed).length;
+                    document.getElementById('statInvites').textContent = invites.filter(i => !i.isUsed).length;
+                    
+                    if (invites.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#555;">No invite codes generated</td></tr>';
+                        return;
+                    }
+                    
+                    tbody.innerHTML = invites.map((invite) => `
+                        <tr>
+                            <td class="fingerprint-cell" onclick="copyText('${invite.code}')" title="Click to copy">${invite.code}</td>
+                            <td>${new Date(invite.createdAt).toLocaleDateString()}</td>
+                            <td>${invite.description || 'No description'}</td>
+                            <td><span class="status-badge ${invite.isUsed ? 'failed' : 'success'}">${invite.isUsed ? 'Used' : 'Active'}</span></td>
+                            <td>${invite.usedBy || '-'}</td>
+                            <td>${invite.usedAt ? new Date(invite.usedAt).toLocaleDateString() : '-'}</td>
+                            <td>
+                                <button class="btn-sm btn-view" onclick="copyText('${invite.code}')">Copy</button>
+                                <button class="btn-sm btn-delete" onclick="deleteInvite(${invite.id})">Delete</button>
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+            } catch (err) {
+                console.error('Invites load failed:', err);
             }
-            
-            tbody.innerHTML = invites.map((invite, index) => `
-                <tr>
-                    <td class="fingerprint-cell" onclick="copyText('${invite.code}')" title="Click to copy">${invite.code}</td>
-                    <td>${new Date(invite.createdAt).toLocaleDateString()}</td>
-                    <td>${invite.description || 'No description'}</td>
-                    <td><span class="status-badge ${invite.used ? 'failed' : 'success'}">${invite.used ? 'Used' : 'Active'}</span></td>
-                    <td>${invite.usedBy || '-'}</td>
-                    <td>${invite.usedAt ? new Date(invite.usedAt).toLocaleDateString() : '-'}</td>
-                    <td>
-                        <button class="btn-sm btn-view" onclick="copyText('${invite.code}')">Copy</button>
-                        ${!invite.used ? `<button class="btn-sm btn-delete" onclick="deleteInvite(${invites.length - 1 - index})">Delete</button>` : ''}
-                    </td>
-                </tr>
-            `).join('');
         }
 
-        function generateInvite() {
+        async function generateInvite() {
             const description = document.getElementById('inviteDescription').value.trim();
+            const authToken = localStorage.getItem('rnn_token');
             
-            // Generate random invite code
-            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-            let code = '';
-            for (let i = 0; i < 8; i++) {
-                code += chars.charAt(Math.floor(Math.random() * chars.length));
+            try {
+                const response = await fetch(`${API_URL}/api/admin/invites`, {
+                    method: 'POST',
+                    headers: { 
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ description })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('inviteDescription').value = '';
+                    loadInvitesList();
+                    initDashboard();
+                    showToast('Invite code generated: ' + data.code);
+                    copyText(data.code);
+                }
+            } catch (err) {
+                showToast('Generation failed');
             }
-            
-            const invites = JSON.parse(localStorage.getItem('rnn_invite_codes') || '[]');
-            
-            // Check if code already exists (very unlikely but possible)
-            if (invites.find(i => i.code === code)) {
-                generateInvite(); // Try again
-                return;
-            }
-            
-            const invite = {
-                code: code,
-                description: description || 'No description',
-                createdAt: new Date().toISOString(),
-                used: false,
-                usedBy: null,
-                usedAt: null
-            };
-            
-            invites.push(invite);
-            localStorage.setItem('rnn_invite_codes', JSON.stringify(invites));
-            
-            document.getElementById('inviteDescription').value = '';
-            loadInvitesList();
-            initDashboard();
-            showToast('Invite code generated: ' + code);
-            
-            // Auto-copy to clipboard
-            copyText(code);
         }
 
-        function deleteInvite(index) {
+        async function deleteInvite(id) {
             if (!confirm('Delete this invite code?')) return;
-            
-            const invites = JSON.parse(localStorage.getItem('rnn_invite_codes') || '[]');
-            invites.splice(invites.length - 1 - index, 1);
-            localStorage.setItem('rnn_invite_codes', JSON.stringify(invites));
-            
-            loadInvitesList();
-            initDashboard();
-            showToast('Invite code deleted');
-        }
-
-        function clearUsedInvites() {
-            if (!confirm('Clear all used invite codes?')) return;
-            
-            const invites = JSON.parse(localStorage.getItem('rnn_invite_codes') || '[]');
-            const activeInvites = invites.filter(i => !i.used);
-            localStorage.setItem('rnn_invite_codes', JSON.stringify(activeInvites));
-            
-            loadInvitesList();
-            initDashboard();
-            showToast('Used invite codes cleared');
+            const authToken = localStorage.getItem('rnn_token');
+            try {
+                const response = await fetch(`${API_URL}/api/admin/invites/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                
+                if (response.ok) {
+                    loadInvitesList();
+                    initDashboard();
+                    showToast('Invite code deleted');
+                }
+            } catch (err) {
+                showToast('Delete failed');
+            }
         }
     </script>
 </body>
