@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FreeME - Setup Guide</title>
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; max-width: 800px; margin: 40px auto; padding: 0 20px; line-height: 1.8; color: #333; }
+    h1 { color: #6c5ce7; } h2 { color: #2d3436; border-bottom: 2px solid #6c5ce7; padding-bottom: 8px; }
+    code { background: #f0f2f5; padding: 2px 8px; border-radius: 4px; font-size: 14px; }
+    pre { background: #2d3436; color: #dfe6e9; padding: 16px; border-radius: 8px; overflow-x: auto; }
+    .step { background: #f8f9fa; padding: 16px 20px; border-left: 4px solid #6c5ce7; margin: 16px 0; border-radius: 0 8px 8px 0; }
+    a { color: #6c5ce7; }
+  </style>
+</head>
+<body>
+  <h1>🕊️ FreeME - Setup Guide</h1>
+  <p>Follow these steps to set up your own FreeME social media platform on GitHub Pages.</p>
+
+  <h2>Step 1: Create a Firebase Project</h2>
+  <div class="step">
+    <ol>
+      <li>Go to <a href="https://console.firebase.google.com" target="_blank">Firebase Console</a></li>
+      <li>Click <strong>"Create a project"</strong> (or use an existing one)</li>
+      <li>Give it a name (e.g., "freeme-social")</li>
+      <li>Disable Google Analytics (optional) and click Create</li>
+    </ol>
+  </div>
+
+  <h2>Step 2: Enable Authentication</h2>
+  <div class="step">
+    <ol>
+      <li>In Firebase Console, go to <strong>Authentication → Sign-in method</strong></li>
+      <li>Enable <strong>Email/Password</strong></li>
+      <li>Enable <strong>Google</strong> (optional, for Google sign-in)</li>
+    </ol>
+  </div>
+
+  <h2>Step 3: Create Firestore Database</h2>
+  <div class="step">
+    <ol>
+      <li>Go to <strong>Firestore Database → Create database</strong></li>
+      <li>Select <strong>"Start in test mode"</strong> for now</li>
+      <li>Choose a location closest to you</li>
+      <li>Later, copy the security rules from <code>firestore.rules.js</code> into Firestore → Rules</li>
+    </ol>
+  </div>
+
+  <h2>Step 4: Enable Storage</h2>
+  <div class="step">
+    <ol>
+      <li>Go to <strong>Storage → Get started</strong></li>
+      <li>Accept the default rules for now</li>
+      <li>This is used for uploading profile pictures and post images</li>
+    </ol>
+  </div>
+
+  <h2>Step 5: Get Your Firebase Config</h2>
+  <div class="step">
+    <ol>
+      <li>Go to <strong>Project Settings</strong> (gear icon) → <strong>General</strong></li>
+      <li>Scroll to <strong>"Your apps"</strong> → Click the web icon <code>&lt;/&gt;</code></li>
+      <li>Register your app (name: "FreeME")</li>
+      <li>Copy the <code>firebaseConfig</code> object</li>
+      <li>Open <code>js/firebase-config.js</code> and replace the placeholder values</li>
+    </ol>
+  </div>
+
+  <h2>Step 6: Create Firestore Indexes</h2>
+  <div class="step">
+    <p>Firestore will auto-create indexes when needed. If you see index errors in the browser console, click the link provided to create them automatically.</p>
+    <p>Required composite indexes:</p>
+    <ul>
+      <li><code>posts</code> → <code>authorId</code> (ASC) + <code>createdAt</code> (DESC)</li>
+      <li><code>notifications</code> → <code>targetUid</code> (ASC) + <code>createdAt</code> (DESC)</li>
+      <li><code>notifications</code> → <code>targetUid</code> (ASC) + <code>read</code> (ASC)</li>
+    </ul>
+  </div>
+
+  <h2>Step 7: Deploy to GitHub Pages</h2>
+  <div class="step">
+    <ol>
+      <li>Create a new GitHub repository</li>
+      <li>Push all these files to the repo</li>
+      <li>Go to repo <strong>Settings → Pages</strong></li>
+      <li>Under "Source", select <strong>main</strong> branch and <strong>/ (root)</strong></li>
+      <li>Click Save</li>
+      <li>Your site will be live at <code>https://yourusername.github.io/repo-name</code></li>
+    </ol>
+  </div>
+
+  <h2>Step 8: Add GitHub Pages URL to Firebase</h2>
+  <div class="step">
+    <ol>
+      <li>Go to Firebase Console → <strong>Authentication → Settings → Authorized domains</strong></li>
+      <li>Add your GitHub Pages domain: <code>yourusername.github.io</code></li>
+    </ol>
+  </div>
+
+  <h2>Important Notes</h2>
+  <div class="step">
+    <ul>
+      <li><strong>First user to register becomes Admin</strong> automatically</li>
+      <li>Admins can manage users, posts, reports, and site settings from the Admin panel (shield icon)</li>
+      <li>Images are stored in Firebase Storage (or base64 fallback)</li>
+      <li>Embeds support YouTube, Vimeo, Spotify, and generic links</li>
+      <li>Dark mode is available in Settings</li>
+    </ul>
+  </div>
+
+  <p style="margin-top:40px;text-align:center;color:#636e72">
+    <a href="index.html">← Back to FreeME</a>
+  </p>
+</body>
+</html>

@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FreeME - Social Platform</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div id="app">
+    <!-- NAV BAR -->
+    <nav id="navbar" class="navbar hidden">
+      <div class="nav-inner">
+        <a href="#" class="logo" data-page="feed">
+          <i class="fas fa-dove"></i> Free<span>ME</span>
+        </a>
+        <div class="nav-search">
+          <i class="fas fa-search"></i>
+          <input type="text" id="searchInput" placeholder="Search FreeME...">
+        </div>
+        <div class="nav-links">
+          <a href="#" data-page="feed" class="nav-link active" title="Feed"><i class="fas fa-home"></i></a>
+          <a href="#" data-page="explore" class="nav-link" title="Explore"><i class="fas fa-compass"></i></a>
+          <a href="#" data-page="notifications" class="nav-link" title="Notifications">
+            <i class="fas fa-bell"></i>
+            <span class="notif-badge hidden" id="notifBadge">0</span>
+          </a>
+          <a href="#" data-page="admin" class="nav-link admin-only hidden" title="Admin"><i class="fas fa-shield-halved"></i></a>
+          <div class="nav-avatar-wrap" id="navAvatarWrap">
+            <img src="" alt="avatar" id="navAvatar" class="nav-avatar">
+            <div class="dropdown-menu" id="userDropdown">
+              <a href="#" data-page="profile"><i class="fas fa-user"></i> My Profile</a>
+              <a href="#" data-page="settings"><i class="fas fa-gear"></i> Settings</a>
+              <hr>
+              <a href="#" id="logoutBtn"><i class="fas fa-right-from-bracket"></i> Log Out</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- AUTH PAGE -->
+    <div id="page-auth" class="page">
+      <div class="auth-container">
+        <div class="auth-hero">
+          <i class="fas fa-dove auth-logo-icon"></i>
+          <h1>Free<span>ME</span></h1>
+          <p>Express yourself freely. Connect with the world.</p>
+        </div>
+        <div class="auth-box">
+          <div class="auth-tabs">
+            <button class="auth-tab active" data-tab="login">Log In</button>
+            <button class="auth-tab" data-tab="register">Sign Up</button>
+          </div>
+          <!-- Login Form -->
+          <form id="loginForm" class="auth-form">
+            <div class="form-group">
+              <label>Email</label>
+              <input type="email" id="loginEmail" required placeholder="you@email.com">
+            </div>
+            <div class="form-group">
+              <label>Password</label>
+              <input type="password" id="loginPassword" required placeholder="Your password">
+            </div>
+            <button type="submit" class="btn btn-primary btn-full">Log In</button>
+            <div class="auth-divider"><span>or</span></div>
+            <button type="button" id="googleLoginBtn" class="btn btn-google btn-full">
+              <i class="fab fa-google"></i> Continue with Google
+            </button>
+            <p class="auth-error hidden" id="loginError"></p>
+          </form>
+          <!-- Register Form -->
+          <form id="registerForm" class="auth-form hidden">
+            <div class="form-group">
+              <label>Display Name</label>
+              <input type="text" id="regName" required placeholder="Your name" minlength="2" maxlength="30">
+            </div>
+            <div class="form-group">
+              <label>Username</label>
+              <input type="text" id="regUsername" required placeholder="@username" minlength="3" maxlength="20" pattern="[a-zA-Z0-9_]+">
+            </div>
+            <div class="form-group">
+              <label>Email</label>
+              <input type="email" id="regEmail" required placeholder="you@email.com">
+            </div>
+            <div class="form-group">
+              <label>Password</label>
+              <input type="password" id="regPassword" required placeholder="Min 6 characters" minlength="6">
+            </div>
+            <button type="submit" class="btn btn-primary btn-full">Create Account</button>
+            <div class="auth-divider"><span>or</span></div>
+            <button type="button" id="googleRegBtn" class="btn btn-google btn-full">
+              <i class="fab fa-google"></i> Sign up with Google
+            </button>
+            <p class="auth-error hidden" id="regError"></p>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- FEED PAGE -->
+    <div id="page-feed" class="page hidden">
+      <div class="main-layout">
+        <aside class="sidebar-left">
+          <div class="sidebar-card profile-card">
+            <div class="profile-card-banner"></div>
+            <img src="" alt="" id="sidebarAvatar" class="sidebar-avatar">
+            <h3 id="sidebarName">User</h3>
+            <p id="sidebarUsername">@user</p>
+            <div class="profile-stats">
+              <div><strong id="sidebarPosts">0</strong><span>Posts</span></div>
+              <div><strong id="sidebarFollowers">0</strong><span>Followers</span></div>
+              <div><strong id="sidebarFollowing">0</strong><span>Following</span></div>
+            </div>
+          </div>
+          <div class="sidebar-card">
+            <h4><i class="fas fa-fire"></i> Trending</h4>
+            <div id="trendingList" class="trending-list"></div>
+          </div>
+        </aside>
+
+        <main class="content-main">
+          <!-- Post Composer -->
+          <div class="post-composer">
+            <img src="" alt="" id="composerAvatar" class="composer-avatar">
+            <div class="composer-body">
+              <textarea id="composerText" placeholder="What's on your mind?" rows="3"></textarea>
+              <div class="composer-preview hidden" id="composerPreview"></div>
+              <div class="composer-toolbar">
+                <div class="composer-actions">
+                  <label class="composer-btn" title="Add Image">
+                    <i class="fas fa-image"></i>
+                    <input type="file" id="composerImage" accept="image/*" hidden>
+                  </label>
+                  <button type="button" class="composer-btn" id="embedBtn" title="Add Embed/Link">
+                    <i class="fas fa-link"></i>
+                  </button>
+                  <button type="button" class="composer-btn" id="pollBtn" title="Add Poll">
+                    <i class="fas fa-poll"></i>
+                  </button>
+                  <button type="button" class="composer-btn" id="emojiBtn" title="Emoji">
+                    <i class="fas fa-face-smile"></i>
+                  </button>
+                </div>
+                <div class="composer-right">
+                  <span class="char-count" id="charCount">0/500</span>
+                  <button class="btn btn-primary" id="postBtn">Post</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Embed Modal -->
+          <div class="modal hidden" id="embedModal">
+            <div class="modal-content modal-sm">
+              <h3>Embed a Link</h3>
+              <input type="url" id="embedUrl" placeholder="Paste a URL (YouTube, Twitter, etc.)" class="input-full">
+              <div class="modal-actions">
+                <button class="btn btn-ghost" id="embedCancel">Cancel</button>
+                <button class="btn btn-primary" id="embedConfirm">Embed</button>
+              </div>
+            </div>
+          </div>
+          <!-- Feed -->
+          <div class="feed-filters">
+            <button class="feed-filter active" data-filter="all">All</button>
+            <button class="feed-filter" data-filter="following">Following</button>
+            <button class="feed-filter" data-filter="popular">Popular</button>
+          </div>
+          <div id="feedContainer" class="feed-container">
+            <div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> Loading...</div>
+          </div>
+        </main>
+
+        <aside class="sidebar-right">
+          <div class="sidebar-card">
+            <h4><i class="fas fa-user-plus"></i> Suggested</h4>
+            <div id="suggestedUsers" class="suggested-list"></div>
+          </div>
+          <div class="sidebar-card">
+            <h4><i class="fas fa-hashtag"></i> Popular Tags</h4>
+            <div id="popularTags" class="tag-cloud"></div>
+          </div>
+          <div class="sidebar-footer">
+            <p>&copy; 2026 FreeME &middot; <a href="#">Terms</a> &middot; <a href="#">Privacy</a></p>
+          </div>
+        </aside>
+      </div>
+    </div>
+
+    <!-- EXPLORE PAGE -->
+    <div id="page-explore" class="page hidden">
+      <div class="main-layout">
+        <main class="content-main content-wide">
+          <h2 class="page-title"><i class="fas fa-compass"></i> Explore</h2>
+          <div class="explore-search">
+            <input type="text" id="exploreSearch" placeholder="Search posts, people, tags...">
+          </div>
+          <div class="explore-tabs">
+            <button class="explore-tab active" data-tab="posts">Posts</button>
+            <button class="explore-tab" data-tab="people">People</button>
+            <button class="explore-tab" data-tab="tags">Tags</button>
+          </div>
+          <div id="exploreContent" class="feed-container"></div>
+        </main>
+      </div>
+    </div>
+
+    <!-- NOTIFICATIONS PAGE -->
+    <div id="page-notifications" class="page hidden">
+      <div class="main-layout">
+        <main class="content-main content-wide">
+          <h2 class="page-title"><i class="fas fa-bell"></i> Notifications</h2>
+          <div id="notifContainer" class="notif-container"></div>
+        </main>
+      </div>
+    </div>
+
+    <!-- PROFILE PAGE -->
+    <div id="page-profile" class="page hidden">
+      <div class="main-layout">
+        <main class="content-main content-wide">
+          <div class="profile-header" id="profileHeader">
+            <div class="profile-banner" id="profileBanner"></div>
+            <div class="profile-info">
+              <img src="" alt="" id="profileAvatar" class="profile-avatar-lg">
+              <div class="profile-details">
+                <h2 id="profileName">User</h2>
+                <p class="profile-handle" id="profileHandle">@user</p>
+                <p class="profile-bio" id="profileBio"></p>
+                <div class="profile-meta">
+                  <span><i class="fas fa-calendar"></i> Joined <span id="profileJoined"></span></span>
+                  <span><i class="fas fa-map-marker-alt"></i> <span id="profileLocation"></span></span>
+                </div>
+                <div class="profile-stats-row">
+                  <span><strong id="profilePostCount">0</strong> Posts</span>
+                  <span><strong id="profileFollowerCount">0</strong> Followers</span>
+                  <span><strong id="profileFollowingCount">0</strong> Following</span>
+                </div>
+              </div>
+              <div class="profile-actions" id="profileActions"></div>
+            </div>
+          </div>
+          <div id="profileFeed" class="feed-container"></div>
+        </main>
+      </div>
+    </div>
+
+    <!-- SETTINGS PAGE -->
+    <div id="page-settings" class="page hidden">
+      <div class="main-layout">
+        <main class="content-main content-wide">
+          <h2 class="page-title"><i class="fas fa-gear"></i> Settings</h2>
+          <div class="settings-grid">
+            <div class="settings-card">
+              <h3>Profile Settings</h3>
+              <form id="settingsForm">
+                <div class="form-group">
+                  <label>Display Name</label>
+                  <input type="text" id="setName" maxlength="30">
+                </div>
+                <div class="form-group">
+                  <label>Bio</label>
+                  <textarea id="setBio" rows="3" maxlength="200" placeholder="Tell people about yourself..."></textarea>
+                </div>
+                <div class="form-group">
+                  <label>Location</label>
+                  <input type="text" id="setLocation" maxlength="50" placeholder="City, Country">
+                </div>
+                <div class="form-group">
+                  <label>Profile Picture</label>
+                  <input type="file" id="setAvatar" accept="image/*">
+                </div>
+                <div class="form-group">
+                  <label>Banner Image</label>
+                  <input type="file" id="setBanner" accept="image/*">
+                </div>
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+              </form>
+            </div>
+            <div class="settings-card">
+              <h3>Account</h3>
+              <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="setEmail" disabled>
+              </div>
+              <div class="form-group">
+                <label>Theme</label>
+                <select id="themeSelect">
+                  <option value="light">Light</option>
+                  <option value="dark">Dark</option>
+                </select>
+              </div>
+              <hr>
+              <button class="btn btn-danger" id="deleteAccountBtn">Delete Account</button>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <!-- ADMIN PAGE -->
+    <div id="page-admin" class="page hidden">
+      <div class="main-layout">
+        <main class="content-main content-wide">
+          <h2 class="page-title"><i class="fas fa-shield-halved"></i> Admin Dashboard</h2>
+          <div class="admin-stats" id="adminStats">
+            <div class="stat-card"><i class="fas fa-users"></i><div><strong id="adminUserCount">0</strong><span>Users</span></div></div>
+            <div class="stat-card"><i class="fas fa-newspaper"></i><div><strong id="adminPostCount">0</strong><span>Posts</span></div></div>
+            <div class="stat-card"><i class="fas fa-flag"></i><div><strong id="adminReportCount">0</strong><span>Reports</span></div></div>
+            <div class="stat-card"><i class="fas fa-chart-line"></i><div><strong id="adminActiveCount">0</strong><span>Active Today</span></div></div>
+          </div>
+          <div class="admin-tabs">
+            <button class="admin-tab active" data-tab="users">Users</button>
+            <button class="admin-tab" data-tab="posts">Posts</button>
+            <button class="admin-tab" data-tab="reports">Reports</button>
+            <button class="admin-tab" data-tab="settings">Site Settings</button>
+          </div>
+          <div id="adminContent" class="admin-content"></div>
+        </main>
+      </div>
+    </div>
+
+    <!-- IMAGE LIGHTBOX -->
+    <div class="lightbox hidden" id="lightbox">
+      <button class="lightbox-close" id="lightboxClose"><i class="fas fa-times"></i></button>
+      <img src="" alt="" id="lightboxImg">
+    </div>
+
+    <!-- TOAST -->
+    <div id="toastContainer" class="toast-container"></div>
+  </div>
+
+  <!-- Backend: Use local-backend.js for local/demo mode, or firebase scripts for production -->
+  <!-- LOCAL MODE (works instantly, data saved in browser) -->
+  <script src="js/local-backend.js"></script>
+
+  <!-- PRODUCTION MODE: Uncomment below and remove local-backend.js above to use Firebase -->
+  <!-- <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script> -->
+  <!-- <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script> -->
+  <!-- <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script> -->
+  <!-- <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script> -->
+  <!-- <script src="js/firebase-config.js"></script> -->
+
+  <!-- App Scripts -->
+  <script src="js/utils.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/posts.js"></script>
+  <script src="js/admin.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
