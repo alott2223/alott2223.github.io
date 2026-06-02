@@ -19,12 +19,64 @@
   </head>
   <body style="background-color: #0a0a0a; color: #fafafa; margin: 0;">
     <nav style="padding:16px; background:#060606; display:flex; justify-content:flex-end;">
-      <a href="/semantic-curve.html" style="color:#9be7ff; text-decoration:none; font-weight:600;">Semantic Curve Theory</a>
     </nav>
+      <nav style="padding:16px; background:#060606; display:flex; justify-content:flex-end;">
+      </nav>
     <div id="root"></div>
     <footer style="padding:24px; text-align:center; color:#888;">
-      © <span id="year">2026</span> Alott — <a href="/semantic-curve.html" style="color:#9be7ff;">Semantic Curve Theory</a>
+        © <span id="year">2026</span> Alott
     </footer>
     <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+      <script>
+      (function(){
+        // remove any existing explicit links
+        var nav = document.querySelector('nav');
+        if(nav){var a = nav.querySelector('a[href="/semantic-curve.html"]'); if(a) a.remove();}
+        var footer = document.querySelector('footer');
+        if(footer){var fa = footer.querySelector('a[href="/semantic-curve.html"]'); if(fa) fa.remove();}
+
+        function makeTile(){
+          var tile = document.createElement('a');
+          tile.href = '/semantic-curve.html';
+          tile.className = 'card';
+          tile.style.display = 'block';
+          tile.style.textDecoration = 'none';
+          tile.style.margin = '12px';
+          tile.innerHTML = '<div style="padding:20px;min-width:220px;">'
+            + '<h3 class="section-title" style="font-size:1.125rem;margin:0 0 8px;color:#fff;">Semantic Curve Theory</h3>'
+            + '<p class="section-subtitle" style="margin:0;color:#a1a1a1;">Conceptual model linking semantic density to utility.</p>'
+            + '</div>';
+          return tile;
+        }
+
+        function insertTile(){
+          var selectors = ['.projects','.projects-grid','.grid','.cards','.cards-grid','.work-grid','.portfolio','.projects-list'];
+          for(var i=0;i<selectors.length;i++){
+            var el = document.querySelector(selectors[i]);
+            if(el){
+              el.appendChild(makeTile());
+              return true;
+            }
+          }
+          var root = document.getElementById('root');
+          if(root){
+            var sec = document.createElement('section');
+            sec.className='container';
+            sec.style.padding='40px 20px';
+            sec.innerHTML='<h2 class="section-title">Projects</h2>';
+            sec.appendChild(makeTile());
+            root.parentNode.insertBefore(sec, root);
+            return true;
+          }
+          return false;
+        }
+
+        if(document.readyState==='loading'){
+          document.addEventListener('DOMContentLoaded',function(){setTimeout(insertTile,500)});
+        } else {
+          setTimeout(insertTile,500);
+        }
+      })();
+      </script>
   </body>
 </html>
