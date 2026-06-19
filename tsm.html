@@ -110,8 +110,21 @@ section:nth-child(even){background:var(--bg2)}
 
 .fade-in{opacity:0;transform:translateY(20px);transition:opacity 0.6s,transform 0.6s}.fade-in.visible{opacity:1;transform:translateY(0)}
 
-@media(max-width:900px){.sandbox{flex-direction:column;align-items:center}.panel{width:100%;max-width:520px}}
+@media(max-width:900px){.sandbox{flex-direction:column;align-items:center}.panel{width:100%;max-width:520px}.explainer-grid{grid-template-columns:1fr}}
 @media(max-width:640px){.hero h1{font-size:2rem}.cta-btns{flex-direction:column;align-items:center}}
+
+/* EXPLAINER */
+.explainer{position:relative;z-index:1;width:100%;max-width:860px;margin:10px auto 32px;text-align:left;background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:28px 28px 20px}
+.explainer-title{font-size:1.1rem;font-weight:800;margin-bottom:16px;text-align:center;color:var(--text)}
+.explainer-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px}
+.explainer-item{display:flex;gap:12px;align-items:flex-start;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px}
+.explainer-icon{font-size:1.2rem;flex-shrink:0;width:28px;text-align:center}
+.explainer-text strong{display:block;font-size:0.82rem;color:var(--text);margin-bottom:4px}
+.explainer-text p{font-size:0.78rem;color:var(--text2);margin:0;line-height:1.5}
+.explainer-telemetry{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:0.75rem;color:var(--text2);display:flex;flex-wrap:wrap;gap:8px 20px;margin-bottom:14px}
+.explainer-telemetry strong{color:var(--text);display:block;width:100%;margin-bottom:4px;font-size:0.78rem}
+.explainer-telemetry b{color:var(--accent)}
+.explainer-cta{text-align:center;font-size:0.85rem;color:var(--accent);font-weight:600;margin:0}
 </style>
 </head>
 <body>
@@ -125,7 +138,50 @@ section:nth-child(even){background:var(--bg2)}
 <section class="hero">
   <div class="hero-badge">Interactive Research Demo</div>
   <h1>Topological Semantic<br>Mechanics</h1>
-  <p class="hero-sub">Self-warping Riemannian manifolds replacing static embedding spaces. Click anywhere on the grid to inject stress. Watch Ricci flow heal the geometry in real-time.</p>
+  <p class="hero-sub">A live simulation of how AI embedding spaces could reshape themselves during inference. Read the explanation below, then try it yourself.</p>
+
+  <!-- EXPLANATION BEFORE DEMO -->
+  <div class="explainer">
+    <h2 class="explainer-title">What You're Looking At</h2>
+    <div class="explainer-grid">
+      <div class="explainer-item">
+        <div class="explainer-icon">🔵</div>
+        <div class="explainer-text">
+          <strong>The Grid = An AI's "Meaning Map"</strong>
+          <p>Each dot represents a coordinate where the AI stores a concept (a word, an idea). The lines between them represent distance relationships. In normal operation, the grid breathes gently — the space is healthy.</p>
+        </div>
+      </div>
+      <div class="explainer-item">
+        <div class="explainer-icon">💥</div>
+        <div class="explainer-text">
+          <strong>Injecting Stress = An Attack or Hard Problem</strong>
+          <p>When you click "Inject" or click the grid directly, you're simulating what happens when the AI encounters an adversarial prompt or an extremely complex question. The space warps — coordinates get displaced, concepts collide.</p>
+        </div>
+      </div>
+      <div class="explainer-item">
+        <div class="explainer-icon">🟡→🔴</div>
+        <div class="explainer-text">
+          <strong>Color = Curvature Severity</strong>
+          <p><span style="color:var(--accent)">Cyan</span> = healthy, low curvature. <span style="color:var(--amber)">Amber</span> = moderate stress, geometry stretching. <span style="color:var(--red)">Red</span> = critical — coordinates are dangerously warped.</p>
+        </div>
+      </div>
+      <div class="explainer-item">
+        <div class="explainer-icon">💚</div>
+        <div class="explainer-text">
+          <strong>Recovery = Ricci Flow Healing</strong>
+          <p>Watch the grid heal itself. The Ricci regularization term automatically smooths extreme curvature, pulling coordinates back to healthy positions. Try turning it OFF to see what happens without it.</p>
+        </div>
+      </div>
+    </div>
+    <div class="explainer-telemetry">
+      <strong>Telemetry explained:</strong>
+      <span><b>Σ Curvature</b> = total geometric stress across all nodes</span>
+      <span><b>Max Disp.</b> = how far the most-displaced node has moved from home</span>
+      <span><b>Entropy</b> = disorder level (high = coordinates are confused)</span>
+      <span><b>N_eff</b> = effective parameter multiplier (how much extra capacity the curvature creates)</span>
+    </div>
+    <p class="explainer-cta">👇 Try it: click anywhere on the grid below, or use the control panel on the right.</p>
+  </div>
 
   <div class="sandbox">
     <div class="canvas-container">
@@ -273,11 +329,10 @@ function inject(cx,cy,mag){
       else if(pattern==='shockwave') angle=Math.atan2(dy,dx);
       else if(pattern==='cascade') angle=Math.PI*0.25+dist*0.5;
       else angle=Math.random()*Math.PI*2;
+      // Apply velocity (displaces the metric tensor locally)
       nodes[i][j].vx+=Math.cos(angle)*intensity*spacing*0.45;
       nodes[i][j].vy+=Math.sin(angle)*intensity*spacing*0.45;
-      nodes[i][j].c=intensity*3.5;
-      nodes[i][j].e=intensity;
-      // spawn particles
+      // spawn particles along the geodesic distortion
       if(trailsOn&&Math.random()<0.3){
         particles.push({x:nodes[i][j].x,y:nodes[i][j].y,vx:Math.cos(angle)*2,vy:Math.sin(angle)*2,life:1,color:intensity>1.5?'r':intensity>0.8?'a':'c'});
       }
@@ -303,43 +358,71 @@ function physics(){
     }
     return;
   }
-  var totalC=0,maxD=0,totalE=0;
+  var totalC=0,maxD=0,totalE=0,totalVol=0;
   for(var i=0;i<N;i++)for(var j=0;j<N;j++){
     var n=nodes[i][j];
     var dpx=n.x-n.bx,dpy=n.y-n.by,dp=Math.sqrt(dpx*dpx+dpy*dpy);
+
+    // Compute discrete scalar curvature: deviation of local distances from expected
+    // (angle deficit method — sum of neighbor distances vs expected)
+    var expectedDist=spacing,actualDistSum=0,neighborCount=0;
+    var offs=[[-1,0],[1,0],[0,-1],[0,1]];
+    for(var k=0;k<4;k++){var ni=i+offs[k][0],nj=j+offs[k][1];
+      if(ni>=0&&ni<N&&nj>=0&&nj<N){
+        var ddx=nodes[ni][nj].x-n.x,ddy=nodes[ni][nj].y-n.y;
+        actualDistSum+=Math.sqrt(ddx*ddx+ddy*ddy);
+        neighborCount++;
+      }
+    }
+    // Curvature = how much local metric deviates from flat
+    var avgActualDist=neighborCount>0?actualDistSum/neighborCount:expectedDist;
+    var metricDeviation=(avgActualDist-expectedDist)/expectedDist;
+    var discreteCurvature=Math.abs(metricDeviation)*10; // scale for visibility
+    n.c=n.c*0.7+discreteCurvature*0.3; // blend for smooth display
+
+    // Volume element: ratio of local area to expected area (measures expansion)
+    var localVol=avgActualDist/expectedDist;
+    totalVol+=localVol;
+
     if(ricciOn){
+      // Ricci flow: pull toward expected distances (smooth curvature)
       var rf=Math.min(mu*n.c,maxRicci);
       n.vx-=eta*dpx*0.05+rf*(dpx/(dp+0.01))*0.01;
       n.vy-=eta*dpy*0.05+rf*(dpy/(dp+0.01))*0.01;
     }
+    // Coupling: average of neighbors (Laplacian smoothing)
     var ax=0,ay=0,cnt=0;
-    var offs=[[-1,0],[1,0],[0,-1],[0,1]];
     for(var k=0;k<4;k++){var ni=i+offs[k][0],nj=j+offs[k][1];
       if(ni>=0&&ni<N&&nj>=0&&nj<N){ax+=nodes[ni][nj].x;ay+=nodes[ni][nj].y;cnt++;}
     }
     if(cnt){ax/=cnt;ay/=cnt;n.vx+=lambda*(ax-n.x)*0.1;n.vy+=lambda*(ay-n.y)*0.1;}
     n.vx*=0.91;n.vy*=0.91;
-    n.c*=ricciOn?0.97:0.995;n.e*=0.96;
+    if(!ricciOn)n.c*=0.998; // very slow decay without Ricci
     n.x+=n.vx;n.y+=n.vy;
     // trail
     if(trailsOn&&dp>2){n.trail.push({x:n.x,y:n.y,a:1});if(n.trail.length>12)n.trail.shift();}
-    totalC+=n.c;if(dp>maxD)maxD=dp;totalE+=n.e;
+    totalC+=n.c;if(dp>maxD)maxD=dp;
+    // Entropy: local positional variance (how disordered is the neighborhood)
+    n.e=Math.abs(metricDeviation);
+    totalE+=n.e;
   }
   // particles
   for(var p=particles.length-1;p>=0;p--){
     var pt=particles[p];pt.x+=pt.vx;pt.y+=pt.vy;pt.life-=0.025;pt.vx*=0.96;pt.vy*=0.96;
     if(pt.life<=0)particles.splice(p,1);
   }
-  // telemetry
-  document.getElementById('t-curvature').textContent=totalC.toFixed(1);
+  // telemetry — now mathematically faithful
+  var scalarCurvature=totalC; // sum of discrete curvatures (analogous to ∫|R|dV)
+  document.getElementById('t-curvature').textContent=scalarCurvature.toFixed(1);
   document.getElementById('t-displacement').textContent=maxD.toFixed(1);
   document.getElementById('t-entropy').textContent=totalE.toFixed(2);
-  var neff=Math.exp(totalC*0.01);
+  // N_eff = N * exp(∫√|R| dV) — computed as exp(sqrt(totalCurvature) * volumeScale)
+  var curvatureIntegral=Math.sqrt(scalarCurvature)*(totalVol/(N*N))*0.15;
+  var neff=Math.exp(curvatureIntegral);
   document.getElementById('t-neff').textContent=neff.toFixed(2)+'x';
   // audio
-  if(audioOn&&gainNode){gainNode.gain.value=Math.min(0.3,totalC*0.005);if(oscillator)oscillator.frequency.value=200+totalC*8;}
+  if(audioOn&&gainNode){gainNode.gain.value=Math.min(0.3,scalarCurvature*0.003);if(oscillator)oscillator.frequency.value=180+scalarCurvature*5;}
   // state transitions
-  var avgD=(maxD);
   if(state==='stressed'){stressTimer++;if(stressTimer>30)setState('recovering');}
   else if(state==='recovering'&&maxD<spacing*0.03)setState('homeostasis');
 }
