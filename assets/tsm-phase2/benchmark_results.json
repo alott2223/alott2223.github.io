@@ -1,0 +1,32 @@
+{
+  "baseline": {
+    "params": 413312,
+    "train_time_s": 257.99,
+    "perplexity": 12.2082,
+    "latency_ms": 1.058
+  },
+  "tsm": {
+    "params": 413312,
+    "train_time_s": 265.97,
+    "perplexity": 12.1434,
+    "latency_ms": 8.874,
+    "neff_mean": 5.4734,
+    "neff_multiplier_display": "5.47x"
+  },
+  "comparison": {
+    "perplexity_improvement_pct": 0.53,
+    "latency_overhead_ms": 7.817,
+    "same_param_count": true
+  },
+  "adversarial": {
+    "baseline_normal_loss": 2.8336,
+    "baseline_shocked_loss": 3.9338,
+    "baseline_degradation_pct": 38.83,
+    "tsm_normal_loss": 2.8018,
+    "tsm_shocked_loss": 3.8923,
+    "tsm_degradation_pct": 38.92,
+    "circuit_breaker_trips": 0,
+    "tsm_recovery_steps_mean": 1.0,
+    "tsm_more_robust": false
+  }
+}
