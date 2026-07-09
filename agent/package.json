@@ -1,0 +1,17 @@
+{
+  "name": "quoteforge-agent",
+  "version": "0.1.0",
+  "private": true,
+  "description": "QuoteForge quote agent — reads a fabrication drawing with Claude vision and prices it deterministically.",
+  "type": "commonjs",
+  "bin": { "quote-agent": "quote-agent.js" },
+  "scripts": {
+    "quote": "node quote-agent.js",
+    "mock": "node quote-agent.js --mock",
+    "selftest": "node selftest.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.70.0"
+  },
+  "engines": { "node": ">=18" }
+}

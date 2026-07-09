@@ -166,6 +166,32 @@
   .quote-actions{display:flex;gap:10px;padding:14px 18px;background:var(--bg-3);border-top:1px solid var(--line)}
   .demo-hint{color:var(--muted);font-size:.9rem;margin:auto;text-align:center;padding:40px 20px}
   .sent-flash{color:var(--good);font-weight:600;font-size:.9rem;display:none;align-items:center;padding:0 6px}
+  .demo-tag{margin-left:auto;font-family:var(--mono);font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;color:var(--accent-2);border:1px solid var(--line);border-radius:99px;padding:3px 10px}
+
+  /* BUILDER */
+  #builder{background:var(--bg-2);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .builder-shell{display:grid;grid-template-columns:1fr 380px;gap:22px;margin-top:40px;align-items:start}
+  @media(max-width:860px){.builder-shell{grid-template-columns:1fr}}
+  .builder-form{background:var(--bg);border:1px solid var(--line);border-radius:16px;padding:24px}
+  .fg{margin-bottom:16px}
+  .fg.row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .fg label{display:block;font-size:.8rem;color:var(--muted);margin-bottom:6px;font-weight:600}
+  .fg input,.fg select{width:100%;padding:10px 12px;border-radius:9px;border:1px solid var(--line);background:var(--bg-2);color:var(--text);font-size:.92rem;outline:none;font-family:inherit}
+  .fg input:focus,.fg select:focus{border-color:var(--accent)}
+  .fg .hint{font-size:.72rem;color:var(--muted);margin-top:5px}
+  .builder-quote{position:sticky;top:84px;border:1px solid var(--accent);border-radius:16px;overflow:hidden;box-shadow:0 12px 44px rgba(255,122,26,.12)}
+  .builder-quote .bq-head{display:flex;justify-content:space-between;align-items:center;padding:16px 18px;background:var(--bg-3);border-bottom:1px solid var(--line)}
+  .builder-quote .bq-head .qn{font-family:var(--mono);font-size:.78rem;color:var(--muted)}
+  .builder-quote .bq-head .conf{font-size:.76rem;color:var(--good);font-weight:600}
+  .builder-quote table{width:100%;border-collapse:collapse;font-size:.86rem}
+  .builder-quote td{padding:9px 18px;border-bottom:1px solid var(--line)}
+  .builder-quote td:last-child{text-align:right;font-family:var(--mono)}
+  .builder-quote tr.sub td{color:var(--muted);font-size:.82rem}
+  .builder-quote tr.total td{border-bottom:none;font-weight:700;font-size:1.05rem;background:rgba(255,122,26,.06)}
+  .builder-quote tr.total td:last-child{color:var(--accent)}
+  .bq-foot{padding:14px 18px;background:var(--bg-3);border-top:1px solid var(--line);display:flex;gap:10px}
+  .bq-disclaimer{font-size:.72rem;color:var(--muted);margin-top:12px;text-align:center}
+  @media print{nav,footer,.hero,#problem,#how,#demo,#pricing,#waitlist,.builder-form,.bq-foot{display:none!important}.builder-quote{box-shadow:none;position:static}}
 
   /* PRICING */
   .plans{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:44px}
@@ -207,7 +233,8 @@
     <a class="logo" href="#"><span class="logo-mark">Q</span>QuoteForge</a>
     <div class="nav-links">
       <a href="#problem">Why</a>
-      <a href="#demo">Live demo</a>
+      <a href="#demo">Demo</a>
+      <a href="#builder">Builder</a>
       <a href="#pricing">Pricing</a>
       <a href="#waitlist" class="btn btn-primary btn-sm">Get early access</a>
     </div>
@@ -259,11 +286,11 @@
 
 <section id="demo">
   <div class="wrap">
-    <div class="kicker">Live demo</div>
+    <div class="kicker">Guided tour</div>
     <h2>Watch a drawing become a quote.</h2>
-    <p class="lead">Pick an incoming RFQ on the left. This is the actual flow your estimator would see.</p>
+    <p class="lead">Pick an incoming RFQ to see the flow your estimator would follow. These three are worked examples with sample data — to price your own numbers, use the <a href="#builder" style="color:var(--accent);text-decoration:none;font-weight:600">live builder&nbsp;↓</a></p>
     <div class="demo-shell">
-      <div class="demo-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="title">quoteforge — inbox</span></div>
+      <div class="demo-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="title">quoteforge — inbox</span><span class="demo-tag">sample data</span></div>
       <div class="demo-body">
         <div class="demo-left">
           <h4>Incoming RFQs</h4>
@@ -272,6 +299,85 @@
         <div class="demo-right" id="demo-right">
           <div class="demo-hint">← Select an RFQ to run the quote engine</div>
         </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="builder">
+  <div class="wrap">
+    <div class="kicker">Live builder</div>
+    <h2>Price a job with your own numbers.</h2>
+    <p class="lead">This one is real — it runs the actual QuoteForge pricing engine right in your browser. Change anything and the quote recalculates instantly.</p>
+    <div class="builder-shell">
+      <div class="builder-form">
+        <div class="fg row">
+          <div>
+            <label for="b-material">Material</label>
+            <select id="b-material"></select>
+          </div>
+          <div>
+            <label for="b-finish">Finish</label>
+            <select id="b-finish"></select>
+          </div>
+        </div>
+        <div class="fg row">
+          <div>
+            <label for="b-thickness">Thickness (in)</label>
+            <input id="b-thickness" type="number" step="0.001" min="0" value="0.375">
+          </div>
+          <div>
+            <label for="b-qty">Quantity</label>
+            <input id="b-qty" type="number" step="1" min="1" value="40">
+          </div>
+        </div>
+        <div class="fg row">
+          <div>
+            <label for="b-length">Part length (in)</label>
+            <input id="b-length" type="number" step="0.1" min="0" value="12">
+          </div>
+          <div>
+            <label for="b-width">Part width (in)</label>
+            <input id="b-width" type="number" step="0.1" min="0" value="8">
+          </div>
+        </div>
+        <div class="fg"><div class="hint">Footprint drives material weight (area = length × width) and cut length (perimeter).</div></div>
+        <div class="fg row">
+          <div>
+            <label for="b-holes">Drilled holes / part</label>
+            <input id="b-holes" type="number" step="1" min="0" value="4">
+          </div>
+          <div>
+            <label for="b-weld">Weld length / part (in)</label>
+            <input id="b-weld" type="number" step="0.1" min="0" value="18.5">
+          </div>
+        </div>
+        <div class="fg row">
+          <div>
+            <label for="b-bends">Brake bends / part</label>
+            <input id="b-bends" type="number" step="1" min="0" value="0">
+          </div>
+          <div>
+            <label for="b-margin">Margin (%)</label>
+            <input id="b-margin" type="number" step="1" min="0" value="28">
+          </div>
+        </div>
+        <div class="fg">
+          <label for="b-labor">Shop labor rate ($/hr)</label>
+          <input id="b-labor" type="number" step="1" min="0" value="95">
+        </div>
+      </div>
+
+      <div>
+        <div class="builder-quote">
+          <div class="bq-head"><span class="qn" id="bq-qn">Q-2026-0000 · draft</span><span class="conf" id="bq-conf">● —</span></div>
+          <table><tbody id="bq-rows"></tbody></table>
+          <div class="bq-foot">
+            <button class="btn btn-primary btn-sm" onclick="window.print()">Print / save PDF</button>
+            <a class="btn btn-ghost btn-sm" href="#waitlist">Get this in your inbox</a>
+          </div>
+        </div>
+        <p class="bq-disclaimer">Estimate only, from indicative material &amp; labor rates. Calibrate to your shop before quoting a customer.</p>
       </div>
     </div>
   </div>
@@ -438,6 +544,97 @@ function sendQuote(btn){
   btn.disabled = true;
   btn.style.opacity = .5;
 }
+
+// ---------- Quote Builder (real, runs the pricing engine in-browser) ----------
+// Mirrors agent/pricing.js — the same math the local Claude agent uses.
+const PF = (function(){
+  const MATERIALS = {
+    a36:   {label:'A36 mild steel', density:0.2836, pricePerLb:0.68},
+    a1011: {label:'A1011 HR steel', density:0.2836, pricePerLb:0.62},
+    ss304: {label:'304 stainless',  density:0.2890, pricePerLb:3.87},
+    ss316: {label:'316 stainless',  density:0.2890, pricePerLb:4.95},
+    al5052:{label:'5052 aluminum',  density:0.0968, pricePerLb:2.14},
+    al6061:{label:'6061 aluminum',  density:0.0975, pricePerLb:2.35}
+  };
+  const RATES = {laserInPerMin:28, drillSecPerHole:22, weldInPerMin:3.2, bendSecPerBend:25, ssWeldFactor:0.7};
+  const FINISHES = {
+    none:{label:'None',perPart:0,flat:0},
+    powder:{label:'Powder coat',perPart:6.50,flat:45},
+    zinc:{label:'Zinc plating',perPart:4.25,flat:40},
+    passivate:{label:'Passivation',perPart:3.10,flat:60},
+    anodize:{label:'Anodize (Al)',perPart:7.80,flat:55}
+  };
+  const r2 = n => Math.round(n*100)/100;
+  const usd = n => '$' + r2(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+  function estimate(j){
+    const mat = MATERIALS[j.material], qty = j.quantity, labor = j.laborRate>0?j.laborRate:95;
+    const marginPct = j.marginPct!=null?j.marginPct:28;
+    const ss = j.material==='ss304'||j.material==='ss316';
+    const lines = [];
+    const weightLb = j.areaSqIn*j.thicknessIn*mat.density*qty;
+    lines.push(['Material — '+mat.label+' '+j.thicknessIn+'" ('+r2(weightLb)+' lb)', weightLb*mat.pricePerLb]);
+    let cutHrs = 0;
+    if(j.cutLengthIn>0) cutHrs += (j.cutLengthIn*qty)/RATES.laserInPerMin/60;
+    if(cutHrs>0) lines.push(['Cutting ('+r2(cutHrs)+' hr @ '+usd(labor)+')', cutHrs*labor]);
+    if(j.holes>0){ const h=(j.holes*qty*RATES.drillSecPerHole)/3600; lines.push(['Drilling — '+(j.holes*qty)+' holes ('+r2(h)+' hr)', h*labor]); }
+    if(j.weldLengthIn>0){ const rate=RATES.weldInPerMin*(ss?RATES.ssWeldFactor:1); const h=(j.weldLengthIn*qty)/rate/60; lines.push(['Welding — '+r2(j.weldLengthIn*qty)+'" fillet ('+r2(h)+' hr @ '+usd(labor)+')', h*labor]); }
+    if(j.bends>0){ const h=(j.bends*qty*RATES.bendSecPerBend)/3600; lines.push(['Forming — '+(j.bends*qty)+' bends ('+r2(h)+' hr)', h*labor]); }
+    const fin = FINISHES[j.finish]||FINISHES.none;
+    if(fin.perPart>0||fin.flat>0) lines.push([fin.label+' ('+qty+' pcs)', fin.flat+fin.perPart*qty]);
+    const subtotal = lines.reduce((s,l)=>s+l[1],0);
+    const margin = subtotal*(marginPct/100);
+    const provided = ['cutLengthIn','holes','weldLengthIn','bends'].filter(k=>j[k]>0).length;
+    return {lines:lines.map(l=>[l[0],r2(l[1])]), subtotal:r2(subtotal), margin:r2(margin), marginPct,
+      total:r2(subtotal+margin), confidence:Math.min(96,82+provided*3), weightLb:r2(weightLb)};
+  }
+  return {MATERIALS, FINISHES, estimate, usd};
+})();
+
+(function initBuilder(){
+  const $ = id => document.getElementById(id);
+  const matSel = $('b-material'), finSel = $('b-finish');
+  if(!matSel) return;
+  Object.keys(PF.MATERIALS).forEach(k=>{ const o=document.createElement('option'); o.value=k; o.textContent=PF.MATERIALS[k].label; matSel.appendChild(o); });
+  Object.keys(PF.FINISHES).forEach(k=>{ const o=document.createElement('option'); o.value=k; o.textContent=PF.FINISHES[k].label; finSel.appendChild(o); });
+  matSel.value='a36'; finSel.value='powder';
+
+  const num = (id,d) => { const v=parseFloat($(id).value); return isNaN(v)?d:v; };
+  const qn = 'Q-'+new Date().getFullYear()+'-'+String(Math.floor(Math.random()*9000)+1000);
+
+  function recompute(){
+    const L=num('b-length',0), W=num('b-width',0);
+    const job = {
+      material: matSel.value, finish: finSel.value,
+      quantity: Math.max(1, Math.round(num('b-qty',1))),
+      thicknessIn: num('b-thickness',0),
+      areaSqIn: L*W,
+      cutLengthIn: 2*(L+W),
+      holes: Math.max(0, Math.round(num('b-holes',0))),
+      weldLengthIn: Math.max(0, num('b-weld',0)),
+      bends: Math.max(0, Math.round(num('b-bends',0))),
+      marginPct: num('b-margin',28),
+      laborRate: num('b-labor',95)
+    };
+    const rows = $('bq-rows');
+    if(!(job.thicknessIn>0) || !(job.areaSqIn>0)){
+      rows.innerHTML = '<tr><td colspan="2" style="color:var(--muted);text-align:center;padding:28px">Enter thickness and part dimensions to see a quote.</td></tr>';
+      $('bq-conf').textContent='● —';
+      return;
+    }
+    const q = PF.estimate(job);
+    let html = q.lines.map(l=>'<tr><td>'+l[0]+'</td><td>'+PF.usd(l[1])+'</td></tr>').join('');
+    html += '<tr class="sub"><td>Subtotal</td><td>'+PF.usd(q.subtotal)+'</td></tr>';
+    html += '<tr class="sub"><td>Margin ('+q.marginPct+'%)</td><td>'+PF.usd(q.margin)+'</td></tr>';
+    html += '<tr class="total"><td>Quote total</td><td>'+PF.usd(q.total)+'</td></tr>';
+    rows.innerHTML = html;
+    $('bq-qn').textContent = qn+' · draft';
+    $('bq-conf').textContent = '● '+q.confidence+'% confidence';
+  }
+
+  ['b-material','b-finish','b-thickness','b-qty','b-length','b-width','b-holes','b-weld','b-bends','b-margin','b-labor']
+    .forEach(id=>{ const el=$(id); el.addEventListener('input',recompute); el.addEventListener('change',recompute); });
+  recompute();
+})();
 
 // ---------- Waitlist ----------
 // Paste your Formspree form ID below (the part after /f/ in your endpoint).
