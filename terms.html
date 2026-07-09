@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Terms of Service — QuoteForge</title>
+<meta name="description" content="The terms that govern your use of the QuoteForge website and early-access program.">
+<meta name="theme-color" content="#0e1116">
+<link rel="canonical" href="https://alott.me/terms.html">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23ff7a1a'/%3E%3Ctext x='16' y='24' font-family='Arial,Helvetica,sans-serif' font-size='22' font-weight='900' text-anchor='middle' fill='%230e1116'%3EQ%3C/text%3E%3C/svg%3E">
+<style>
+  :root{--bg:#0e1116;--bg-2:#151a21;--line:#2a3340;--text:#e8ecf1;--muted:#9aa7b5;--accent:#ff7a1a}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,Roboto,sans-serif;line-height:1.7;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:760px;margin:0 auto;padding:0 24px}
+  nav{border-bottom:1px solid var(--line);background:var(--bg-2)}
+  .nav-inner{display:flex;align-items:center;height:64px}
+  .logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:1.15rem;letter-spacing:-.02em;text-decoration:none;color:var(--text)}
+  .logo-mark{width:28px;height:28px;border-radius:7px;background:linear-gradient(135deg,var(--accent),#ff9d4d);display:grid;place-items:center;color:#0e1116;font-size:15px;font-weight:900}
+  main{padding:56px 0 80px}
+  h1{font-size:2rem;font-weight:800;letter-spacing:-.02em;margin-bottom:6px}
+  .updated{color:var(--muted);font-size:.9rem;margin-bottom:36px}
+  h2{font-size:1.15rem;font-weight:700;margin:32px 0 10px}
+  p,li{color:var(--muted);font-size:.98rem}
+  ul{margin:8px 0 8px 22px}
+  li{margin:4px 0}
+  a{color:var(--accent);text-decoration:none}
+  a:hover{text-decoration:underline}
+  strong{color:var(--text)}
+  footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);font-size:.85rem}
+  .footer-links{display:flex;gap:20px}
+  .footer-links a{color:var(--muted)}
+</style>
+</head>
+<body>
+<nav><div class="wrap nav-inner"><a class="logo" href="/"><span class="logo-mark">Q</span>QuoteForge</a></div></nav>
+<main>
+  <div class="wrap">
+    <h1>Terms of Service</h1>
+    <p class="updated">Last updated: <span id="date">2026</span></p>
+
+    <p>These terms govern your use of the QuoteForge website at alott.me (the "Site") and the early-access waitlist. By using the Site, you agree to them.</p>
+
+    <h2>1. Early-access status</h2>
+    <p>QuoteForge is a product in development. The Site describes planned capabilities and pricing, which may change before general availability. Joining the waitlist does not create a contract to provide the service, and pricing shown is indicative until a plan is offered to you in writing.</p>
+
+    <h2>2. Use of the Site</h2>
+    <ul>
+      <li>You may browse the Site and submit your email to the waitlist.</li>
+      <li>You agree not to misuse the Site, attempt to disrupt it, or submit information that isn't yours to submit.</li>
+      <li>The interactive demo on the Site uses sample data for illustration only.</li>
+    </ul>
+
+    <h2>3. Intellectual property</h2>
+    <p>The QuoteForge name, branding, copy and design on this Site are owned by us. You may not copy or reuse them without permission.</p>
+
+    <h2>4. No warranty</h2>
+    <p>The Site is provided "as is," without warranties of any kind. Any figures, sample quotes or performance claims shown are illustrative and are not a guarantee of results.</p>
+
+    <h2>5. Limitation of liability</h2>
+    <p>To the fullest extent permitted by law, we are not liable for any indirect or consequential loss arising from your use of the Site.</p>
+
+    <h2>6. Changes</h2>
+    <p>We may update these terms as the product develops. Continued use of the Site after changes means you accept the updated terms.</p>
+
+    <h2>7. Contact</h2>
+    <p>Questions about these terms? Email <a href="mailto:hello@alott.me">hello@alott.me</a>.</p>
+  </div>
+</main>
+<footer>
+  <div class="wrap footer-links">
+    <a href="/">← Back to QuoteForge</a>
+    <a href="/privacy.html">Privacy Policy</a>
+  </div>
+</footer>
+<script>
+  document.getElementById('date').textContent =
+    new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+</script>
+</body>
+</html>
