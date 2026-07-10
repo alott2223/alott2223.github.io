@@ -1,7 +1,10 @@
 #!/usr/bin/env node
-/* Deterministic checks for the pricing engine — no API key, no network. */
+/* Deterministic checks for the engine + trainer — no API key, no network. */
 'use strict';
+const path = require('path');
 const pricing = require('./pricing.js');
+const { calibrate } = require('./train.js');
+const { loadHistory, similar } = require('./lib/history.js');
 
 let pass = 0, fail = 0;
 function ok(name, cond) {
@@ -48,6 +51,37 @@ threw = false;
 try { pricing.estimate({ material: 'a36', quantity: 0, thicknessIn: 1, areaSqIn: 1 }); }
 catch (e) { threw = true; }
 ok('rejects zero quantity', threw);
+
+// 5. estimate() honors a calibrated config (learned labor rate raises cost)
+const base = pricing.estimate({ material: 'a36', quantity: 1, thicknessIn: 0.25, areaSqIn: 50, weldLengthIn: 30 });
+const cfg  = pricing.estimate({ material: 'a36', quantity: 1, thicknessIn: 0.25, areaSqIn: 50, weldLengthIn: 30 },
+  { defaults: { laborRate: 130 } });
+ok('config laborRate raises labor lines', cfg.total > base.total);
+const cheapMat = pricing.estimate({ material: 'a36', quantity: 1, thicknessIn: 0.25, areaSqIn: 50 },
+  { materialPrices: { a36: 0.40 } });
+const dearMat  = pricing.estimate({ material: 'a36', quantity: 1, thicknessIn: 0.25, areaSqIn: 50 },
+  { materialPrices: { a36: 1.00 } });
+ok('config materialPrices changes material cost', dearMat.total > cheapMat.total);
+
+// 6. Trainer recovers the hidden TRUE rates from data/gen-sample.js
+const history = loadHistory(path.join(__dirname, 'data', 'history.sample.jsonl'));
+ok('history loaded', history.length >= 40);
+const c = calibrate(history);
+const within = (v, target, tolPct) => Math.abs(v - target) <= target * tolPct;
+ok('recovers laser rate ~26 in/min',   within(c.rates.laserInPerMin, 26, 0.10));
+ok('recovers drill ~24 sec/hole',       within(c.rates.drillSecPerHole, 24, 0.10));
+ok('recovers weld ~3.0 in/min',         within(c.rates.weldInPerMin, 3.0, 0.10));
+ok('recovers stainless factor ~0.65',   Math.abs(c.rates.ssWeldFactor - 0.65) <= 0.08);
+ok('recovers bend ~27 sec/bend',        within(c.rates.bendSecPerBend, 27, 0.10));
+ok('recovers labor ~$98/hr',            Math.abs(c.defaults.laborRate - 98) <= 3);
+ok('recommends a sane margin',          c.recommendedMargin >= 22 && c.recommendedMargin <= 34);
+ok('margin analysis covers buckets',    c.marginAnalysis.length >= 5);
+
+// 7. Similar-job matching finds re-order clusters
+const reorder = history.find((j) => /re-order/.test(j.partName || ''));
+const sim = similar(reorder, history, 3);
+ok('re-order finds a close match',      sim.count >= 1);
+ok('top match scores high',             sim.matches[0].score >= 90);
 
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

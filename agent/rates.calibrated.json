@@ -1,0 +1,63 @@
+{
+  "generatedAt": "2026-07-10T01:40:35.706Z",
+  "sampleSize": 48,
+  "rates": {
+    "laserInPerMin": 26.31,
+    "sawSecPerCut": 45,
+    "drillSecPerHole": 23.8,
+    "weldInPerMin": 2.99,
+    "bendSecPerBend": 26.8,
+    "ssWeldFactor": 0.64
+  },
+  "defaults": {
+    "laborRate": 98,
+    "marginPct": 32
+  },
+  "recommendedMargin": 32,
+  "winTarget": 0.6,
+  "marginAnalysis": [
+    {
+      "marginPct": 22,
+      "jobs": 10,
+      "wins": 10,
+      "winRatePct": 100
+    },
+    {
+      "marginPct": 24,
+      "jobs": 10,
+      "wins": 8,
+      "winRatePct": 80
+    },
+    {
+      "marginPct": 26,
+      "jobs": 8,
+      "wins": 7,
+      "winRatePct": 88
+    },
+    {
+      "marginPct": 28,
+      "jobs": 8,
+      "wins": 4,
+      "winRatePct": 50
+    },
+    {
+      "marginPct": 30,
+      "jobs": 5,
+      "wins": 4,
+      "winRatePct": 80
+    },
+    {
+      "marginPct": 32,
+      "jobs": 3,
+      "wins": 3,
+      "winRatePct": 100
+    },
+    {
+      "marginPct": 34,
+      "jobs": 4,
+      "wins": 2,
+      "winRatePct": 50
+    }
+  ],
+  "notes": []
+}

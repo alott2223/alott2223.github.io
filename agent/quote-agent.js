@@ -24,8 +24,11 @@
 const fs = require('fs');
 const path = require('path');
 const pricing = require('./pricing.js');
+const { loadHistory, similar } = require('./lib/history.js');
 
 const MODEL = 'claude-opus-4-8';
+const CALIB_FILE = path.join(__dirname, 'rates.calibrated.json');
+const HISTORY_FILE = path.join(__dirname, 'data', 'history.sample.jsonl');
 
 // ---- CLI parsing ----------------------------------------------------------
 function parseArgs(argv) {
@@ -34,6 +37,7 @@ function parseArgs(argv) {
     const a = argv[i];
     if (a === '--mock') args.flags.mock = true;
     else if (a === '--json') args.flags.json = true;
+    else if (a === '--raw') args.flags.raw = true;       // ignore learned rates
     else if (a.startsWith('--')) args.flags[a.slice(2)] = argv[++i];
     else args.file = a;
   }
@@ -151,18 +155,22 @@ function applyOverrides(spec, flags) {
   return spec;
 }
 
-function toJob(spec) {
+function toJob(spec, calib) {
+  const d = (calib && calib.defaults) || {};
   return {
     material: spec.material, quantity: spec.quantity, thicknessIn: spec.thicknessIn,
     areaSqIn: spec.areaSqIn, cutLengthIn: spec.cutLengthIn, sawCuts: spec.sawCuts,
     holes: spec.holes, weldLengthIn: spec.weldLengthIn, bends: spec.bends,
     finish: spec.finish,
-    marginPct: spec._marginPct != null ? spec._marginPct : 28,
-    laborRate: spec._laborRate || 95,
+    // Flag override wins; otherwise the learned default; otherwise the built-in.
+    marginPct: spec._marginPct != null ? spec._marginPct
+      : (d.marginPct != null ? d.marginPct : 28),
+    laborRate: spec._laborRate || d.laborRate || 95,
   };
 }
 
-function printQuote(spec, quote) {
+function printQuote(spec, quote, match, calib) {
+  match = match || { count: 0 };
   const qn = 'Q-' + new Date().getFullYear() + '-' + String(Math.floor(Math.random() * 9000) + 1000);
   const W = 54;
   const line = (l, r) => {
@@ -180,7 +188,14 @@ function printQuote(spec, quote) {
   console.log('  ├' + '─'.repeat(W + 2) + '┤');
   console.log('  │ ' + line('QUOTE TOTAL', quote.total) + ' │');
   console.log('  └' + '─'.repeat(W + 2) + '┘');
-  console.log(`   confidence ${quote.confidence}%  ·  ${quote.meta.weightLb} lb ${quote.meta.material}`);
+  const conf = Math.min(98, quote.confidence + (match.count > 0 ? 3 : 0));
+  console.log(`   confidence ${conf}%  ·  ${quote.meta.weightLb} lb ${quote.meta.material}`);
+  if (match.count > 0) {
+    console.log(`   matched to ${match.count} similar job(s) in your history`);
+  }
+  console.log(calib
+    ? `   using learned rates (trained on ${calib.sampleSize} jobs)`
+    : `   using default rates — run \`node train.js\` to calibrate to your shop`);
   if (spec.notes) console.log(`   note: ${spec.notes}`);
   console.log('');
 }
@@ -210,18 +225,38 @@ async function main() {
   }
 
   const spec = applyOverrides(extracted.spec, flags);
+
+  // Use learned rates if the shop has trained (rates.calibrated.json), unless --raw.
+  let calib = null;
+  if (!flags.raw && fs.existsSync(CALIB_FILE)) {
+    try { calib = JSON.parse(fs.readFileSync(CALIB_FILE, 'utf8')); }
+    catch (e) { process.stderr.write('Warning: could not read rates.calibrated.json\n'); }
+  }
+  const job = toJob(spec, calib);
+
   let quote;
   try {
-    quote = pricing.estimate(toJob(spec));
+    quote = pricing.estimate(job, calib || {});
   } catch (err) {
     console.error('Pricing error: ' + err.message);
     process.exit(1);
   }
 
+  // Match against past jobs → history-backed confidence.
+  let match = { count: 0, matches: [], avgScore: 0 };
+  const histFile = flags.history || HISTORY_FILE;
+  if (fs.existsSync(histFile)) {
+    try { match = similar(job, loadHistory(histFile), 3); } catch (e) {}
+  }
+
   if (flags.json) {
-    console.log(JSON.stringify({ spec, quote }, null, 2));
+    console.log(JSON.stringify({
+      spec, quote,
+      calibrated: calib ? { sampleSize: calib.sampleSize, generatedAt: calib.generatedAt } : null,
+      similarJobs: match.matches.map((m) => ({ id: m.job.id, score: m.score })),
+    }, null, 2));
   } else {
-    printQuote(spec, quote);
+    printQuote(spec, quote, match, calib);
     if (extracted.usage) {
       process.stderr.write(
         `   [tokens in ${extracted.usage.input_tokens}, out ${extracted.usage.output_tokens}]\n`

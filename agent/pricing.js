@@ -69,14 +69,25 @@
    * @param {number} [job.marginPct]     margin percentage (default 28)
    * @returns {{lines: [string, number][], subtotal, margin, total, confidence, meta}}
    */
-  function estimate(job) {
+  function estimate(job, config) {
     const errs = validate(job);
     if (errs.length) throw new Error('Invalid job: ' + errs.join('; '));
 
-    const mat = MATERIALS[job.material];
+    // Calibrated config (from train.js) overrides the built-in defaults.
+    config = config || {};
+    const rates = Object.assign({}, RATES, config.rates || {});
+    const priceOverrides = config.materialPrices || {};
+    const defaults = config.defaults || {};
+
+    const baseMat = MATERIALS[job.material];
+    const mat = priceOverrides[job.material] != null
+      ? Object.assign({}, baseMat, { pricePerLb: priceOverrides[job.material] })
+      : baseMat;
     const qty = job.quantity;
-    const laborRate = job.laborRate > 0 ? job.laborRate : 95;
-    const marginPct = job.marginPct != null ? job.marginPct : 28;
+    const laborRate = job.laborRate > 0 ? job.laborRate
+      : (defaults.laborRate > 0 ? defaults.laborRate : 95);
+    const marginPct = job.marginPct != null ? job.marginPct
+      : (defaults.marginPct != null ? defaults.marginPct : 28);
     const isStainless = job.material === 'ss304' || job.material === 'ss316';
 
     const lines = [];
@@ -91,21 +102,21 @@
 
     // Cutting (laser by cut length, or saw by cut count)
     let cutHrs = 0;
-    if (job.cutLengthIn > 0) cutHrs += (job.cutLengthIn * qty) / RATES.laserInPerMin / 60;
-    if (job.sawCuts > 0)     cutHrs += (job.sawCuts * qty * RATES.sawSecPerCut) / 3600;
+    if (job.cutLengthIn > 0) cutHrs += (job.cutLengthIn * qty) / rates.laserInPerMin / 60;
+    if (job.sawCuts > 0)     cutHrs += (job.sawCuts * qty * rates.sawSecPerCut) / 3600;
     if (cutHrs > 0) {
       lines.push([`Cutting (${round2(cutHrs)} hr @ ${usd(laborRate)})`, cutHrs * laborRate]);
     }
 
     // Drilling
     if (job.holes > 0) {
-      const drillHrs = (job.holes * qty * RATES.drillSecPerHole) / 3600;
+      const drillHrs = (job.holes * qty * rates.drillSecPerHole) / 3600;
       lines.push([`Drilling — ${job.holes * qty} holes (${round2(drillHrs)} hr)`, drillHrs * laborRate]);
     }
 
     // Welding
     if (job.weldLengthIn > 0) {
-      const rate = RATES.weldInPerMin * (isStainless ? RATES.ssWeldFactor : 1);
+      const rate = rates.weldInPerMin * (isStainless ? rates.ssWeldFactor : 1);
       const weldHrs = (job.weldLengthIn * qty) / rate / 60;
       lines.push([
         `Welding — ${round2(job.weldLengthIn * qty)}" fillet (${round2(weldHrs)} hr @ ${usd(laborRate)})`,
@@ -115,7 +126,7 @@
 
     // Forming / bending
     if (job.bends > 0) {
-      const bendHrs = (job.bends * qty * RATES.bendSecPerBend) / 3600;
+      const bendHrs = (job.bends * qty * rates.bendSecPerBend) / 3600;
       lines.push([`Forming — ${job.bends * qty} bends (${round2(bendHrs)} hr)`, bendHrs * laborRate]);
     }
 
