@@ -27,6 +27,24 @@ export ANTHROPIC_API_KEY=sk-ant-...     # your Anthropic API key
 
 Requires Node.js 18+.
 
+## Cost & model
+
+The deterministic paths (pricing, training, matching, structured RFQs, `--reply`)
+use **no Claude at all** — zero API cost. Only the AI parsing paths call Claude:
+drawing extraction (`quote-agent.js <drawing>`) and RFQ-email parsing
+(`rfq.js --from-text`).
+
+Those default to **Haiku 4.5** — the cheapest model ($1 / $5 per M tokens), which
+puts each parse at a fraction of a cent. Bump the model up for messier inputs:
+
+```bash
+node rfq.js --from-text email.txt --model claude-sonnet-5
+export QUOTEFORGE_MODEL=claude-opus-4-8      # applies to all runs
+```
+
+No key set? The AI paths error with a pointer to the free structured path; the
+site's Quote Builder and `rfq.js data/*.json` keep working at $0.
+
 ## Use
 
 ```bash

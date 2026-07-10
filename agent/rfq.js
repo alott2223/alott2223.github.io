@@ -17,8 +17,8 @@
 const fs = require('fs');
 const path = require('path');
 const pricing = require('./pricing.js');
+const { resolveModel } = require('./lib/model.js');
 
-const MODEL = 'claude-opus-4-8';
 const CALIB_FILE = path.join(__dirname, 'rates.calibrated.json');
 const DEFAULT_RFQ = path.join(__dirname, 'data', 'rfq-2026-10482.json');
 
@@ -67,16 +67,19 @@ function loadStructured(file) {
   return JSON.parse(fs.readFileSync(file, 'utf8'));
 }
 
-async function fromText(file) {
+async function fromText(file, model) {
+  if (!process.env.ANTHROPIC_API_KEY) {
+    throw new Error('ANTHROPIC_API_KEY not set. --from-text needs it to parse free text. ' +
+      'No key? Price a structured RFQ instead: node rfq.js data/rfq-2026-10482.json');
+  }
   let Anthropic;
   try { Anthropic = require('@anthropic-ai/sdk'); }
   catch (e) { throw new Error('Missing dependency. Run `npm install` first.'); }
-  if (!process.env.ANTHROPIC_API_KEY) throw new Error('ANTHROPIC_API_KEY not set (required for --from-text).');
   const text = fs.readFileSync(file, 'utf8');
   const client = new Anthropic();
-  process.stderr.write(`Parsing ${path.basename(file)} with ${MODEL}…\n`);
+  process.stderr.write(`Parsing ${path.basename(file)} with ${model}…\n`);
   const resp = await client.messages.create({
-    model: MODEL, max_tokens: 4096,
+    model, max_tokens: 4096,
     system: 'You are an estimator. Convert this RFQ into the structured schema. ' +
       'Compute each part\'s areaSqIn from its length × width. Map materials/finishes to the closest allowed value. ' +
       'Put assembly-level weld length in assemblyWeldIn (not per part). Use the RFQ\'s own labor rate, margin, ' +
@@ -188,12 +191,13 @@ async function main() {
     else if (argv[i] === '--reply') flags.reply = true;
     else if (argv[i] === '--from-text') flags.fromText = argv[++i];
     else if (argv[i] === '--from') flags.from = argv[++i];
+    else if (argv[i] === '--model') flags.model = argv[++i];
     else if (!argv[i].startsWith('--')) file = argv[i];
   }
 
   let rfq;
   try {
-    if (flags.fromText) rfq = await fromText(flags.fromText);
+    if (flags.fromText) rfq = await fromText(flags.fromText, resolveModel(flags));
     else rfq = loadStructured(file || DEFAULT_RFQ);
   } catch (err) { console.error('Error: ' + err.message); process.exit(1); }
 

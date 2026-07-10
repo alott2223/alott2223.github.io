@@ -25,8 +25,8 @@ const fs = require('fs');
 const path = require('path');
 const pricing = require('./pricing.js');
 const { loadHistory, similar } = require('./lib/history.js');
+const { resolveModel } = require('./lib/model.js');
 
-const MODEL = 'claude-opus-4-8';
 const CALIB_FILE = path.join(__dirname, 'rates.calibrated.json');
 const HISTORY_FILE = path.join(__dirname, 'data', 'history.sample.jsonl');
 
@@ -100,20 +100,20 @@ function fileToBlock(file) {
 }
 
 // ---- Extraction (real + mock) --------------------------------------------
-async function extractWithClaude(file) {
+async function extractWithClaude(file, model) {
+  if (!process.env.ANTHROPIC_API_KEY) {
+    throw new Error('ANTHROPIC_API_KEY is not set. Export your key, or run with --mock.');
+  }
   let Anthropic;
   try {
     Anthropic = require('@anthropic-ai/sdk');
   } catch (e) {
     throw new Error('Missing dependency. Run `npm install` in the agent/ folder first.');
   }
-  if (!process.env.ANTHROPIC_API_KEY) {
-    throw new Error('ANTHROPIC_API_KEY is not set. Export your key, or run with --mock.');
-  }
   const client = new Anthropic();
 
   const resp = await client.messages.create({
-    model: MODEL,
+    model,
     max_tokens: 4096,
     system: SYSTEM,
     output_config: { format: { type: 'json_schema', schema: EXTRACTION_SCHEMA } },
@@ -216,8 +216,9 @@ async function main() {
       extracted = mockExtract();
     } else {
       if (!fs.existsSync(file)) throw new Error(`File not found: ${file}`);
-      process.stderr.write(`Reading ${path.basename(file)} with ${MODEL}…\n`);
-      extracted = await extractWithClaude(file);
+      const model = resolveModel(flags);
+      process.stderr.write(`Reading ${path.basename(file)} with ${model}…\n`);
+      extracted = await extractWithClaude(file, model);
     }
   } catch (err) {
     console.error('Error: ' + err.message);
