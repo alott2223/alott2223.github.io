@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Hire alott — Roblox scripting, web builds & AI automation</title>
+<meta name="description" content="Freelance Roblox/Luau scripter and web developer. Custom game systems, admin tools, landing pages and AI-powered automation — delivered fast, with clean code and clear communication.">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#0e1116">
+<link rel="canonical" href="https://alott.me/hire.html">
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23ff7a1a'/%3E%3Ctext x='16' y='24' font-family='Arial,Helvetica,sans-serif' font-size='22' font-weight='900' text-anchor='middle' fill='%230e1116'%3EA%3C/text%3E%3C/svg%3E">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="Hire alott — Roblox scripting, web builds & AI automation">
+<meta property="og:description" content="Custom Roblox game systems, landing pages and AI automation. Fast turnaround, clean code, flat pricing.">
+<meta property="og:url" content="https://alott.me/hire.html">
+
+<style>
+  :root{
+    --bg:#0e1116;
+    --bg-2:#151a21;
+    --bg-3:#1c232d;
+    --line:#2a3340;
+    --text:#e8ecf1;
+    --muted:#9aa7b5;
+    --accent:#ff7a1a;
+    --accent-2:#ffb066;
+    --good:#3ecf8e;
+    --mono:'SF Mono',ui-monospace,'Cascadia Code',Menlo,Consolas,monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,Roboto,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+
+  nav{position:sticky;top:0;z-index:50;background:rgba(14,17,22,.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+  .nav-inner{display:flex;align-items:center;justify-content:space-between;height:64px}
+  .logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:1.15rem;letter-spacing:-.02em;text-decoration:none;color:var(--text)}
+  .logo-mark{width:28px;height:28px;border-radius:7px;background:linear-gradient(135deg,var(--accent),#ff9d4d);display:grid;place-items:center;color:#0e1116;font-size:15px;font-weight:900}
+  .nav-links{display:flex;gap:28px;align-items:center}
+  .nav-links a{color:var(--muted);text-decoration:none;font-size:.92rem;transition:color .15s}
+  .nav-links a:hover{color:var(--text)}
+  .btn{display:inline-block;padding:11px 22px;border-radius:9px;font-weight:600;font-size:.95rem;text-decoration:none;cursor:pointer;border:none;transition:transform .12s,box-shadow .12s;font-family:inherit}
+  .btn-primary{background:var(--accent);color:#14100b}
+  .btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(255,122,26,.35)}
+  .btn-ghost{background:transparent;color:var(--text);border:1px solid var(--line)}
+  .btn-ghost:hover{border-color:var(--muted)}
+  .btn-sm{padding:8px 16px;font-size:.88rem}
+
+  .hero{padding:96px 0 64px;text-align:center;position:relative;overflow:hidden}
+  .hero::before{content:'';position:absolute;top:-200px;left:50%;transform:translateX(-50%);width:900px;height:500px;background:radial-gradient(ellipse,rgba(255,122,26,.14),transparent 65%);pointer-events:none}
+  .pill{display:inline-block;padding:6px 14px;border-radius:99px;border:1px solid var(--line);background:var(--bg-2);color:var(--accent-2);font-size:.82rem;font-weight:600;letter-spacing:.02em;margin-bottom:24px}
+  h1{font-size:clamp(2.1rem,5.5vw,3.4rem);font-weight:800;letter-spacing:-.03em;line-height:1.12;max-width:840px;margin:0 auto 20px}
+  h1 .glow{color:var(--accent)}
+  .sub{font-size:1.15rem;color:var(--muted);max-width:640px;margin:0 auto 36px}
+  .hero-ctas{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+
+  section{padding:72px 0}
+  .kicker{color:var(--accent);font-weight:700;font-size:.85rem;text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px}
+  h2{font-size:clamp(1.6rem,3.5vw,2.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.2;margin-bottom:14px}
+  .lead{color:var(--muted);font-size:1.05rem;max-width:640px}
+
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:40px}
+  .card{background:var(--bg-2);border:1px solid var(--line);border-radius:14px;padding:26px}
+  .card .icon{font-size:1.6rem;margin-bottom:14px;display:block}
+  .card h3{font-size:1.05rem;font-weight:700;margin-bottom:8px}
+  .card p{font-size:.93rem;color:var(--muted)}
+  .card ul{list-style:none;margin-top:12px}
+  .card li{font-size:.88rem;color:var(--muted);padding:4px 0 4px 22px;position:relative}
+  .card li::before{content:'✓';position:absolute;left:0;color:var(--good);font-weight:700}
+
+  #work{background:var(--bg-2);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  #work .card{background:var(--bg)}
+  .work-link{color:var(--accent);text-decoration:none;font-weight:600;font-size:.88rem}
+  .work-link:hover{text-decoration:underline}
+  .tech{font-family:var(--mono);font-size:.72rem;color:var(--accent-2);margin-top:10px;display:block}
+
+  .plans{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:40px}
+  .plan{background:var(--bg-2);border:1px solid var(--line);border-radius:16px;padding:30px;display:flex;flex-direction:column}
+  .plan.featured{border-color:var(--accent);position:relative;box-shadow:0 12px 44px rgba(255,122,26,.12)}
+  .plan .tag-best{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--accent);color:#14100b;font-size:.72rem;font-weight:800;padding:4px 12px;border-radius:99px;letter-spacing:.04em}
+  .plan h3{font-size:1.05rem;font-weight:700}
+  .plan .price{font-size:2rem;font-weight:800;margin:12px 0 2px;letter-spacing:-.02em}
+  .plan .price span{font-size:.9rem;font-weight:500;color:var(--muted)}
+  .plan .for{font-size:.85rem;color:var(--muted);margin-bottom:20px}
+  .plan ul{list-style:none;margin-bottom:26px;flex:1}
+  .plan li{font-size:.9rem;color:var(--muted);padding:6px 0 6px 24px;position:relative}
+  .plan li::before{content:'✓';position:absolute;left:0;color:var(--good);font-weight:700}
+  .plan .btn{text-align:center}
+  .plan-note{font-size:.82rem;color:var(--muted);margin-top:18px;text-align:center}
+
+  .how{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:40px;counter-reset:step}
+  .step{background:var(--bg-2);border:1px solid var(--line);border-radius:14px;padding:22px;position:relative}
+  .step::before{counter-increment:step;content:counter(step,decimal-leading-zero);font-family:var(--mono);color:var(--accent);font-weight:700;font-size:.85rem;display:block;margin-bottom:10px}
+  .step h3{font-size:.98rem;font-weight:700;margin-bottom:6px}
+  .step p{font-size:.88rem;color:var(--muted)}
+
+  #contact{background:var(--bg-2);border-top:1px solid var(--line)}
+  .contact-shell{max-width:560px;margin:36px auto 0}
+  .fg{margin-bottom:16px}
+  .fg label{display:block;font-size:.8rem;color:var(--muted);margin-bottom:6px;font-weight:600}
+  .fg input,.fg select,.fg textarea{width:100%;padding:12px 14px;border-radius:9px;border:1px solid var(--line);background:var(--bg);color:var(--text);font-size:.95rem;outline:none;font-family:inherit;resize:vertical}
+  .fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--accent)}
+  .form-note{font-size:.8rem;color:var(--muted);margin-top:14px;text-align:center}
+  .form-note a{color:var(--muted)}
+  .form-success{display:none;margin-top:28px;color:var(--good);font-weight:600;font-size:1.05rem;text-align:center}
+  .form-error{display:none;margin-top:16px;color:#ff8f6b;font-size:.9rem;text-align:center}
+
+  footer{border-top:1px solid var(--line);padding:40px 0;color:var(--muted);font-size:.85rem}
+  .foot-inner{display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between}
+  .foot-links{display:flex;gap:22px;flex-wrap:wrap}
+  .foot-links a{color:var(--muted);text-decoration:none;transition:color .15s}
+  .foot-links a:hover{color:var(--text)}
+  @media(max-width:860px){.grid3,.plans{grid-template-columns:1fr}.how{grid-template-columns:1fr 1fr}}
+  @media(max-width:560px){.how{grid-template-columns:1fr}.nav-links a:not(.btn){display:none}.foot-inner{justify-content:center;text-align:center;flex-direction:column}}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap nav-inner">
+    <a class="logo" href="#"><span class="logo-mark">A</span>alott</a>
+    <div class="nav-links">
+      <a href="#services">Services</a>
+      <a href="#work">Work</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#contact" class="btn btn-primary btn-sm">Get a quote</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="pill">🟢 Available for new projects</span>
+    <h1>Roblox systems &amp; web builds, <span class="glow">shipped fast.</span></h1>
+    <p class="sub">I build custom Luau game systems, admin tools, landing pages and AI-powered automation. Flat pricing, quick turnaround, and you own all the code.</p>
+    <div class="hero-ctas">
+      <a href="#contact" class="btn btn-primary">Tell me about your project</a>
+      <a href="#work" class="btn btn-ghost">See my work</a>
+    </div>
+  </div>
+</header>
+
+<section id="services">
+  <div class="wrap">
+    <div class="kicker">Services</div>
+    <h2>What I build</h2>
+    <div class="grid3">
+      <div class="card">
+        <span class="icon">🎮</span>
+        <h3>Roblox / Luau scripting</h3>
+        <p>Custom systems for your game, written clean and documented.</p>
+        <ul>
+          <li>Gameplay mechanics &amp; combat systems</li>
+          <li>Admin panels &amp; moderation tools</li>
+          <li>DataStores, inventories, shops</li>
+          <li>UI built with real polish</li>
+          <li>Bug fixes &amp; performance passes</li>
+        </ul>
+      </div>
+      <div class="card">
+        <span class="icon">🌐</span>
+        <h3>Websites &amp; landing pages</h3>
+        <p>Fast, modern single-page sites that look expensive and load instantly.</p>
+        <ul>
+          <li>Product &amp; service landing pages</li>
+          <li>Portfolio &amp; personal sites</li>
+          <li>Working contact/waitlist forms</li>
+          <li>SEO basics done right</li>
+          <li>Free hosting setup (GitHub Pages)</li>
+        </ul>
+      </div>
+      <div class="card">
+        <span class="icon">🤖</span>
+        <h3>AI automation</h3>
+        <p>Put AI to work on your repetitive tasks — set up once, runs forever.</p>
+        <ul>
+          <li>Chatbots trained on your docs</li>
+          <li>Data extraction from PDFs/emails</li>
+          <li>Discord bots &amp; server tooling</li>
+          <li>Content pipelines &amp; scrapers</li>
+          <li>Custom pricing/quote engines</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="work">
+  <div class="wrap">
+    <div class="kicker">Selected work</div>
+    <h2>Things I've shipped</h2>
+    <div class="grid3">
+      <div class="card">
+        <span class="icon">⚡</span>
+        <h3>QuoteForge</h3>
+        <p>AI quoting engine for fabrication shops — parses RFQ drawings and produces itemized quotes with a live in-browser pricing engine.</p>
+        <span class="tech">JavaScript · AI · pricing engine</span>
+        <p style="margin-top:12px"><a class="work-link" href="/">View live →</a></p>
+      </div>
+      <div class="card">
+        <span class="icon">📦</span>
+        <h3>Container platform</h3>
+        <p>Self-hosted container management platform with real-time monitoring — Go backend, React frontend, Docker API integration.</p>
+        <span class="tech">Go · React · Docker</span>
+        <p style="margin-top:12px"><a class="work-link" href="https://github.com/alott2223/cyber-container-platform" rel="noopener">Source →</a></p>
+      </div>
+      <div class="card">
+        <span class="icon">🎮</span>
+        <h3>Roblox game systems</h3>
+        <p>Large-scale Luau feature suites: ESP/visual systems, movement mechanics, UI frameworks and drawing-library ports across executor environments.</p>
+        <span class="tech">Luau · Roblox Studio</span>
+        <p style="margin-top:12px"><a class="work-link" href="#contact">Ask for samples →</a></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="pricing">
+  <div class="wrap">
+    <div class="kicker">Pricing</div>
+    <h2>Flat rates. No surprises.</h2>
+    <p class="lead">Every project is scoped up front with a fixed price. You know the number before I write a line of code.</p>
+    <div class="plans">
+      <div class="plan">
+        <h3>Quick fix</h3>
+        <div class="price">$25<span> — 50</span></div>
+        <div class="for">Small script or bug fix</div>
+        <ul>
+          <li>One script or one bug</li>
+          <li>24–48 hour delivery</li>
+          <li>1 revision included</li>
+          <li>Source code + explanation</li>
+        </ul>
+        <a href="#contact" class="btn btn-ghost">Start here</a>
+      </div>
+      <div class="plan featured">
+        <span class="tag-best">MOST POPULAR</span>
+        <h3>Full system</h3>
+        <div class="price">$75<span> — 200</span></div>
+        <div class="for">A complete feature, done right</div>
+        <ul>
+          <li>Full game system or landing page</li>
+          <li>UI included where relevant</li>
+          <li>3–7 day delivery</li>
+          <li>3 revisions included</li>
+          <li>Documentation + handoff call</li>
+        </ul>
+        <a href="#contact" class="btn btn-primary">Get a quote</a>
+      </div>
+      <div class="plan">
+        <h3>Project</h3>
+        <div class="price">$250<span>+</span></div>
+        <div class="for">Multi-system builds &amp; automation</div>
+        <ul>
+          <li>Multiple systems or full site + tooling</li>
+          <li>AI automation setups</li>
+          <li>Milestone-based delivery</li>
+          <li>Unlimited scoped revisions</li>
+          <li>2 weeks post-delivery support</li>
+        </ul>
+        <a href="#contact" class="btn btn-ghost">Scope it out</a>
+      </div>
+    </div>
+    <p class="plan-note">Not sure which fits? Send the project — I'll reply with a fixed quote, usually same day.</p>
+  </div>
+</section>
+
+<section id="process" style="padding-top:0">
+  <div class="wrap">
+    <div class="kicker">Process</div>
+    <h2>How working with me goes</h2>
+    <div class="how">
+      <div class="step"><h3>You describe it</h3><p>Send what you want built — a paragraph is enough. Screenshots and references help.</p></div>
+      <div class="step"><h3>I quote it</h3><p>You get a fixed price and delivery date, usually within a few hours.</p></div>
+      <div class="step"><h3>I build it</h3><p>Progress updates as I go. No disappearing for a week.</p></div>
+      <div class="step"><h3>You own it</h3><p>Full source code, documentation, and revisions until it's right.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="contact">
+  <div class="wrap">
+    <div class="kicker" style="text-align:center">Contact</div>
+    <h2 style="text-align:center">Tell me what you need built.</h2>
+    <p class="lead" style="margin:0 auto;text-align:center">I read every message and usually reply the same day with a fixed quote.</p>
+    <form class="contact-shell" id="hire-form">
+      <input type="hidden" name="_subject" value="💼 New hire inquiry from alott.me/hire">
+      <input type="hidden" name="form" value="hire">
+      <div class="fg">
+        <label for="h-name">Your name</label>
+        <input id="h-name" name="name" type="text" placeholder="Alex" required>
+      </div>
+      <div class="fg">
+        <label for="h-email">Email</label>
+        <input id="h-email" name="email" type="email" placeholder="you@example.com" autocomplete="email" required>
+      </div>
+      <div class="fg">
+        <label for="h-type">Project type</label>
+        <select id="h-type" name="project_type">
+          <option>Roblox / Luau scripting</option>
+          <option>Website / landing page</option>
+          <option>AI automation</option>
+          <option>Something else</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label for="h-budget">Budget</label>
+        <select id="h-budget" name="budget">
+          <option>$25 – $50</option>
+          <option selected>$75 – $200</option>
+          <option>$250+</option>
+          <option>Not sure yet</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label for="h-details">What do you need?</label>
+        <textarea id="h-details" name="details" rows="5" placeholder="Describe the project — what it should do, any deadlines, links or references." required></textarea>
+      </div>
+      <button class="btn btn-primary" type="submit" id="h-submit" style="width:100%">Send project details</button>
+      <div class="form-error" id="h-error">Something went wrong — please try again, or email me at <a href="mailto:hello@alott.me" style="color:inherit">hello@alott.me</a>.</div>
+      <div class="form-success" id="h-success">✓ Got it. I'll reply with a quote — usually same day.</div>
+      <p class="form-note">Prefer email? <a href="mailto:hello@alott.me">hello@alott.me</a> works too.</p>
+    </form>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot-inner">
+    <div>© <span id="year">2026</span> alott · <a href="mailto:hello@alott.me" style="color:inherit;text-decoration:none">hello@alott.me</a></div>
+    <div class="foot-links">
+      <a href="/">QuoteForge</a>
+      <a href="https://github.com/alott2223" rel="noopener">GitHub</a>
+      <a href="/privacy.html">Privacy</a>
+      <a href="/terms.html">Terms</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+const FORMSPREE_ID = 'mqevvprr';
+
+const form    = document.getElementById('hire-form');
+const submit  = document.getElementById('h-submit');
+const errBox  = document.getElementById('h-error');
+const okBox   = document.getElementById('h-success');
+
+form.addEventListener('submit', async e => {
+  e.preventDefault();
+  errBox.style.display = 'none';
+  submit.disabled = true;
+  submit.textContent = 'Sending…';
+
+  const done = () => {
+    form.querySelectorAll('input:not([type=hidden]),select,textarea,button').forEach(el => el.style.display = 'none');
+    form.querySelector('.form-note').style.display = 'none';
+    form.querySelectorAll('.fg label').forEach(el => el.style.display = 'none');
+    okBox.style.display = 'block';
+  };
+  const fail = () => {
+    errBox.style.display = 'block';
+    submit.disabled = false;
+    submit.textContent = 'Send project details';
+  };
+
+  try{
+    const res = await fetch('https://formspree.io/f/' + FORMSPREE_ID, {
+      method: 'POST',
+      headers: { 'Accept': 'application/json' },
+      body: new FormData(form)
+    });
+    res.ok ? done() : fail();
+  }catch(err){
+    fail();
+  }
+});
+
+document.getElementById('year').textContent = new Date().getFullYear();
+</script>
+</body>
+</html>
