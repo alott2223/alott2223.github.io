@@ -1,0 +1,62 @@
+{
+  "rfqId": "RFQ-2026-10482",
+  "name": "Stainless Steel Pump Mount Bracket Assembly",
+  "customer": {
+    "company": "Midwest Industrial Cooling LLC",
+    "contact": "purchasing@midwestcooling.example",
+    "industry": "HVAC Manufacturing"
+  },
+  "quantity": 25,
+  "leadTimeDays": 14,
+
+  "material": "ss304",
+  "materialPricePerLb": 4.25,
+  "scrapPct": 15,
+  "laborRate": 110,
+  "marginPct": 32,
+
+  "parts": [
+    {
+      "name": "Side Plate",
+      "quantity": 50,
+      "material": "ss304",
+      "thicknessIn": 0.25,
+      "areaSqIn": 60,
+      "cutLengthIn": 42,
+      "holes": 6,
+      "weldLengthIn": 0,
+      "bends": 0,
+      "finish": "beadblast"
+    },
+    {
+      "name": "Mount Plate",
+      "quantity": 25,
+      "material": "ss304",
+      "thicknessIn": 0.25,
+      "areaSqIn": 112,
+      "cutLengthIn": 42,
+      "holes": 0,
+      "weldLengthIn": 0,
+      "bends": 3,
+      "finish": "beadblast"
+    }
+  ],
+
+  "assemblyWeldIn": 32,
+  "weldType": "TIG",
+  "weldMaterial": "ss304",
+
+  "adders": [
+    { "label": "Dimensional inspection report", "amount": 95 },
+    { "label": "Material certification (304 SS)", "amount": 55 },
+    { "label": "Packaging & crating", "amount": 85 }
+  ],
+
+  "deliverables": [
+    "Fabricated bracket assembly",
+    "Dimensional inspection report",
+    "Material certification",
+    "Packed and shipped"
+  ],
+  "notes": "Parts must have clean cosmetic welds. No sharp edges. Assembly will be visible on finished equipment."
+}

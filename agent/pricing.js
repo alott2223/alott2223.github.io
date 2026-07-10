@@ -43,6 +43,8 @@
     zinc:      { label: 'Zinc plating',    perPart: 4.25, flat: 40  },
     passivate: { label: 'Passivation',     perPart: 3.10, flat: 60  },
     anodize:   { label: 'Anodize (Al)',    perPart: 7.80, flat: 55  },
+    beadblast: { label: 'Bead blast (#4)', perPart: 3.50, flat: 50  },
+    deburr:    { label: 'Deburr / edge break', perPart: 1.20, flat: 25 },
   };
 
   function round2(n) { return Math.round(n * 100) / 100; }
@@ -157,6 +159,84 @@
     };
   }
 
+  /**
+   * Price a multi-part ASSEMBLY (e.g. an RFQ with several parts + assembly-level
+   * welding, a scrap allowance, finishing, and fixed adders). Reuses estimate()
+   * per part, then adds assembly-level lines and a single margin.
+   *
+   * @param {object} a
+   * @param {number} a.quantity          number of assemblies
+   * @param {object[]} a.parts           per-part job specs (see estimate)
+   * @param {number} [a.scrapPct]        scrap allowance on raw material (%)
+   * @param {number} [a.assemblyWeldIn]  weld length per ASSEMBLY, inches
+   * @param {string} [a.weldMaterial]    material key for the assembly weld
+   * @param {string} [a.weldType]        label, e.g. "TIG"
+   * @param {object[]} [a.adders]        [{label, amount}] fixed line items
+   * @param {number} [a.laborRate]       shop labor rate $/hr
+   * @param {number} [a.marginPct]       margin %
+   */
+  function estimateAssembly(a, config) {
+    config = config || {};
+    const rates = Object.assign({}, RATES, config.rates || {});
+    const defaults = config.defaults || {};
+    const laborRate = a.laborRate > 0 ? a.laborRate : (defaults.laborRate > 0 ? defaults.laborRate : 95);
+    const marginPct = a.marginPct != null ? a.marginPct
+      : (defaults.marginPct != null ? defaults.marginPct : 28);
+    const scrapPct = a.scrapPct > 0 ? a.scrapPct : 0;
+
+    if (!a.parts || !a.parts.length) throw new Error('Assembly has no parts');
+
+    const lines = [];
+    let materialCost = 0;
+    let weightLb = 0;
+
+    a.parts.forEach((p) => {
+      const pj = Object.assign({}, p, { laborRate, marginPct: 0 });
+      const q = estimate(pj, config); // per-part material + ops + finish (no margin)
+      q.lines.forEach((l) => {
+        lines.push([`${p.name}: ${l[0]}`, l[1]]);
+        if (/^Material/.test(l[0])) materialCost += l[1];
+      });
+      weightLb += q.meta.weightLb;
+    });
+
+    // Scrap allowance on raw material
+    if (scrapPct > 0) {
+      lines.push([`Scrap allowance (${scrapPct}% of material)`, round2(materialCost * scrapPct / 100)]);
+    }
+
+    // Assembly-level welding
+    if (a.assemblyWeldIn > 0) {
+      const ss = a.weldMaterial === 'ss304' || a.weldMaterial === 'ss316';
+      const rate = rates.weldInPerMin * (ss ? rates.ssWeldFactor : 1);
+      const totalIn = a.assemblyWeldIn * a.quantity;
+      const hrs = totalIn / rate / 60;
+      lines.push([
+        `Assembly welding — ${a.weldType ? a.weldType + ' ' : ''}${round2(totalIn)}" (${round2(hrs)} hr @ ${usd(laborRate)})`,
+        hrs * laborRate,
+      ]);
+    }
+
+    // Fixed adders (inspection, certs, packaging, …)
+    (a.adders || []).forEach((ad) => {
+      if (ad && ad.amount > 0) lines.push([ad.label, ad.amount]);
+    });
+
+    const subtotal = lines.reduce((s, l) => s + l[1], 0);
+    const margin = subtotal * (marginPct / 100);
+    const total = subtotal + margin;
+
+    return {
+      lines: lines.map((l) => [l[0], round2(l[1])]),
+      subtotal: round2(subtotal),
+      margin: round2(margin),
+      marginPct,
+      total: round2(total),
+      unitPrice: round2(total / a.quantity),
+      meta: { weightLb: round2(weightLb), quantity: a.quantity, parts: a.parts.length },
+    };
+  }
+
   function validate(job) {
     const e = [];
     if (!job || typeof job !== 'object') return ['job must be an object'];
@@ -167,5 +247,5 @@
     return e;
   }
 
-  return { MATERIALS, RATES, FINISHES, estimate, validate, round2, usd };
+  return { MATERIALS, RATES, FINISHES, estimate, estimateAssembly, validate, round2, usd };
 });

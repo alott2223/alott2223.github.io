@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 /* Deterministic checks for the engine + trainer — no API key, no network. */
 'use strict';
+const fs = require('fs');
 const path = require('path');
 const pricing = require('./pricing.js');
 const { calibrate } = require('./train.js');
@@ -82,6 +83,22 @@ const reorder = history.find((j) => /re-order/.test(j.partName || ''));
 const sim = similar(reorder, history, 3);
 ok('re-order finds a close match',      sim.count >= 1);
 ok('top match scores high',             sim.matches[0].score >= 90);
+
+// 8. Multi-part assembly pricing (the RFQ intake path)
+const rfq = JSON.parse(fs.readFileSync(path.join(__dirname, 'data', 'rfq-2026-10482.json'), 'utf8'));
+const asm = pricing.estimateAssembly({
+  quantity: rfq.quantity, parts: rfq.parts, scrapPct: rfq.scrapPct,
+  assemblyWeldIn: rfq.assemblyWeldIn, weldType: rfq.weldType, weldMaterial: rfq.weldMaterial,
+  adders: rfq.adders, laborRate: rfq.laborRate, marginPct: rfq.marginPct,
+}, { materialPrices: { ss304: rfq.materialPricePerLb } });
+ok('assembly prices to a positive total', asm.total > 0);
+ok('assembly total = subtotal + margin', approx(asm.total, asm.subtotal + asm.margin));
+ok('assembly unit price × qty = total', approx(asm.unitPrice * rfq.quantity, asm.total, 0.5));
+ok('assembly has a scrap line', asm.lines.some((l) => /Scrap/.test(l[0])));
+ok('assembly has an assembly weld line', asm.lines.some((l) => /Assembly welding/.test(l[0])));
+ok('assembly rolls both parts in', asm.lines.some((l) => /Side Plate/.test(l[0])) && asm.lines.some((l) => /Mount Plate/.test(l[0])));
+ok('assembly includes deliverable adders', asm.lines.some((l) => /inspection report/.test(l[0])));
+ok('assembly weight sums both parts', asm.meta.weightLb > 400 && asm.meta.weightLb < 440);
 
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

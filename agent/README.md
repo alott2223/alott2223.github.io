@@ -46,6 +46,29 @@ node quote-agent.js --mock
 
 Supported inputs: `.pdf`, `.png`, `.jpg`, `.webp`, `.gif`.
 
+## Quote a full RFQ (multi-part assembly)
+
+`quote-agent.js` prices a single part. `rfq.js` prices a whole **assembly** —
+multiple parts, assembly-level welding, a scrap allowance, and fixed adders for
+deliverables (inspection report, cert, packaging) — into one customer quote.
+
+```bash
+# Structured RFQ → quote (deterministic, no API key)
+node rfq.js data/rfq-2026-10482.json
+npm run rfq                     # same, uses the bundled sample RFQ
+
+# Raw RFQ email/text → Claude parses it → quote  (needs ANTHROPIC_API_KEY)
+node rfq.js --from-text path/to/rfq-email.txt
+
+node rfq.js --raw               # ignore learned rates
+node rfq.js --json              # machine-readable
+```
+
+The RFQ's own labor rate, margin, material price and scrap factor are honored;
+the shop's **learned operation rates** (from `train.js`) fill in the productivity.
+See `data/rfq-2026-10482.json` for the structured shape. The `--from-text` path
+is the "forward the email, get a quote back" flow the landing page describes.
+
 ## Training — learn your shop's real numbers
 
 "Training" here is **calibration, not neural-net fine-tuning** (Claude isn't
@@ -115,7 +138,9 @@ live metals feed — `estimate(job, {materialPrices})` already accepts that.
 | File | Purpose |
 |------|---------|
 | `quote-agent.js` | CLI: drawing → Claude extraction → priced quote (+ learned rates, similar jobs) |
-| `pricing.js` | Deterministic pricing engine (also runs in the browser); takes an optional calibrated config |
+| `rfq.js` | CLI: structured RFQ (or raw text via Claude) → full multi-part assembly quote |
+| `pricing.js` | Deterministic engine: `estimate()` (one part) + `estimateAssembly()` (RFQ); optional calibrated config |
+| `data/rfq-2026-10482.json` | Sample structured RFQ (stainless pump-mount assembly) |
 | `train.js` | Learns rates + margin from job history → `rates.calibrated.json` |
 | `lib/history.js` | Load history; kNN similar-job matching |
 | `data/gen-sample.js` | Deterministic sample-history generator (hidden true rates) |
@@ -128,6 +153,8 @@ live metals feed — `estimate(job, {materialPrices})` already accepts that.
 
 - [x] Calibrate operation rates + margin from won/lost quote history
 - [x] Match new jobs to similar past jobs (history-backed confidence)
+- [x] Multi-part assembly quoting (parts + assembly welds + scrap + adders)
+- [x] RFQ intake — structured now, raw-text via Claude (`--from-text`)
 - [ ] Wire material `pricePerLb` to a live metals feed
 - [ ] Append each new won/lost quote back into history (continuous learning)
-- [ ] Email intake (forward an RFQ → quote reply), the flow the landing page describes
+- [ ] Wire `--from-text` to an actual mailbox (RFQ email in → quote reply out)

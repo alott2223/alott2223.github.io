@@ -8,6 +8,7 @@
   "scripts": {
     "quote": "node quote-agent.js",
     "mock": "node quote-agent.js --mock",
+    "rfq": "node rfq.js",
     "train": "node train.js",
     "gen-data": "node data/gen-sample.js",
     "selftest": "node selftest.js"
