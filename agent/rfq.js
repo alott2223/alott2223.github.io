@@ -10,7 +10,8 @@
  * Claude to turn a free-form RFQ email into the same structured shape, which is
  * the "forward the email, get a quote back" flow the landing page describes.
  *
- * Flags: --raw (ignore learned rates)  --json  --from-text <file>
+ * Flags: --reply (customer-facing quote email)  --from <addr>  --raw  --json
+ *        --from-text <file>
  */
 'use strict';
 const fs = require('fs');
@@ -126,6 +127,56 @@ function printQuote(rfq, quote, calib) {
   console.log('');
 }
 
+// ---- Customer-facing quote email ------------------------------------------
+// Rolls internal lines into customer categories and folds margin INTO the
+// prices — the customer sees category totals and the price, never the margin
+// percentage or internal labor hours.
+function renderEmail(rfq, quote, fromAddr) {
+  const groups = [
+    { label: 'Materials', re: /Material|Scrap/, total: 0 },
+    { label: 'Fabrication (cut, drill, form, weld)', re: /Cutting|Drilling|Forming|welding|Welding/, total: 0 },
+    { label: 'Finishing', re: /Bead blast|coat|plating|Passivation|Anodize|Deburr/, total: 0 },
+    { label: 'Inspection, certification & packaging', re: /inspection|certification|Packaging|report/i, total: 0 },
+  ];
+  quote.lines.forEach((l) => {
+    const g = groups.find((x) => x.re.test(l[0]));
+    (g || groups[1]).total += l[1];
+  });
+  // Scale each category by (total/subtotal) so margin is folded in and the
+  // categories sum to the quoted total. Push any rounding remainder to Materials.
+  const scale = quote.total / quote.subtotal;
+  let running = 0;
+  groups.forEach((g) => { g.price = pricing.round2(g.total * scale); running += g.price; });
+  groups[0].price = pricing.round2(groups[0].price + (quote.total - running));
+
+  const c = rfq.customer || {};
+  const L = [];
+  L.push(`To: ${c.contact || ''}`);
+  L.push(`From: QuoteForge <${fromAddr}>`);
+  L.push(`Subject: Quote — ${rfq.name} (${rfq.rfqId})`);
+  L.push('');
+  L.push(`Hi${c.company ? ' ' + c.company : ''},`);
+  L.push('');
+  L.push(`Thank you for the RFQ. Please find our quote below for the ${rfq.name.toLowerCase()}, ${rfq.quantity} assemblies.`);
+  L.push('');
+  groups.forEach((g) => { if (g.price > 0) L.push(`  ${g.label.padEnd(40)} ${pricing.usd(g.price)}`); });
+  L.push(`  ${''.padEnd(40)} ${'—'.repeat(10)}`);
+  L.push(`  ${'Total'.padEnd(40)} ${pricing.usd(quote.total)}`);
+  L.push(`  ${`Unit price (${rfq.quantity} assemblies)`.padEnd(40)} ${pricing.usd(quote.unitPrice)} /ea`);
+  L.push('');
+  if (rfq.leadTimeDays) L.push(`Lead time: ${rfq.leadTimeDays} business days from PO and approved drawings.`);
+  if (rfq.deliverables && rfq.deliverables.length) L.push(`Includes: ${rfq.deliverables.join(', ')}.`);
+  if (rfq.notes) L.push(`Noted: ${rfq.notes.replace(/\s+/g, ' ').trim()}`);
+  L.push('');
+  L.push('This quote is valid for 30 days. Prices in USD, FOB our facility, exclusive of applicable taxes.');
+  L.push('Happy to adjust quantities or turnaround — just reply to this email.');
+  L.push('');
+  L.push('Best regards,');
+  L.push('QuoteForge');
+  L.push(fromAddr);
+  return L.join('\n');
+}
+
 // ---- Main -----------------------------------------------------------------
 async function main() {
   const argv = process.argv.slice(2);
@@ -134,7 +185,9 @@ async function main() {
   for (let i = 0; i < argv.length; i++) {
     if (argv[i] === '--raw') flags.raw = true;
     else if (argv[i] === '--json') flags.json = true;
+    else if (argv[i] === '--reply') flags.reply = true;
     else if (argv[i] === '--from-text') flags.fromText = argv[++i];
+    else if (argv[i] === '--from') flags.from = argv[++i];
     else if (!argv[i].startsWith('--')) file = argv[i];
   }
 
@@ -165,6 +218,7 @@ async function main() {
   catch (err) { console.error('Pricing error: ' + err.message); process.exit(1); }
 
   if (flags.json) console.log(JSON.stringify({ rfq: { rfqId: rfq.rfqId, name: rfq.name }, quote }, null, 2));
+  else if (flags.reply) console.log(renderEmail(rfq, quote, flags.from || 'hello@alott.me'));
   else printQuote(rfq, quote, calib);
 }
 

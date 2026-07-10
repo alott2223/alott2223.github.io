@@ -60,9 +60,18 @@ npm run rfq                     # same, uses the bundled sample RFQ
 # Raw RFQ email/text → Claude parses it → quote  (needs ANTHROPIC_API_KEY)
 node rfq.js --from-text path/to/rfq-email.txt
 
+node rfq.js --reply             # paste-ready CUSTOMER quote email
 node rfq.js --raw               # ignore learned rates
 node rfq.js --json              # machine-readable
 ```
+
+`--reply` prints a customer-facing quote email (To/Subject/body). It rolls the
+line items into categories and **folds the margin into the prices** — the
+customer sees category totals + the price, never your margin % or labor hours.
+Now that `hello@alott.me` forwarding is live, the loop is: RFQ lands in your
+inbox → save it → `node rfq.js --from-text saved.txt --reply` → paste the reply.
+(Fully automated inbound — email in → auto-reply — needs a small backend; see
+Roadmap.)
 
 The RFQ's own labor rate, margin, material price and scrap factor are honored;
 the shop's **learned operation rates** (from `train.js`) fill in the productivity.
