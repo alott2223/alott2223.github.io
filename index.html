@@ -1,692 +1,723 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Alott — Systems · Security · AI Research</title>
+<meta name="description" content="Alott — independent engineer and researcher building production platforms, security tooling, and AI systems. Creator of Topological Semantic Mechanics."/>
+<meta name="keywords" content="Alott, developer, security researcher, AI research, TSM, Topological Semantic Mechanics, Go, Python, React, MLOps"/>
+<meta name="author" content="Alott"/>
+<meta name="robots" content="index, follow"/>
+<meta name="theme-color" content="#050509"/>
+<link rel="canonical" href="https://alott.me/"/>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
 
-<title>QuoteForge — Turn drawings into accurate quotes in minutes</title>
-<meta name="description" content="QuoteForge reads the drawings your customers email you — messy PDFs and all — and turns them into an accurate, itemized quote in minutes. AI quoting built for fabrication, welding and finishing shops.">
-<meta name="keywords" content="fabrication quoting software, weld shop quoting, RFQ automation, metal fabrication estimating, AI quoting, sheet metal quote software">
-<meta name="author" content="QuoteForge">
-<meta name="robots" content="index, follow">
-<meta name="theme-color" content="#0e1116">
-<link rel="canonical" href="https://alott.me/">
+<meta property="og:type" content="website"/>
+<meta property="og:site_name" content="Alott"/>
+<meta property="og:title" content="Alott — Systems · Security · AI Research"/>
+<meta property="og:description" content="Independent engineer and researcher. Platforms, security tooling, and AI systems that push past their limits."/>
+<meta property="og:url" content="https://alott.me/"/>
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Alott — Systems · Security · AI Research"/>
+<meta name="twitter:description" content="Independent engineer and researcher. Platforms, security tooling, and AI systems that push past their limits."/>
 
-<!-- Icons -->
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23ff7a1a'/%3E%3Ctext x='16' y='24' font-family='Arial,Helvetica,sans-serif' font-size='22' font-weight='900' text-anchor='middle' fill='%230e1116'%3EQ%3C/text%3E%3C/svg%3E">
-<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23ff7a1a'/%3E%3Ctext x='16' y='24' font-family='Arial,Helvetica,sans-serif' font-size='22' font-weight='900' text-anchor='middle' fill='%230e1116'%3EQ%3C/text%3E%3C/svg%3E">
-
-<!-- Open Graph -->
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="QuoteForge">
-<meta property="og:title" content="QuoteForge — Turn drawings into accurate quotes in minutes">
-<meta property="og:description" content="Forward the RFQ. QuoteForge reads the drawings and hands back an accurate, itemized quote in minutes — built for fab, weld & finishing shops.">
-<meta property="og:url" content="https://alott.me/">
-<meta property="og:image" content="https://alott.me/og-image.png">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="QuoteForge — from drawing to quote in minutes">
-
-<!-- Twitter -->
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="QuoteForge — Turn drawings into accurate quotes in minutes">
-<meta name="twitter:description" content="Forward the RFQ. QuoteForge reads the drawings and hands back an accurate, itemized quote in minutes — built for fab, weld & finishing shops.">
-<meta name="twitter:image" content="https://alott.me/og-image.png">
-<meta name="twitter:image:alt" content="QuoteForge — from drawing to quote in minutes">
-
-<!-- Structured data -->
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "QuoteForge",
-  "applicationCategory": "BusinessApplication",
-  "operatingSystem": "Web",
-  "description": "AI quoting software for fabrication, welding and finishing shops. Forward an RFQ email and get an accurate, itemized quote back in minutes.",
-  "url": "https://alott.me/",
-  "image": "https://alott.me/og-image.png",
-  "offers": [
-    {"@type": "Offer", "name": "Bench", "price": "299", "priceCurrency": "USD"},
-    {"@type": "Offer", "name": "Floor", "price": "799", "priceCurrency": "USD"},
-    {"@type": "Offer", "name": "Works", "price": "1900", "priceCurrency": "USD"}
-  ],
-  "publisher": {
-    "@type": "Organization",
-    "name": "QuoteForge",
-    "url": "https://alott.me/",
-    "email": "hello@alott.me"
-  }
-}
-</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
 
 <style>
-  :root{
-    --bg:#0e1116;
-    --bg-2:#151a21;
-    --bg-3:#1c232d;
-    --line:#2a3340;
-    --text:#e8ecf1;
-    --muted:#9aa7b5;
-    --accent:#ff7a1a;
-    --accent-2:#ffb066;
-    --good:#3ecf8e;
-    --mono:'SF Mono',ui-monospace,'Cascadia Code',Menlo,Consolas,monospace;
-  }
-  *{margin:0;padding:0;box-sizing:border-box}
-  html{scroll-behavior:smooth}
-  body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,Roboto,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
-  .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+:root{
+  --bg:#050509;
+  --bg-2:#0a0a12;
+  --bg-3:#10101c;
+  --panel:rgba(255,255,255,0.022);
+  --panel-hover:rgba(255,255,255,0.045);
+  --border:rgba(255,255,255,0.08);
+  --border-soft:rgba(255,255,255,0.05);
+  --text:#eef0f6;
+  --text-2:#9a9fb4;
+  --text-3:#5c6076;
+  --cyan:#22d3ee;
+  --emerald:#34d399;
+  --violet:#a78bfa;
+  --glow:rgba(34,211,238,0.35);
+  --sans:'Inter',system-ui,-apple-system,sans-serif;
+  --serif:'Instrument Serif',Georgia,serif;
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+  --max:1160px;
+  --ease:cubic-bezier(0.22,1,0.36,1);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{
+  font-family:var(--sans);background:var(--bg);color:var(--text);
+  line-height:1.65;overflow-x:hidden;-webkit-font-smoothing:antialiased;
+}
+::selection{background:rgba(34,211,238,0.28);color:#fff}
+::-webkit-scrollbar{width:10px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:#1e2030;border-radius:5px;border:2px solid var(--bg)}
+::-webkit-scrollbar-thumb:hover{background:#2c2f45}
+a{color:inherit}
 
-  /* NAV */
-  nav{position:sticky;top:0;z-index:50;background:rgba(14,17,22,.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
-  .nav-inner{display:flex;align-items:center;justify-content:space-between;height:64px}
-  .logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:1.15rem;letter-spacing:-.02em;text-decoration:none;color:var(--text)}
-  .logo-mark{width:28px;height:28px;border-radius:7px;background:linear-gradient(135deg,var(--accent),#ff9d4d);display:grid;place-items:center;color:#0e1116;font-size:15px;font-weight:900}
-  .nav-links{display:flex;gap:28px;align-items:center}
-  .nav-links a{color:var(--muted);text-decoration:none;font-size:.92rem;transition:color .15s}
-  .nav-links a:hover{color:var(--text)}
-  .btn{display:inline-block;padding:11px 22px;border-radius:9px;font-weight:600;font-size:.95rem;text-decoration:none;cursor:pointer;border:none;transition:transform .12s,box-shadow .12s}
-  .btn-primary{background:var(--accent);color:#14100b}
-  .btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(255,122,26,.35)}
-  .btn-ghost{background:transparent;color:var(--text);border:1px solid var(--line)}
-  .btn-ghost:hover{border-color:var(--muted)}
-  .btn-sm{padding:8px 16px;font-size:.88rem}
+/* ---------- grain + ambient ---------- */
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:2;opacity:.5;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0.035'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+}
 
-  /* HERO */
-  .hero{padding:96px 0 72px;text-align:center;position:relative;overflow:hidden}
-  .hero::before{content:'';position:absolute;top:-200px;left:50%;transform:translateX(-50%);width:900px;height:500px;background:radial-gradient(ellipse,rgba(255,122,26,.14),transparent 65%);pointer-events:none}
-  .pill{display:inline-block;padding:6px 14px;border-radius:99px;border:1px solid var(--line);background:var(--bg-2);color:var(--accent-2);font-size:.82rem;font-weight:600;letter-spacing:.02em;margin-bottom:24px}
-  h1{font-size:clamp(2.2rem,5.5vw,3.6rem);font-weight:800;letter-spacing:-.03em;line-height:1.12;max-width:820px;margin:0 auto 20px}
-  h1 .glow{color:var(--accent)}
-  .sub{font-size:1.18rem;color:var(--muted);max-width:640px;margin:0 auto 36px}
-  .hero-ctas{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
-  .hero-note{margin-top:18px;font-size:.85rem;color:var(--muted)}
+/* ---------- nav ---------- */
+.nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;justify-content:space-between;align-items:center;
+  padding:18px 32px;
+  transition:background .35s,border-color .35s,padding .35s;
+  border-bottom:1px solid transparent;
+}
+.nav.scrolled{
+  background:rgba(5,5,9,0.72);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  border-bottom-color:var(--border-soft);padding:13px 32px;
+}
+.nav-logo{
+  font-family:var(--mono);font-weight:600;font-size:.95rem;text-decoration:none;
+  color:var(--text);letter-spacing:-.02em;
+}
+.nav-logo span{color:var(--cyan)}
+.nav-links{display:flex;gap:28px;align-items:center}
+.nav-links a{
+  font-size:.8rem;font-weight:500;color:var(--text-2);text-decoration:none;
+  letter-spacing:.02em;transition:color .2s;position:relative;
+}
+.nav-links a:hover{color:var(--text)}
+.nav-links a.active{color:var(--cyan)}
+.nav-cta{
+  padding:8px 18px;border:1px solid var(--border);border-radius:99px;
+  color:var(--text)!important;transition:border-color .2s,background .2s,box-shadow .25s;
+}
+.nav-cta:hover{border-color:var(--cyan);box-shadow:0 0 20px rgba(34,211,238,0.15)}
+@media(max-width:720px){.nav-links a:not(.nav-cta){display:none}}
 
-  /* STATS */
-  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:14px;overflow:hidden;margin:64px auto 0;max-width:820px}
-  .stat{background:var(--bg-2);padding:26px 20px;text-align:center}
-  .stat .num{font-size:2rem;font-weight:800;color:var(--accent);letter-spacing:-.02em}
-  .stat .lbl{font-size:.85rem;color:var(--muted);margin-top:4px}
+/* ---------- hero ---------- */
+.hero{
+  min-height:100svh;position:relative;display:flex;flex-direction:column;
+  justify-content:center;padding:120px 32px 80px;overflow:hidden;
+}
+#field{position:absolute;inset:0;width:100%;height:100%;display:block}
+.hero::after{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse 80% 55% at 50% 115%, rgba(52,211,153,0.06), transparent 60%),
+    radial-gradient(ellipse 70% 50% at 80% -10%, rgba(34,211,238,0.07), transparent 55%),
+    linear-gradient(to bottom, transparent 55%, var(--bg) 98%);
+}
+.hero-inner{position:relative;z-index:3;max-width:var(--max);margin:0 auto;width:100%}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:9px;padding:7px 16px;
+  background:rgba(52,211,153,0.06);border:1px solid rgba(52,211,153,0.2);
+  border-radius:99px;font-family:var(--mono);font-size:.68rem;font-weight:500;
+  color:var(--emerald);letter-spacing:.12em;text-transform:uppercase;margin-bottom:34px;
+}
+.hero-badge::before{
+  content:'';width:6px;height:6px;border-radius:50%;background:var(--emerald);
+  box-shadow:0 0 8px var(--emerald);animation:pulse 2.4s ease-in-out infinite;
+}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+.hero h1{
+  font-size:clamp(3.4rem,10vw,7.6rem);font-weight:800;letter-spacing:-.045em;
+  line-height:.98;margin-bottom:8px;
+}
+.hero h1 .thin{
+  font-family:var(--serif);font-style:italic;font-weight:400;letter-spacing:-.02em;
+  background:linear-gradient(120deg,var(--cyan) 10%,var(--emerald) 60%,var(--violet) 110%);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+  padding-right:.08em;
+}
+.hero-roles{
+  font-family:var(--mono);font-size:clamp(.7rem,1.6vw,.85rem);color:var(--text-3);
+  letter-spacing:.28em;text-transform:uppercase;margin:26px 0 30px;
+}
+.hero-roles b{color:var(--text-2);font-weight:500}
+.hero-sub{
+  font-size:clamp(1.02rem,2vw,1.25rem);color:var(--text-2);max-width:640px;
+  font-weight:300;line-height:1.75;margin-bottom:44px;
+}
+.hero-sub em{font-family:var(--serif);font-style:italic;color:var(--text);font-size:1.08em}
+.hero-actions{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+.btn{
+  display:inline-flex;align-items:center;gap:9px;padding:14px 28px;border-radius:10px;
+  font-size:.88rem;font-weight:600;text-decoration:none;letter-spacing:.01em;
+  transition:transform .25s var(--ease),box-shadow .25s,border-color .2s,background .2s;
+}
+.btn-primary{
+  background:linear-gradient(120deg,var(--cyan),var(--emerald));color:#04060a;
+  box-shadow:0 4px 28px rgba(34,211,238,0.22);
+}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 40px rgba(34,211,238,0.35)}
+.btn-ghost{border:1px solid var(--border);color:var(--text);background:rgba(255,255,255,0.02)}
+.btn-ghost:hover{border-color:rgba(34,211,238,0.5);transform:translateY(-2px)}
+.hero-stats{
+  display:flex;gap:0;margin-top:76px;border:1px solid var(--border-soft);border-radius:16px;
+  background:rgba(10,10,18,0.5);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  overflow:hidden;max-width:760px;
+}
+.stat{flex:1;padding:22px 26px;border-right:1px solid var(--border-soft)}
+.stat:last-child{border-right:none}
+.stat-num{
+  font-family:var(--mono);font-size:clamp(1.3rem,3vw,1.8rem);font-weight:600;
+  background:linear-gradient(120deg,var(--text) 30%,var(--cyan));
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+}
+.stat-lbl{font-size:.68rem;color:var(--text-3);text-transform:uppercase;letter-spacing:.14em;margin-top:4px;font-weight:500}
+@media(max-width:640px){.hero-stats{flex-direction:column}.stat{border-right:none;border-bottom:1px solid var(--border-soft)}.stat:last-child{border-bottom:none}}
+.scroll-hint{
+  position:absolute;bottom:28px;left:50%;transform:translateX(-50%);z-index:3;
+  font-family:var(--mono);font-size:.6rem;letter-spacing:.3em;color:var(--text-3);
+  text-transform:uppercase;animation:drift 2.6s ease-in-out infinite;
+}
+@keyframes drift{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(7px)}}
 
-  /* SECTIONS */
-  section{padding:88px 0}
-  .kicker{color:var(--accent);font-weight:700;font-size:.85rem;text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px}
-  h2{font-size:clamp(1.6rem,3.5vw,2.3rem);font-weight:800;letter-spacing:-.02em;line-height:1.2;margin-bottom:14px}
-  .lead{color:var(--muted);font-size:1.08rem;max-width:620px}
+/* ---------- ticker ---------- */
+.ticker{
+  border-top:1px solid var(--border-soft);border-bottom:1px solid var(--border-soft);
+  overflow:hidden;padding:15px 0;background:var(--bg-2);position:relative;z-index:3;
+}
+.ticker-track{display:flex;gap:0;width:max-content;animation:ticker 42s linear infinite}
+@media(prefers-reduced-motion:reduce){.ticker-track{animation:none}}
+.ticker span{
+  font-family:var(--mono);font-size:.68rem;color:var(--text-3);letter-spacing:.22em;
+  text-transform:uppercase;padding:0 34px;white-space:nowrap;
+}
+.ticker span::after{content:'✦';color:var(--cyan);margin-left:68px;opacity:.5}
+@keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 
-  /* PROBLEM */
-  .problem-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:44px}
-  .card{background:var(--bg-2);border:1px solid var(--line);border-radius:14px;padding:26px}
-  .card .icon{font-size:1.6rem;margin-bottom:14px;display:block}
-  .card h3{font-size:1.05rem;font-weight:700;margin-bottom:8px}
-  .card p{font-size:.93rem;color:var(--muted)}
+/* ---------- sections ---------- */
+section{padding:130px 32px;position:relative}
+.container{max-width:var(--max);margin:0 auto}
+.sec-head{margin-bottom:64px;display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap}
+.sec-eyebrow{
+  font-family:var(--mono);font-size:.7rem;font-weight:500;color:var(--cyan);
+  letter-spacing:.24em;text-transform:uppercase;display:flex;align-items:center;gap:12px;margin-bottom:18px;
+}
+.sec-eyebrow::before{content:'';width:34px;height:1px;background:linear-gradient(90deg,var(--cyan),transparent)}
+.sec-title{font-size:clamp(2rem,4.6vw,3.2rem);font-weight:800;letter-spacing:-.035em;line-height:1.08}
+.sec-title em{font-family:var(--serif);font-style:italic;font-weight:400;color:var(--cyan)}
+.sec-note{font-size:.9rem;color:var(--text-3);max-width:330px;font-weight:300;line-height:1.7}
 
-  /* HOW */
-  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:44px;counter-reset:step}
-  .step{background:var(--bg-2);border:1px solid var(--line);border-radius:14px;padding:26px;position:relative}
-  .step::before{counter-increment:step;content:counter(step,decimal-leading-zero);font-family:var(--mono);color:var(--accent);font-weight:700;font-size:.85rem;display:block;margin-bottom:12px}
-  .step h3{font-size:1.02rem;font-weight:700;margin-bottom:8px}
-  .step p{font-size:.92rem;color:var(--muted)}
+/* ---------- research ---------- */
+#research{background:linear-gradient(to bottom,var(--bg),var(--bg-2) 30%,var(--bg))}
+.research-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:18px}
+.r-card{
+  position:relative;grid-column:span 6;padding:38px;border-radius:20px;
+  background:var(--panel);border:1px solid var(--border-soft);text-decoration:none;
+  overflow:hidden;transition:transform .35s var(--ease),border-color .3s,background .3s;
+  display:flex;flex-direction:column;min-height:250px;
+}
+.r-card::before{
+  content:'';position:absolute;inset:0;opacity:0;transition:opacity .4s;pointer-events:none;
+  background:radial-gradient(560px circle at var(--mx,50%) var(--my,50%),rgba(34,211,238,0.09),transparent 45%);
+}
+.r-card:hover{transform:translateY(-5px);border-color:rgba(34,211,238,0.32);background:var(--panel-hover)}
+.r-card:hover::before{opacity:1}
+.r-card.wide{grid-column:span 12;min-height:300px}
+.r-card.wide .r-body{max-width:600px}
+@media(max-width:820px){.r-card,.r-card.wide{grid-column:span 12}}
+.r-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:auto}
+.r-badge{
+  font-family:var(--mono);font-size:.6rem;font-weight:600;letter-spacing:.16em;
+  padding:5px 12px;border-radius:99px;text-transform:uppercase;
+  background:rgba(34,211,238,0.08);border:1px solid rgba(34,211,238,0.25);color:var(--cyan);
+}
+.r-badge.green{background:rgba(52,211,153,0.08);border-color:rgba(52,211,153,0.25);color:var(--emerald)}
+.r-badge.purple{background:rgba(167,139,250,0.08);border-color:rgba(167,139,250,0.25);color:var(--violet)}
+.r-arrow{
+  width:36px;height:36px;border-radius:50%;border:1px solid var(--border);
+  display:grid;place-items:center;color:var(--text-3);font-size:.9rem;
+  transition:all .3s var(--ease);
+}
+.r-card:hover .r-arrow{background:var(--cyan);border-color:var(--cyan);color:#04060a;transform:rotate(45deg)}
+.r-metric{
+  font-family:var(--mono);font-size:clamp(2.2rem,5vw,3.4rem);font-weight:600;letter-spacing:-.03em;
+  background:linear-gradient(120deg,var(--cyan),var(--emerald));
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+  margin:22px 0 4px;line-height:1;
+}
+.r-metric-lbl{font-family:var(--mono);font-size:.64rem;color:var(--text-3);letter-spacing:.18em;text-transform:uppercase;margin-bottom:16px}
+.r-card h3{font-size:1.35rem;font-weight:700;letter-spacing:-.02em;color:var(--text);margin:22px 0 10px}
+.r-card.wide h3{font-size:1.6rem;margin-top:26px}
+.r-card p{font-size:.92rem;color:var(--text-2);font-weight:300;line-height:1.7}
 
-  /* DEMO */
-  #demo{background:var(--bg-2);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
-  .demo-shell{margin-top:40px;background:var(--bg);border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.4)}
-  .demo-bar{display:flex;align-items:center;gap:8px;padding:12px 16px;background:var(--bg-3);border-bottom:1px solid var(--line)}
-  .dot{width:11px;height:11px;border-radius:50%}
-  .dot.r{background:#ff5f57}.dot.y{background:#febc2e}.dot.g{background:#28c840}
-  .demo-bar .title{margin-left:10px;font-family:var(--mono);font-size:.78rem;color:var(--muted)}
-  .demo-body{display:grid;grid-template-columns:340px 1fr;min-height:480px}
-  @media(max-width:860px){.demo-body{grid-template-columns:1fr}}
-  .demo-left{border-right:1px solid var(--line);padding:22px}
-  @media(max-width:860px){.demo-left{border-right:none;border-bottom:1px solid var(--line)}}
-  .demo-left h4{font-size:.8rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:14px}
-  .rfq{display:flex;gap:12px;padding:14px;border:1px solid var(--line);border-radius:11px;background:var(--bg-2);cursor:pointer;margin-bottom:12px;transition:border-color .15s,background .15s;align-items:center}
-  .rfq:hover{border-color:var(--accent)}
-  .rfq.active{border-color:var(--accent);background:rgba(255,122,26,.07)}
-  .rfq .thumb{width:52px;height:52px;border-radius:8px;background:var(--bg-3);display:grid;place-items:center;flex-shrink:0}
-  .rfq .thumb svg{width:38px;height:38px}
-  .rfq .meta .name{font-size:.9rem;font-weight:600}
-  .rfq .meta .from{font-size:.78rem;color:var(--muted);font-family:var(--mono)}
-  .demo-right{padding:22px;display:flex;flex-direction:column}
-  .console{font-family:var(--mono);font-size:.82rem;background:var(--bg-3);border:1px solid var(--line);border-radius:10px;padding:16px;min-height:130px;margin-bottom:18px}
-  .console .ln{opacity:0;transform:translateY(4px);transition:opacity .25s,transform .25s;color:var(--muted);padding:2px 0}
-  .console .ln.show{opacity:1;transform:none}
-  .console .ln .ok{color:var(--good)}
-  .console .ln .tag{color:var(--accent)}
-  .quote-card{border:1px solid var(--line);border-radius:12px;overflow:hidden;opacity:0;transform:translateY(8px);transition:opacity .4s,transform .4s}
-  .quote-card.show{opacity:1;transform:none}
-  .quote-head{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;background:var(--bg-3);border-bottom:1px solid var(--line)}
-  .quote-head .qn{font-family:var(--mono);font-size:.8rem;color:var(--muted)}
-  .quote-head .conf{font-size:.78rem;color:var(--good);font-weight:600}
-  table{width:100%;border-collapse:collapse;font-size:.88rem}
-  td{padding:10px 18px;border-bottom:1px solid var(--line)}
-  td:last-child{text-align:right;font-family:var(--mono)}
-  tr.total td{border-bottom:none;font-weight:700;font-size:1rem;background:rgba(255,122,26,.06)}
-  tr.total td:last-child{color:var(--accent)}
-  .quote-actions{display:flex;gap:10px;padding:14px 18px;background:var(--bg-3);border-top:1px solid var(--line)}
-  .demo-hint{color:var(--muted);font-size:.9rem;margin:auto;text-align:center;padding:40px 20px}
-  .sent-flash{color:var(--good);font-weight:600;font-size:.9rem;display:none;align-items:center;padding:0 6px}
-  .demo-tag{margin-left:auto;font-family:var(--mono);font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;color:var(--accent-2);border:1px solid var(--line);border-radius:99px;padding:3px 10px}
+/* ---------- projects ---------- */
+.proj-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+@media(max-width:980px){.proj-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:640px){.proj-grid{grid-template-columns:1fr}}
+.p-card{
+  position:relative;padding:30px;border-radius:18px;background:var(--panel);
+  border:1px solid var(--border-soft);text-decoration:none;overflow:hidden;
+  transition:transform .35s var(--ease),border-color .3s,background .3s;
+  display:flex;flex-direction:column;gap:0;min-height:270px;
+}
+.p-card::before{
+  content:'';position:absolute;inset:0;opacity:0;transition:opacity .4s;pointer-events:none;
+  background:radial-gradient(420px circle at var(--mx,50%) var(--my,50%),rgba(167,139,250,0.08),transparent 45%);
+}
+.p-card:hover{transform:translateY(-5px);border-color:rgba(255,255,255,0.16);background:var(--panel-hover)}
+.p-card:hover::before{opacity:1}
+.p-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.p-index{font-family:var(--mono);font-size:.68rem;color:var(--text-3);letter-spacing:.1em}
+.p-ext{color:var(--text-3);transition:color .2s,transform .3s var(--ease);font-size:.85rem}
+.p-card:hover .p-ext{color:var(--cyan);transform:translate(2px,-2px)}
+.p-card h3{font-size:1.14rem;font-weight:700;letter-spacing:-.015em;margin-bottom:8px}
+.p-card p{font-size:.86rem;color:var(--text-2);font-weight:300;line-height:1.65;flex:1}
+.p-tags{display:flex;gap:7px;flex-wrap:wrap;margin-top:20px}
+.p-tags span{
+  font-family:var(--mono);font-size:.6rem;color:var(--text-3);letter-spacing:.06em;
+  padding:4px 10px;border-radius:6px;background:rgba(255,255,255,0.03);border:1px solid var(--border-soft);
+}
 
-  /* BUILDER */
-  #builder{background:var(--bg-2);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
-  .builder-shell{display:grid;grid-template-columns:1fr 380px;gap:22px;margin-top:40px;align-items:start}
-  @media(max-width:860px){.builder-shell{grid-template-columns:1fr}}
-  .builder-form{background:var(--bg);border:1px solid var(--line);border-radius:16px;padding:24px}
-  .fg{margin-bottom:16px}
-  .fg.row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-  .fg label{display:block;font-size:.8rem;color:var(--muted);margin-bottom:6px;font-weight:600}
-  .fg input,.fg select{width:100%;padding:10px 12px;border-radius:9px;border:1px solid var(--line);background:var(--bg-2);color:var(--text);font-size:.92rem;outline:none;font-family:inherit}
-  .fg input:focus,.fg select:focus{border-color:var(--accent)}
-  .fg .hint{font-size:.72rem;color:var(--muted);margin-top:5px}
-  .builder-quote{position:sticky;top:84px;border:1px solid var(--accent);border-radius:16px;overflow:hidden;box-shadow:0 12px 44px rgba(255,122,26,.12)}
-  .builder-quote .bq-head{display:flex;justify-content:space-between;align-items:center;padding:16px 18px;background:var(--bg-3);border-bottom:1px solid var(--line)}
-  .builder-quote .bq-head .qn{font-family:var(--mono);font-size:.78rem;color:var(--muted)}
-  .builder-quote .bq-head .conf{font-size:.76rem;color:var(--good);font-weight:600}
-  .builder-quote table{width:100%;border-collapse:collapse;font-size:.86rem}
-  .builder-quote td{padding:9px 18px;border-bottom:1px solid var(--line)}
-  .builder-quote td:last-child{text-align:right;font-family:var(--mono)}
-  .builder-quote tr.sub td{color:var(--muted);font-size:.82rem}
-  .builder-quote tr.total td{border-bottom:none;font-weight:700;font-size:1.05rem;background:rgba(255,122,26,.06)}
-  .builder-quote tr.total td:last-child{color:var(--accent)}
-  .bq-foot{padding:14px 18px;background:var(--bg-3);border-top:1px solid var(--line);display:flex;gap:10px}
-  .bq-disclaimer{font-size:.72rem;color:var(--muted);margin-top:12px;text-align:center}
-  @media print{nav,footer,.hero,#problem,#how,#demo,#pricing,#waitlist,.builder-form,.bq-foot{display:none!important}.builder-quote{box-shadow:none;position:static}}
+/* ---------- skills ---------- */
+#skills{background:linear-gradient(to bottom,var(--bg),var(--bg-2) 40%,var(--bg))}
+.skill-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+@media(max-width:980px){.skill-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.skill-grid{grid-template-columns:1fr}}
+.s-col{padding:30px;border-radius:18px;background:var(--panel);border:1px solid var(--border-soft)}
+.s-col h4{
+  font-family:var(--mono);font-size:.68rem;font-weight:600;letter-spacing:.18em;
+  text-transform:uppercase;margin-bottom:22px;display:flex;align-items:center;gap:10px;
+}
+.s-col h4 i{font-style:normal;font-size:1rem}
+.s-col:nth-child(1) h4{color:var(--cyan)}
+.s-col:nth-child(2) h4{color:var(--emerald)}
+.s-col:nth-child(3) h4{color:var(--violet)}
+.s-col:nth-child(4) h4{color:#f0abfc}
+.s-col ul{list-style:none}
+.s-col li{
+  font-size:.86rem;color:var(--text-2);font-weight:300;padding:8px 0;
+  border-bottom:1px solid var(--border-soft);display:flex;justify-content:space-between;align-items:center;
+}
+.s-col li:last-child{border-bottom:none}
+.s-col li::after{content:'';width:5px;height:5px;border-radius:50%;background:var(--text-3);opacity:.5}
+.s-col li.hot::after{background:var(--emerald);opacity:1;box-shadow:0 0 6px var(--emerald)}
 
-  /* PRICING */
-  .plans{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:44px}
-  .plan{background:var(--bg-2);border:1px solid var(--line);border-radius:16px;padding:30px;display:flex;flex-direction:column}
-  .plan.featured{border-color:var(--accent);position:relative;box-shadow:0 12px 44px rgba(255,122,26,.12)}
-  .plan .tag-best{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--accent);color:#14100b;font-size:.72rem;font-weight:800;padding:4px 12px;border-radius:99px;letter-spacing:.04em}
-  .plan h3{font-size:1.05rem;font-weight:700}
-  .plan .price{font-size:2.1rem;font-weight:800;margin:12px 0 2px;letter-spacing:-.02em}
-  .plan .price span{font-size:.9rem;font-weight:500;color:var(--muted)}
-  .plan .for{font-size:.85rem;color:var(--muted);margin-bottom:20px}
-  .plan ul{list-style:none;margin-bottom:26px;flex:1}
-  .plan li{font-size:.9rem;color:var(--muted);padding:6px 0 6px 24px;position:relative}
-  .plan li::before{content:'✓';position:absolute;left:0;color:var(--good);font-weight:700}
-  .plan .btn{text-align:center}
+/* ---------- contact ---------- */
+#contact{padding-bottom:90px}
+.contact-panel{
+  position:relative;border-radius:26px;border:1px solid var(--border-soft);
+  background:
+    radial-gradient(ellipse 70% 90% at 50% -20%, rgba(34,211,238,0.08), transparent 60%),
+    var(--bg-2);
+  padding:clamp(48px,8vw,90px) clamp(28px,6vw,80px);text-align:center;overflow:hidden;
+}
+.contact-panel h2{
+  font-size:clamp(2.2rem,5.4vw,4rem);font-weight:800;letter-spacing:-.04em;line-height:1.05;margin-bottom:20px;
+}
+.contact-panel h2 em{
+  font-family:var(--serif);font-style:italic;font-weight:400;
+  background:linear-gradient(120deg,var(--cyan),var(--emerald));
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+}
+.contact-panel>p{color:var(--text-2);font-weight:300;max-width:520px;margin:0 auto 40px;font-size:1.02rem}
+.contact-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:56px}
+@media(max-width:860px){.contact-cards{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:480px){.contact-cards{grid-template-columns:1fr}}
+.c-card{
+  padding:24px 18px;border-radius:16px;background:rgba(255,255,255,0.025);
+  border:1px solid var(--border-soft);text-decoration:none;
+  transition:transform .3s var(--ease),border-color .25s,background .25s;
+}
+.c-card:hover{transform:translateY(-4px);border-color:rgba(34,211,238,0.35);background:rgba(255,255,255,0.045)}
+.c-card .c-lbl{font-family:var(--mono);font-size:.6rem;color:var(--text-3);letter-spacing:.2em;text-transform:uppercase;margin-bottom:8px}
+.c-card .c-val{font-size:.85rem;font-weight:500;color:var(--text);word-break:break-all}
 
-  /* WAITLIST */
-  #waitlist{text-align:center}
-  .wl-form{display:flex;gap:10px;max-width:460px;margin:32px auto 0}
-  .wl-form input{flex:1;padding:13px 16px;border-radius:10px;border:1px solid var(--line);background:var(--bg-2);color:var(--text);font-size:.95rem;outline:none}
-  .wl-form input:focus{border-color:var(--accent)}
-  .wl-form input:disabled,.wl-form button:disabled{opacity:.6;cursor:not-allowed}
-  .wl-note{font-size:.8rem;color:var(--muted);margin-top:14px}
-  .wl-note a{color:var(--muted);text-decoration:underline}
-  .wl-success{display:none;margin-top:32px;color:var(--good);font-weight:600;font-size:1.05rem}
-  .wl-error{display:none;margin-top:16px;color:#ff8f6b;font-size:.9rem}
+/* ---------- footer ---------- */
+footer{
+  border-top:1px solid var(--border-soft);padding:34px 32px;
+  display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;
+  max-width:var(--max);margin:0 auto;
+}
+footer p{font-family:var(--mono);font-size:.68rem;color:var(--text-3);letter-spacing:.06em}
+footer .f-links{display:flex;gap:22px}
+footer .f-links a{font-size:.75rem;color:var(--text-3);text-decoration:none;transition:color .2s}
+footer .f-links a:hover{color:var(--cyan)}
 
-  footer{border-top:1px solid var(--line);padding:40px 0;color:var(--muted);font-size:.85rem}
-  .foot-inner{display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between}
-  .foot-links{display:flex;gap:22px;flex-wrap:wrap}
-  .foot-links a{color:var(--muted);text-decoration:none;transition:color .15s}
-  .foot-links a:hover{color:var(--text)}
-  @media(max-width:760px){.problem-grid,.steps,.plans,.stats{grid-template-columns:1fr}.nav-links a:not(.btn){display:none}.wl-form{flex-direction:column}.foot-inner{justify-content:center;text-align:center;flex-direction:column}}
+/* ---------- reveal ---------- */
+.reveal{opacity:0;transform:translateY(26px);transition:opacity .8s var(--ease),transform .8s var(--ease)}
+.reveal.in{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}}
 </style>
 </head>
 <body>
 
-<nav>
-  <div class="wrap nav-inner">
-    <a class="logo" href="#"><span class="logo-mark">Q</span>QuoteForge</a>
-    <div class="nav-links">
-      <a href="#problem">Why</a>
-      <a href="#demo">Demo</a>
-      <a href="#builder">Builder</a>
-      <a href="#pricing">Pricing</a>
-      <a href="#waitlist" class="btn btn-primary btn-sm">Get early access</a>
-    </div>
+<nav class="nav" id="nav">
+  <a class="nav-logo" href="/">alott<span>.me</span></a>
+  <div class="nav-links">
+    <a href="#research">Research</a>
+    <a href="#projects">Projects</a>
+    <a href="#skills">Skills</a>
+    <a href="/hire.html">Hire me</a>
+    <a href="#contact" class="nav-cta">Get in touch</a>
   </div>
 </nav>
 
 <header class="hero">
-  <div class="wrap">
-    <span class="pill">⚡ Built for fab, weld &amp; finishing shops</span>
-    <h1>The shop that quotes first, <span class="glow">wins the job.</span></h1>
-    <p class="sub">QuoteForge reads the drawings your customers email you — messy PDFs and all — and turns them into an accurate, itemized quote in minutes. Not days.</p>
-    <div class="hero-ctas">
-      <a href="#demo" class="btn btn-primary">Try the live demo</a>
-      <a href="#waitlist" class="btn btn-ghost">Join the waitlist</a>
+  <canvas id="field" aria-hidden="true"></canvas>
+  <div class="hero-inner">
+    <div class="hero-badge">Open to remote opportunities</div>
+    <h1>Alott<br/><span class="thin">builds systems</span><br/>that adapt.</h1>
+    <div class="hero-roles"><b>Systems</b> · <b>Security</b> · <b>AI Research</b></div>
+    <p class="hero-sub">
+      Independent engineer &amp; researcher shipping production platforms, security tooling,
+      and machine-learning systems — including <em>Topological Semantic Mechanics</em>,
+      a runtime-evolving manifold architecture for neural networks.
+    </p>
+    <div class="hero-actions">
+      <a class="btn btn-primary" href="#research">Explore the research ↓</a>
+      <a class="btn btn-ghost" href="https://github.com/alott2223" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
     </div>
-    <p class="hero-note">No ERP migration. No consultants. Works with the inbox you already have.</p>
-    <div class="stats">
-      <div class="stat"><div class="num">3 min</div><div class="lbl">average drawing → quote</div></div>
-      <div class="stat"><div class="num">2.4×</div><div class="lbl">more quotes out the door</div></div>
-      <div class="stat"><div class="num">$0</div><div class="lbl">setup cost or IT required</div></div>
+    <div class="hero-stats">
+      <div class="stat"><div class="stat-num">5.47×</div><div class="stat-lbl">Effective params · TSM II</div></div>
+      <div class="stat"><div class="stat-num">6+ yrs</div><div class="stat-lbl">Shipping since 2020</div></div>
+      <div class="stat"><div class="stat-num">3</div><div class="stat-lbl">Domains, one stack</div></div>
     </div>
   </div>
+  <div class="scroll-hint">scroll</div>
 </header>
 
-<section id="problem">
-  <div class="wrap">
-    <div class="kicker">The problem</div>
-    <h2>Your best estimator is a person. And they're busy.</h2>
-    <p class="lead">Every quote starts the same way: a PDF lands in the inbox, and it waits for the one person who can price it.</p>
-    <div class="problem-grid">
-      <div class="card"><span class="icon">📥</span><h3>Quotes die in the inbox</h3><p>RFQs sit for 2–5 days while the owner walks the floor. By the time the number goes out, a faster shop already won the work.</p></div>
-      <div class="card"><span class="icon">🧠</span><h3>Pricing lives in one head</h3><p>Material, weld time, finishing passes — it's all tribal knowledge. When the estimator is out, quoting stops. When they retire, it's gone.</p></div>
-      <div class="card"><span class="icon">📉</span><h3>Guesswork eats margin</h3><p>Eyeballed quotes swing 30% either way. Too high loses the job; too low and you work a week for free. Nobody knows which until it's over.</p></div>
-    </div>
+<div class="ticker" aria-hidden="true">
+  <div class="ticker-track" id="ticker">
+    <span>Riemannian Manifolds</span><span>Go</span><span>Python</span><span>PyTorch</span>
+    <span>Network Security</span><span>React</span><span>Container Orchestration</span>
+    <span>Meta-Learning</span><span>Traffic Analysis</span><span>TypeScript</span>
   </div>
-</section>
+</div>
 
-<section id="how" style="padding-top:0">
-  <div class="wrap">
-    <div class="kicker">How it works</div>
-    <h2>Forward the email. Get a quote back.</h2>
-    <div class="steps">
-      <div class="step"><h3>Forward the RFQ</h3><p>Send the customer's email — drawings, specs, napkin sketches — to your QuoteForge address. That's the whole integration.</p></div>
-      <div class="step"><h3>AI breaks down the job</h3><p>QuoteForge extracts dimensions, materials, weld lengths and finish specs, then prices against live material rates and your shop's real labor numbers.</p></div>
-      <div class="step"><h3>Review, adjust, send</h3><p>You get an itemized draft with a confidence score. Tweak margin, approve, and it's in your customer's inbox — same morning.</p></div>
-    </div>
-  </div>
-</section>
-
-<section id="demo">
-  <div class="wrap">
-    <div class="kicker">Guided tour</div>
-    <h2>Watch a drawing become a quote.</h2>
-    <p class="lead">Pick an incoming RFQ to see the flow your estimator would follow. These three are worked examples with sample data — to price your own numbers, use the <a href="#builder" style="color:var(--accent);text-decoration:none;font-weight:600">live builder&nbsp;↓</a></p>
-    <div class="demo-shell">
-      <div class="demo-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="title">quoteforge — inbox</span><span class="demo-tag">sample data</span></div>
-      <div class="demo-body">
-        <div class="demo-left">
-          <h4>Incoming RFQs</h4>
-          <div id="rfq-list"></div>
-        </div>
-        <div class="demo-right" id="demo-right">
-          <div class="demo-hint">← Select an RFQ to run the quote engine</div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section id="builder">
-  <div class="wrap">
-    <div class="kicker">Live builder</div>
-    <h2>Price a job with your own numbers.</h2>
-    <p class="lead">This one is real — it runs the actual QuoteForge pricing engine right in your browser. Change anything and the quote recalculates instantly.</p>
-    <div class="builder-shell">
-      <div class="builder-form">
-        <div class="fg row">
-          <div>
-            <label for="b-material">Material</label>
-            <select id="b-material"></select>
-          </div>
-          <div>
-            <label for="b-finish">Finish</label>
-            <select id="b-finish"></select>
-          </div>
-        </div>
-        <div class="fg row">
-          <div>
-            <label for="b-thickness">Thickness (in)</label>
-            <input id="b-thickness" type="number" step="0.001" min="0" value="0.375">
-          </div>
-          <div>
-            <label for="b-qty">Quantity</label>
-            <input id="b-qty" type="number" step="1" min="1" value="40">
-          </div>
-        </div>
-        <div class="fg row">
-          <div>
-            <label for="b-length">Part length (in)</label>
-            <input id="b-length" type="number" step="0.1" min="0" value="12">
-          </div>
-          <div>
-            <label for="b-width">Part width (in)</label>
-            <input id="b-width" type="number" step="0.1" min="0" value="8">
-          </div>
-        </div>
-        <div class="fg"><div class="hint">Footprint drives material weight (area = length × width) and cut length (perimeter).</div></div>
-        <div class="fg row">
-          <div>
-            <label for="b-holes">Drilled holes / part</label>
-            <input id="b-holes" type="number" step="1" min="0" value="4">
-          </div>
-          <div>
-            <label for="b-weld">Weld length / part (in)</label>
-            <input id="b-weld" type="number" step="0.1" min="0" value="18.5">
-          </div>
-        </div>
-        <div class="fg row">
-          <div>
-            <label for="b-bends">Brake bends / part</label>
-            <input id="b-bends" type="number" step="1" min="0" value="0">
-          </div>
-          <div>
-            <label for="b-margin">Margin (%)</label>
-            <input id="b-margin" type="number" step="1" min="0" value="28">
-          </div>
-        </div>
-        <div class="fg">
-          <label for="b-labor">Shop labor rate ($/hr)</label>
-          <input id="b-labor" type="number" step="1" min="0" value="95">
-        </div>
-      </div>
-
+<section id="research">
+  <div class="container">
+    <div class="sec-head reveal">
       <div>
-        <div class="builder-quote">
-          <div class="bq-head"><span class="qn" id="bq-qn">Q-2026-0000 · draft</span><span class="conf" id="bq-conf">● —</span></div>
-          <table><tbody id="bq-rows"></tbody></table>
-          <div class="bq-foot">
-            <button class="btn btn-primary btn-sm" onclick="window.print()">Print / save PDF</button>
-            <a class="btn btn-ghost btn-sm" href="#waitlist">Get this in your inbox</a>
-          </div>
+        <div class="sec-eyebrow">01 — Research</div>
+        <h2 class="sec-title">Topological <em>Semantic</em> Mechanics</h2>
+      </div>
+      <p class="sec-note">An original research program: letting a model's geometry evolve at runtime, so capability scales without adding parameters.</p>
+    </div>
+    <div class="research-grid">
+      <a class="r-card wide reveal" href="/tsm-phase2.html">
+        <div class="r-top"><span class="r-badge green">Phase II · Benchmarked</span><span class="r-arrow">→</span></div>
+        <div class="r-body">
+          <div class="r-metric">5.47× N<sub>eff</sub></div>
+          <div class="r-metric-lbl">effective parameter multiplier at identical size</div>
+          <h3>TSM Phase II Model</h3>
+          <p>A lightweight PyTorch model with runtime manifold evolution. Same parameter count, 5.47× the effective capacity — with perplexity comparisons, N<sub>eff</sub> scaling curves, and adversarial-shock recovery benchmarks.</p>
         </div>
-        <p class="bq-disclaimer">Estimate only, from indicative material &amp; labor rates. Calibrate to your shop before quoting a customer.</p>
+      </a>
+      <a class="r-card reveal" href="/tsm.html">
+        <div class="r-top"><span class="r-badge">Phase I · Interactive</span><span class="r-arrow">→</span></div>
+        <h3>The TSM Manifold, Live</h3>
+        <p>An interactive sandbox where a Riemannian metric evolves in real time. Inject stress patterns, watch curvature respond, and see the geometry recover.</p>
+      </a>
+      <a class="r-card reveal" href="/blackpaper.html">
+        <div class="r-top"><span class="r-badge purple">Whitepaper</span><span class="r-arrow">→</span></div>
+        <h3>The TSM Blackpaper</h3>
+        <p>The full write-up: how a self-reshaping mathematical space could make AI smarter without making it bigger — theory, formalism, and implications for scaling.</p>
+      </a>
+      <a class="r-card wide reveal" href="/semantic-curve.html">
+        <div class="r-top"><span class="r-badge">Theory</span><span class="r-arrow">→</span></div>
+        <div class="r-body">
+          <h3>Semantic Curve Theory</h3>
+          <p>A conceptual model linking semantic density to utility across abstraction layers — the intuition that seeded the TSM program.</p>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<section id="projects">
+  <div class="container">
+    <div class="sec-head reveal">
+      <div>
+        <div class="sec-eyebrow">02 — Selected Work</div>
+        <h2 class="sec-title">Built to run in <em>production</em></h2>
+      </div>
+      <p class="sec-note">Platforms, security tooling, and AI systems — designed, built, and maintained end-to-end.</p>
+    </div>
+    <div class="proj-grid">
+      <a class="p-card reveal" href="https://github.com/alott2223/alott2223.github.io/tree/main/agent" target="_blank" rel="noopener noreferrer">
+        <div class="p-head"><span class="p-index">/01</span><span class="p-ext">↗</span></div>
+        <h3>QuoteForge</h3>
+        <p>An AI quoting engine for fabrication shops: reads messy customer drawings — PDFs and all — and returns accurate, itemized quotes in minutes. Claude-vision parsing, calibrated shop rates, RFQ intake to reply email.</p>
+        <div class="p-tags"><span>Node.js</span><span>Claude API</span><span>Vision</span></div>
+      </a>
+      <a class="p-card reveal" href="https://github.com/alott2223/cyber-container-platform" target="_blank" rel="noopener noreferrer">
+        <div class="p-head"><span class="p-index">/02</span><span class="p-ext">↗</span></div>
+        <h3>Cyber Container Platform</h3>
+        <p>Full-stack container management with a Go backend and React frontend — direct Docker API integration for the whole container lifecycle, without the tooling overhead.</p>
+        <div class="p-tags"><span>Go</span><span>React</span><span>Docker</span></div>
+      </a>
+      <a class="p-card reveal" href="https://github.com/alott2223/sec-proxy" target="_blank" rel="noopener noreferrer">
+        <div class="p-head"><span class="p-index">/03</span><span class="p-ext">↗</span></div>
+        <h3>Sec-Proxy</h3>
+        <p>A custom proxy and routing system built for flexibility standard solutions lack: advanced traffic control, security filtering, and fully programmable routing rules.</p>
+        <div class="p-tags"><span>Networking</span><span>Security</span><span>Routing</span></div>
+      </a>
+      <a class="p-card reveal" href="https://github.com/alott2223/conciousnet" target="_blank" rel="noopener noreferrer">
+        <div class="p-head"><span class="p-index">/04</span><span class="p-ext">↗</span></div>
+        <h3>ConsciousNet</h3>
+        <p>An experimental adaptive AI system capable of self-modification — dynamically adjusting its own architecture and learning strategy from performance feedback.</p>
+        <div class="p-tags"><span>Python</span><span>Neural Nets</span><span>Meta-Learning</span></div>
+      </a>
+      <a class="p-card reveal" href="https://github.com/alott2223/senso-sucks" target="_blank" rel="noopener noreferrer">
+        <div class="p-head"><span class="p-index">/05</span><span class="p-ext">↗</span></div>
+        <h3>Senso-Sucks</h3>
+        <p>Remote management tooling for enterprise environments — centralized administration, monitoring, and automation across distributed systems.</p>
+        <div class="p-tags"><span>Enterprise</span><span>Automation</span><span>Monitoring</span></div>
+      </a>
+      <a class="p-card reveal" href="https://github.com/alott2223/clowncode-" target="_blank" rel="noopener noreferrer">
+        <div class="p-head"><span class="p-index">/06</span><span class="p-ext">↗</span></div>
+        <h3>ClownCode</h3>
+        <p>A programming language where the syntax is emoji. Built in Python as an exploration of language design, parsing, and interpretation — and to prove programming can be fun.</p>
+        <div class="p-tags"><span>Python</span><span>Lang Design</span><span>Interpreter</span></div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<section id="skills">
+  <div class="container">
+    <div class="sec-head reveal">
+      <div>
+        <div class="sec-eyebrow">03 — Capabilities</div>
+        <h2 class="sec-title">One person, <em>full</em> stack</h2>
+      </div>
+      <p class="sec-note">Depth where it matters, breadth everywhere else. Highlighted dots mark daily drivers.</p>
+    </div>
+    <div class="skill-grid">
+      <div class="s-col reveal">
+        <h4><i>⌥</i> Languages</h4>
+        <ul>
+          <li class="hot">Python</li>
+          <li class="hot">Go</li>
+          <li class="hot">TypeScript / JavaScript</li>
+          <li class="hot">React</li>
+          <li>C++</li>
+          <li>Lua</li>
+        </ul>
+      </div>
+      <div class="s-col reveal">
+        <h4><i>⛨</i> Security</h4>
+        <ul>
+          <li class="hot">Proxy Systems</li>
+          <li class="hot">Traffic Analysis</li>
+          <li>Network Security</li>
+          <li>TCP/IP Internals</li>
+          <li>CTF / Pen Testing</li>
+          <li>Encryption &amp; Auth</li>
+        </ul>
+      </div>
+      <div class="s-col reveal">
+        <h4><i>◈</i> AI / ML</h4>
+        <ul>
+          <li class="hot">PyTorch / TensorFlow</li>
+          <li class="hot">Neural Networks</li>
+          <li class="hot">Dataset Curation</li>
+          <li>Model Training</li>
+          <li>Data Processing</li>
+          <li>Meta-Learning</li>
+        </ul>
+      </div>
+      <div class="s-col reveal">
+        <h4><i>⬡</i> Platforms</h4>
+        <ul>
+          <li class="hot">Docker</li>
+          <li class="hot">REST APIs</li>
+          <li class="hot">Git / GitHub</li>
+          <li>Container Orchestration</li>
+          <li>WebSockets</li>
+          <li>Linux Administration</li>
+        </ul>
       </div>
     </div>
   </div>
 </section>
 
-<section id="pricing">
-  <div class="wrap">
-    <div class="kicker">Pricing</div>
-    <h2>Pays for itself with one saved job.</h2>
-    <div class="plans">
-      <div class="plan">
-        <h3>Bench</h3>
-        <div class="price">$299<span>/mo</span></div>
-        <div class="for">For 1–5 person shops</div>
-        <ul><li>25 AI quotes per month</li><li>Email-in RFQ intake</li><li>Live material pricing</li><li>Branded quote PDFs</li></ul>
-        <a href="#waitlist" class="btn btn-ghost">Join waitlist</a>
-      </div>
-      <div class="plan featured">
-        <span class="tag-best">MOST POPULAR</span>
-        <h3>Floor</h3>
-        <div class="price">$799<span>/mo</span></div>
-        <div class="for">For 5–25 person shops</div>
-        <ul><li>Unlimited AI quotes</li><li>Your shop rates &amp; margins learned over time</li><li>Win/loss tracking per quote</li><li>Multi-user review &amp; approve</li><li>Priority support from real humans</li></ul>
-        <a href="#waitlist" class="btn btn-primary">Join waitlist</a>
-      </div>
-      <div class="plan">
-        <h3>Works</h3>
-        <div class="price">$1,900<span>/mo</span></div>
-        <div class="for">For multi-shop operations</div>
-        <ul><li>Everything in Floor</li><li>Multiple locations &amp; rate cards</li><li>Quote-to-invoice handoff</li><li>API + ERP export</li><li>Dedicated onboarding</li></ul>
-        <a href="#waitlist" class="btn btn-ghost">Join waitlist</a>
+<section id="contact">
+  <div class="container">
+    <div class="contact-panel reveal">
+      <div class="sec-eyebrow" style="justify-content:center">04 — Contact</div>
+      <h2>Let's build something<br/><em>worth shipping.</em></h2>
+      <p>Open to remote roles and freelance work across ML infrastructure, security tooling, and full-stack platforms. Available now.</p>
+      <a class="btn btn-primary" href="mailto:admin@alott.me">✉ &nbsp;admin@alott.me</a>
+      <div class="contact-cards">
+        <a class="c-card" href="mailto:admin@alott.me">
+          <div class="c-lbl">Email</div><div class="c-val">admin@alott.me</div>
+        </a>
+        <a class="c-card" href="https://github.com/alott2223" target="_blank" rel="noopener noreferrer">
+          <div class="c-lbl">GitHub</div><div class="c-val">@alott2223</div>
+        </a>
+        <a class="c-card" href="https://discord.com/users/onlywock_" target="_blank" rel="noopener noreferrer">
+          <div class="c-lbl">Discord</div><div class="c-val">onlywock_</div>
+        </a>
+        <a class="c-card" href="/hire.html">
+          <div class="c-lbl">Freelance</div><div class="c-val">Hire me →</div>
+        </a>
       </div>
     </div>
-  </div>
-</section>
-
-<section id="waitlist">
-  <div class="wrap">
-    <div class="kicker">Early access</div>
-    <h2>First 50 shops get 3 months free.</h2>
-    <p class="lead" style="margin:0 auto">We're onboarding fab and weld shops now. Drop your email and we'll be in touch within a week.</p>
-    <form class="wl-form" id="wl-form">
-      <input type="email" id="wl-email" name="email" placeholder="you@yourshop.com" autocomplete="email" required>
-      <button class="btn btn-primary" type="submit" id="wl-submit">Get early access</button>
-    </form>
-    <div class="wl-error" id="wl-error">Something went wrong — please try again, or email us at <a href="mailto:hello@alott.me" style="color:inherit">hello@alott.me</a>.</div>
-    <p class="wl-note">We'll only use your email to contact you about QuoteForge early access. No spam, unsubscribe anytime. See our <a href="/privacy.html">Privacy Policy</a>.</p>
-    <div class="wl-success" id="wl-success">🔥 You're on the list. We'll reach out within a week — keep an eye on your inbox.</div>
   </div>
 </section>
 
 <footer>
-  <div class="wrap foot-inner">
-    <div>© <span id="year">2026</span> QuoteForge · <a href="mailto:hello@alott.me" style="color:inherit;text-decoration:none">hello@alott.me</a></div>
-    <div class="foot-links">
-      <a href="#problem">Why</a>
-      <a href="#pricing">Pricing</a>
-      <a href="/privacy.html">Privacy</a>
-      <a href="/terms.html">Terms</a>
-    </div>
+  <p>© <span id="year">2026</span> Alott — designed &amp; built by hand, one file, no framework.</p>
+  <div class="f-links">
+    <a href="#research">Research</a>
+    <a href="#projects">Projects</a>
+    <a href="/hire.html">Hire</a>
+    <a href="https://github.com/alott2223" target="_blank" rel="noopener noreferrer">GitHub</a>
   </div>
 </footer>
 
 <script>
-// ---------- Demo data ----------
-const RFQS = [
-  {
-    id:'bracket', name:'Welded steel bracket ×40', from:'rfq@hendersonhvac.com',
-    svg:'<svg viewBox="0 0 40 40" fill="none" stroke="#9aa7b5" stroke-width="1.5"><path d="M8 32 L8 12 L20 12 L20 20 L32 20 L32 32 Z"/><circle cx="13" cy="27" r="2"/><circle cx="27" cy="27" r="2"/></svg>',
-    steps:[
-      ['tag','parse','bracket_rev3.pdf → 2 views, 14 dimensions extracted'],
-      ['tag','material','A36 steel plate, 3/8" — $0.68/lb spot (up 2.1% this wk)'],
-      ['tag','ops','cut → drill ×4 → weld 18.5" fillet → powder coat blk'],
-      ['tag','labor','matched to 6 similar jobs in your history'],
-      ['ok','done','quote drafted · confidence 94%']
-    ],
-    quote:{ qn:'Q-2026-0712', conf:'94% confidence',
-      lines:[['Material — A36 plate 3/8" (312 lb)','$212.16'],['Cutting & drilling (2.1 hr @ $85)','$178.50'],['Welding — 18.5" fillet ×40 (6.2 hr @ $95)','$589.00'],['Powder coat, black (40 pcs)','$260.00'],['Margin (28%)','$347.10']],
-      total:'$1,586.76' }
-  },
-  {
-    id:'enclosure', name:'Sheet metal enclosure ×12', from:'purchasing@axledyne.io',
-    svg:'<svg viewBox="0 0 40 40" fill="none" stroke="#9aa7b5" stroke-width="1.5"><rect x="8" y="10" width="24" height="22" rx="2"/><line x1="8" y1="17" x2="32" y2="17"/><circle cx="26" cy="13.5" r="1.2"/><path d="M14 22 h12 M14 26 h12"/></svg>',
-    steps:[
-      ['tag','parse','enclosure_v2_flat.dxf → flat pattern + 6 bend lines'],
-      ['tag','material','5052 aluminum, 0.090" — $2.14/lb spot'],
-      ['tag','ops','laser cut → deburr → brake ×6 bends → rivet nut ×8'],
-      ['tag','labor','bend sequence est. 22 min/unit from shop history'],
-      ['ok','done','quote drafted · confidence 91%']
-    ],
-    quote:{ qn:'Q-2026-0713', conf:'91% confidence',
-      lines:[['Material — 5052 AL 0.090" (46 lb)','$98.44'],['Laser cutting (1.4 hr @ $110)','$154.00'],['Forming — 72 bends (4.4 hr @ $85)','$374.00'],['Hardware & rivet nuts (96 pcs)','$67.20'],['Margin (30%)','$208.09']],
-      total:'$901.73' }
-  },
-  {
-    id:'frame', name:'Stainless conveyor frame ×2', from:'mike@pacificfoodsys.com',
-    svg:'<svg viewBox="0 0 40 40" fill="none" stroke="#9aa7b5" stroke-width="1.5"><path d="M6 30 L34 30 M10 30 L10 14 L30 14 L30 30 M10 20 L30 20 M15 14 L15 30 M25 14 L25 30"/></svg>',
-    steps:[
-      ['tag','parse','conveyor_frame.pdf → weldment, 22 members, BOM table found'],
-      ['tag','material','304 SS tube 1.5" sq — $3.87/lb · food-grade finish req.'],
-      ['tag','ops','saw ×44 cuts → fit & tack → weld 31 joints → passivate'],
-      ['tag','labor','SS weld rate applied (0.7× travel speed vs. mild)'],
-      ['ok','done','quote drafted · confidence 88%']
-    ],
-    quote:{ qn:'Q-2026-0714', conf:'88% confidence',
-      lines:[['Material — 304 SS tube (188 lb)','$727.56'],['Saw cutting — 44 cuts (1.8 hr @ $85)','$153.00'],['Fit-up & welding — 31 joints (11.5 hr @ $105)','$1,207.50'],['Passivation & food-grade finish','$340.00'],['Margin (26%)','$631.30']],
-      total:'$3,059.36' }
-  }
-];
-
-const list = document.getElementById('rfq-list');
-const right = document.getElementById('demo-right');
-let running = false;
-
-RFQS.forEach(r=>{
-  const el = document.createElement('div');
-  el.className = 'rfq';
-  el.id = 'rfq-' + r.id;
-  el.innerHTML = '<div class="thumb">'+r.svg+'</div><div class="meta"><div class="name">'+r.name+'</div><div class="from">'+r.from+'</div></div>';
-  el.addEventListener('click',()=>selectRfq(r));
-  list.appendChild(el);
-});
-
-function selectRfq(r){
-  if(running) return;
-  running = true;
-  document.querySelectorAll('.rfq').forEach(e=>e.classList.remove('active'));
-  document.getElementById('rfq-'+r.id).classList.add('active');
-
-  right.innerHTML = '<div class="console" id="console"></div>' + buildQuoteCard(r.quote);
-  const con = document.getElementById('console');
-
-  r.steps.forEach((s,i)=>{
-    const ln = document.createElement('div');
-    ln.className = 'ln';
-    ln.innerHTML = '<span class="'+s[0]+'">['+s[1]+']</span> ' + s[2];
-    con.appendChild(ln);
-    setTimeout(()=>ln.classList.add('show'), 350 + i*650);
-  });
-
-  const totalDelay = 350 + r.steps.length*650 + 300;
-  setTimeout(()=>{
-    document.getElementById('quote-card').classList.add('show');
-    running = false;
-  }, totalDelay);
-}
-
-function buildQuoteCard(q){
-  let rows = q.lines.map(l=>'<tr><td>'+l[0]+'</td><td>'+l[1]+'</td></tr>').join('');
-  rows += '<tr class="total"><td>Quote total</td><td>'+q.total+'</td></tr>';
-  return '<div class="quote-card" id="quote-card">'+
-    '<div class="quote-head"><span class="qn">'+q.qn+' · draft</span><span class="conf">● '+q.conf+'</span></div>'+
-    '<table>'+rows+'</table>'+
-    '<div class="quote-actions">'+
-      '<button class="btn btn-primary btn-sm" onclick="sendQuote(this)">Approve &amp; send</button>'+
-      '<button class="btn btn-ghost btn-sm">Adjust margin</button>'+
-      '<span class="sent-flash" id="sent-flash">✓ Sent to customer</span>'+
-    '</div></div>';
-}
-
-function sendQuote(btn){
-  const flash = document.getElementById('sent-flash');
-  flash.style.display = 'flex';
-  btn.disabled = true;
-  btn.style.opacity = .5;
-}
-
-// ---------- Quote Builder (real, runs the pricing engine in-browser) ----------
-// Mirrors agent/pricing.js — the same math the local Claude agent uses.
-const PF = (function(){
-  const MATERIALS = {
-    a36:   {label:'A36 mild steel', density:0.2836, pricePerLb:0.68},
-    a1011: {label:'A1011 HR steel', density:0.2836, pricePerLb:0.62},
-    ss304: {label:'304 stainless',  density:0.2890, pricePerLb:3.87},
-    ss316: {label:'316 stainless',  density:0.2890, pricePerLb:4.95},
-    al5052:{label:'5052 aluminum',  density:0.0968, pricePerLb:2.14},
-    al6061:{label:'6061 aluminum',  density:0.0975, pricePerLb:2.35}
-  };
-  const RATES = {laserInPerMin:28, drillSecPerHole:22, weldInPerMin:3.2, bendSecPerBend:25, ssWeldFactor:0.7};
-  const FINISHES = {
-    none:{label:'None',perPart:0,flat:0},
-    powder:{label:'Powder coat',perPart:6.50,flat:45},
-    zinc:{label:'Zinc plating',perPart:4.25,flat:40},
-    passivate:{label:'Passivation',perPart:3.10,flat:60},
-    anodize:{label:'Anodize (Al)',perPart:7.80,flat:55}
-  };
-  const r2 = n => Math.round(n*100)/100;
-  const usd = n => '$' + r2(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
-  function estimate(j){
-    const mat = MATERIALS[j.material], qty = j.quantity, labor = j.laborRate>0?j.laborRate:95;
-    const marginPct = j.marginPct!=null?j.marginPct:28;
-    const ss = j.material==='ss304'||j.material==='ss316';
-    const lines = [];
-    const weightLb = j.areaSqIn*j.thicknessIn*mat.density*qty;
-    lines.push(['Material — '+mat.label+' '+j.thicknessIn+'" ('+r2(weightLb)+' lb)', weightLb*mat.pricePerLb]);
-    let cutHrs = 0;
-    if(j.cutLengthIn>0) cutHrs += (j.cutLengthIn*qty)/RATES.laserInPerMin/60;
-    if(cutHrs>0) lines.push(['Cutting ('+r2(cutHrs)+' hr @ '+usd(labor)+')', cutHrs*labor]);
-    if(j.holes>0){ const h=(j.holes*qty*RATES.drillSecPerHole)/3600; lines.push(['Drilling — '+(j.holes*qty)+' holes ('+r2(h)+' hr)', h*labor]); }
-    if(j.weldLengthIn>0){ const rate=RATES.weldInPerMin*(ss?RATES.ssWeldFactor:1); const h=(j.weldLengthIn*qty)/rate/60; lines.push(['Welding — '+r2(j.weldLengthIn*qty)+'" fillet ('+r2(h)+' hr @ '+usd(labor)+')', h*labor]); }
-    if(j.bends>0){ const h=(j.bends*qty*RATES.bendSecPerBend)/3600; lines.push(['Forming — '+(j.bends*qty)+' bends ('+r2(h)+' hr)', h*labor]); }
-    const fin = FINISHES[j.finish]||FINISHES.none;
-    if(fin.perPart>0||fin.flat>0) lines.push([fin.label+' ('+qty+' pcs)', fin.flat+fin.perPart*qty]);
-    const subtotal = lines.reduce((s,l)=>s+l[1],0);
-    const margin = subtotal*(marginPct/100);
-    const provided = ['cutLengthIn','holes','weldLengthIn','bends'].filter(k=>j[k]>0).length;
-    return {lines:lines.map(l=>[l[0],r2(l[1])]), subtotal:r2(subtotal), margin:r2(margin), marginPct,
-      total:r2(subtotal+margin), confidence:Math.min(96,82+provided*3), weightLb:r2(weightLb)};
-  }
-  return {MATERIALS, FINISHES, estimate, usd};
-})();
-
-(function initBuilder(){
-  const $ = id => document.getElementById(id);
-  const matSel = $('b-material'), finSel = $('b-finish');
-  if(!matSel) return;
-  Object.keys(PF.MATERIALS).forEach(k=>{ const o=document.createElement('option'); o.value=k; o.textContent=PF.MATERIALS[k].label; matSel.appendChild(o); });
-  Object.keys(PF.FINISHES).forEach(k=>{ const o=document.createElement('option'); o.value=k; o.textContent=PF.FINISHES[k].label; finSel.appendChild(o); });
-  matSel.value='a36'; finSel.value='powder';
-
-  const num = (id,d) => { const v=parseFloat($(id).value); return isNaN(v)?d:v; };
-  const qn = 'Q-'+new Date().getFullYear()+'-'+String(Math.floor(Math.random()*9000)+1000);
-
-  function recompute(){
-    const L=num('b-length',0), W=num('b-width',0);
-    const job = {
-      material: matSel.value, finish: finSel.value,
-      quantity: Math.max(1, Math.round(num('b-qty',1))),
-      thicknessIn: num('b-thickness',0),
-      areaSqIn: L*W,
-      cutLengthIn: 2*(L+W),
-      holes: Math.max(0, Math.round(num('b-holes',0))),
-      weldLengthIn: Math.max(0, num('b-weld',0)),
-      bends: Math.max(0, Math.round(num('b-bends',0))),
-      marginPct: num('b-margin',28),
-      laborRate: num('b-labor',95)
-    };
-    const rows = $('bq-rows');
-    if(!(job.thicknessIn>0) || !(job.areaSqIn>0)){
-      rows.innerHTML = '<tr><td colspan="2" style="color:var(--muted);text-align:center;padding:28px">Enter thickness and part dimensions to see a quote.</td></tr>';
-      $('bq-conf').textContent='● —';
-      return;
-    }
-    const q = PF.estimate(job);
-    let html = q.lines.map(l=>'<tr><td>'+l[0]+'</td><td>'+PF.usd(l[1])+'</td></tr>').join('');
-    html += '<tr class="sub"><td>Subtotal</td><td>'+PF.usd(q.subtotal)+'</td></tr>';
-    html += '<tr class="sub"><td>Margin ('+q.marginPct+'%)</td><td>'+PF.usd(q.margin)+'</td></tr>';
-    html += '<tr class="total"><td>Quote total</td><td>'+PF.usd(q.total)+'</td></tr>';
-    rows.innerHTML = html;
-    $('bq-qn').textContent = qn+' · draft';
-    $('bq-conf').textContent = '● '+q.confidence+'% confidence';
-  }
-
-  ['b-material','b-finish','b-thickness','b-qty','b-length','b-width','b-holes','b-weld','b-bends','b-margin','b-labor']
-    .forEach(id=>{ const el=$(id); el.addEventListener('input',recompute); el.addEventListener('change',recompute); });
-  recompute();
-})();
-
-// ---------- Waitlist ----------
-// Paste your Formspree form ID below (the part after /f/ in your endpoint).
-// Create a free form at https://formspree.io → the endpoint looks like
-// https://formspree.io/f/abcdwxyz — copy the "abcdwxyz" part here.
-const FORMSPREE_ID = 'mqevvprr';
-
-const wlForm    = document.getElementById('wl-form');
-const wlEmail   = document.getElementById('wl-email');
-const wlSubmit  = document.getElementById('wl-submit');
-const wlError   = document.getElementById('wl-error');
-const wlSuccess = document.getElementById('wl-success');
-
-wlForm.addEventListener('submit', async e => {
-  e.preventDefault();
-  const email = wlEmail.value.trim();
-  if(!email) return;
-
-  wlError.style.display = 'none';
-  wlSubmit.disabled = true;
-  wlEmail.disabled = true;
-  wlSubmit.textContent = 'Joining…';
-
-  const done = () => { wlForm.style.display = 'none'; wlSuccess.style.display = 'block'; };
-  const fail = () => {
-    wlError.style.display = 'block';
-    wlSubmit.disabled = false;
-    wlEmail.disabled = false;
-    wlSubmit.textContent = 'Get early access';
-  };
-
-  // Until a Formspree ID is configured, don't hit the network — just confirm locally.
-  if(FORMSPREE_ID === 'YOUR_FORM_ID'){
-    console.warn('QuoteForge: set FORMSPREE_ID to capture real signups.');
-    done();
-    return;
-  }
-
-  try{
-    const res = await fetch('https://formspree.io/f/' + FORMSPREE_ID, {
-      method: 'POST',
-      headers: { 'Accept': 'application/json' },
-      body: new FormData(wlForm)
-    });
-    res.ok ? done() : fail();
-  }catch(err){
-    fail();
-  }
-});
-
-// ---------- Footer year ----------
 document.getElementById('year').textContent = new Date().getFullYear();
+
+/* nav scroll state */
+const nav = document.getElementById('nav');
+addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY > 24), {passive:true});
+
+/* duplicate ticker content for seamless loop */
+const ticker = document.getElementById('ticker');
+ticker.innerHTML += ticker.innerHTML;
+
+/* scroll reveals */
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+}, {threshold:0.12});
+document.querySelectorAll('.reveal').forEach((el,i) => {
+  el.style.transitionDelay = (i % 4) * 60 + 'ms';
+  io.observe(el);
+});
+
+/* active nav link */
+const secObs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      document.querySelectorAll('.nav-links a').forEach(a =>
+        a.classList.toggle('active', a.getAttribute('href') === '#' + e.target.id));
+    }
+  });
+}, {rootMargin:'-45% 0px -45% 0px'});
+document.querySelectorAll('section[id]').forEach(s => secObs.observe(s));
+
+/* cursor-tracked card lighting */
+document.querySelectorAll('.r-card, .p-card').forEach(card => {
+  card.addEventListener('pointermove', e => {
+    const r = card.getBoundingClientRect();
+    card.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+    card.style.setProperty('--my', (e.clientY - r.top) + 'px');
+  });
+});
+
+/* hero: evolving manifold field — a nod to TSM */
+(function(){
+  const canvas = document.getElementById('field');
+  const ctx = canvas.getContext('2d');
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let W, H, cols, rows, spacing, t = 0, raf = null;
+  let mouse = {x:-1e4, y:-1e4};
+
+  // curvature wells drifting through the grid
+  const wells = Array.from({length:3}, (_,i) => ({
+    px: Math.random(), py: Math.random(),
+    vx: (Math.random()-.5)*.00035, vy: (Math.random()-.5)*.00035,
+    r: 180 + i*70, s: .8 + i*.35
+  }));
+
+  function resize(){
+    const dpr = Math.min(devicePixelRatio || 1, 2);
+    W = canvas.clientWidth; H = canvas.clientHeight;
+    canvas.width = W * dpr; canvas.height = H * dpr;
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    spacing = W < 700 ? 44 : 54;
+    cols = Math.ceil(W/spacing) + 2;
+    rows = Math.ceil(H/spacing) + 2;
+  }
+
+  function warp(x, y){
+    let dx = 0, dy = 0;
+    for (const w of wells){
+      const wx = w.px*W, wy = w.py*H;
+      const ddx = x-wx, ddy = y-wy;
+      const d2 = ddx*ddx + ddy*ddy;
+      const f = Math.exp(-d2/(2*w.r*w.r)) * 16 * w.s;
+      const a = Math.atan2(ddy, ddx) + t*.0006*w.s;
+      dx += Math.cos(a)*f; dy += Math.sin(a)*f;
+    }
+    const mdx = x-mouse.x, mdy = y-mouse.y;
+    const md2 = mdx*mdx + mdy*mdy;
+    if (md2 < 220*220){
+      const mf = Math.exp(-md2/(2*110*110)) * 22;
+      const md = Math.sqrt(md2) || 1;
+      dx += mdx/md*mf; dy += mdy/md*mf;
+    }
+    dx += Math.sin(y*.011 + t*.00045)*4;
+    dy += Math.cos(x*.011 + t*.0004)*4;
+    return [x+dx, y+dy];
+  }
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    for (const w of wells){
+      w.px += w.vx; w.py += w.vy;
+      if (w.px < .05 || w.px > .95) w.vx *= -1;
+      if (w.py < .05 || w.py > .95) w.vy *= -1;
+    }
+    ctx.lineWidth = 1;
+    for (let j = 0; j < rows; j++){
+      ctx.beginPath();
+      for (let i = 0; i < cols; i++){
+        const [x,y] = warp(i*spacing - spacing/2, j*spacing - spacing/2);
+        i === 0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+      }
+      const fade = 1 - Math.abs(j/rows - .45)*1.4;
+      ctx.strokeStyle = `rgba(34,211,238,${Math.max(0, .05*fade)})`;
+      ctx.stroke();
+    }
+    for (let i = 0; i < cols; i++){
+      ctx.beginPath();
+      for (let j = 0; j < rows; j++){
+        const [x,y] = warp(i*spacing - spacing/2, j*spacing - spacing/2);
+        j === 0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+      }
+      ctx.strokeStyle = 'rgba(52,211,153,0.032)';
+      ctx.stroke();
+    }
+    // nodes at intersections near wells glow faintly
+    for (const w of wells){
+      const wx = w.px*W, wy = w.py*H;
+      const g = ctx.createRadialGradient(wx,wy,0,wx,wy,w.r*.9);
+      g.addColorStop(0,'rgba(34,211,238,0.045)');
+      g.addColorStop(1,'transparent');
+      ctx.fillStyle = g;
+      ctx.fillRect(wx-w.r, wy-w.r, w.r*2, w.r*2);
+    }
+    t += 16;
+    raf = requestAnimationFrame(draw);
+  }
+
+  resize();
+  addEventListener('resize', resize);
+  canvas.parentElement.addEventListener('pointermove', e => {
+    const r = canvas.getBoundingClientRect();
+    mouse.x = e.clientX - r.left; mouse.y = e.clientY - r.top;
+  });
+  canvas.parentElement.addEventListener('pointerleave', () => { mouse.x = -1e4; mouse.y = -1e4; });
+
+  if (reduced){ t = 4000; draw(); cancelAnimationFrame(raf); }
+  else {
+    draw();
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) cancelAnimationFrame(raf);
+      else draw();
+    });
+  }
+})();
 </script>
 </body>
 </html>

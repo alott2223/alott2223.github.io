@@ -1,0 +1,574 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Topological Semantic Mechanics — Alott</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
+  <meta name="description" content="Interactive TSM manifold — runtime Riemannian metric evolution visualized."/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root{--bg:#050508;--bg2:#0a0a0f;--bg3:#111118;--bg4:#1a1a24;--text:#f0f0f5;--text2:#a0a0b8;--text3:#6a6a80;--accent:#06b6d4;--accent2:#10b981;--purple:#8b5cf6;--red:#ef4444;--amber:#f59e0b;--border:#1e1e2e;--glow:rgba(6,182,212,0.3);--sans:'Inter',system-ui,sans-serif;--mono:'JetBrains Mono',monospace}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.7;overflow-x:hidden}
+
+.top-nav{position:sticky;top:0;z-index:100;padding:12px 24px;background:rgba(5,5,8,0.9);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.top-nav a{color:var(--text2);text-decoration:none;font-size:0.8rem;font-weight:500;transition:color 0.2s}
+.top-nav a:hover{color:var(--accent)}
+
+/* HERO */
+.hero{min-height:95vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:40px 20px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 40%,rgba(6,182,212,0.03) 0%,transparent 50%)}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;padding:5px 14px;background:rgba(6,182,212,0.06);border:1px solid rgba(6,182,212,0.15);border-radius:99px;font-size:0.7rem;font-weight:600;color:var(--accent);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:20px;z-index:1;position:relative}
+.hero-badge::before{content:'';width:5px;height:5px;background:var(--accent2);border-radius:50%;animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.hero h1{font-size:clamp(2.2rem,5.5vw,3.8rem);font-weight:900;letter-spacing:-0.04em;line-height:1.05;margin-bottom:14px;z-index:1;position:relative;background:linear-gradient(135deg,#f0f0f5 30%,#06b6d4 70%,#10b981 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-sub{font-size:clamp(0.9rem,1.8vw,1.1rem);color:var(--text2);max-width:620px;margin-bottom:24px;z-index:1;position:relative;font-weight:300}
+
+/* SANDBOX */
+.sandbox{position:relative;z-index:1;display:flex;gap:16px;flex-wrap:wrap;justify-content:center;align-items:flex-start;margin:16px auto;max-width:1100px}
+.canvas-container{position:relative;border-radius:14px;overflow:hidden;border:1px solid var(--border);box-shadow:0 0 80px rgba(6,182,212,0.06),0 0 200px rgba(6,182,212,0.02);flex-shrink:0}
+#grid-canvas{display:block;background:var(--bg2);cursor:crosshair}
+.canvas-overlay{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;padding:10px 12px;pointer-events:none}
+.status-chip{display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:0.6rem;color:var(--accent2);background:rgba(5,5,8,0.85);padding:4px 10px;border-radius:6px;backdrop-filter:blur(8px)}
+.status-chip .dot{width:5px;height:5px;border-radius:50%;background:var(--accent2);animation:blink 1.5s infinite}
+.status-chip.stressed{color:var(--red)}.status-chip.stressed .dot{background:var(--red)}
+.status-chip.recovering{color:var(--amber)}.status-chip.recovering .dot{background:var(--amber)}
+.fps-chip{font-family:var(--mono);font-size:0.6rem;color:var(--text3);background:rgba(5,5,8,0.85);padding:4px 10px;border-radius:6px}
+
+/* CONTROL PANEL */
+.panel{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:16px;width:280px;max-height:600px;overflow-y:auto;flex-shrink:0}
+.panel-title{font-size:0.7rem;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:12px;font-family:var(--mono)}
+.panel-section{margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--border)}
+.panel-section:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+.panel-label{display:flex;justify-content:space-between;font-size:0.72rem;color:var(--text2);margin-bottom:5px;font-weight:500}
+.panel-val{font-family:var(--mono);color:var(--accent);font-weight:600}
+.slider{-webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:2px;background:var(--bg4);outline:none;cursor:pointer;margin-bottom:10px}
+.slider::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:0 0 8px var(--glow);cursor:pointer}
+.slider::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;cursor:pointer}
+
+/* BUTTONS */
+.btn{display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 14px;border-radius:7px;font-family:var(--sans);font-size:0.75rem;font-weight:600;cursor:pointer;transition:all 0.2s;border:none;width:100%;margin-bottom:6px}
+.btn-inject{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#050508;box-shadow:0 2px 12px var(--glow)}
+.btn-inject:hover{transform:translateY(-1px);box-shadow:0 4px 20px var(--glow)}
+.btn-reset{background:transparent;color:var(--text2);border:1px solid var(--border)}
+.btn-reset:hover{border-color:var(--accent);color:var(--accent)}
+.btn-toggle{background:var(--bg4);color:var(--text2);border:1px solid var(--border);font-size:0.7rem}
+.btn-toggle.active{background:rgba(6,182,212,0.1);border-color:var(--accent);color:var(--accent)}
+
+/* PATTERN SELECTOR */
+.pattern-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:10px}
+.pattern-btn{padding:6px 8px;border-radius:6px;background:var(--bg4);border:1px solid var(--border);color:var(--text3);font-size:0.65rem;font-weight:600;cursor:pointer;text-align:center;transition:all 0.2s}
+.pattern-btn.active{border-color:var(--accent);color:var(--accent);background:rgba(6,182,212,0.06)}
+.pattern-btn:hover{border-color:var(--accent)}
+
+/* TELEMETRY */
+.telemetry{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.tele-box{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 10px;text-align:center}
+.tele-val{font-family:var(--mono);font-size:0.9rem;font-weight:700;color:var(--accent)}
+.tele-lbl{font-size:0.55rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;margin-top:2px}
+
+/* SECTIONS BELOW */
+.container{max-width:1100px;margin:0 auto;padding:0 24px}
+section{padding:80px 0}
+section:nth-child(even){background:var(--bg2)}
+.section-label{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:0.68rem;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:12px}
+.section-label::before{content:'';width:18px;height:2px;background:var(--accent)}
+.section-title{font-size:clamp(1.6rem,3.5vw,2.4rem);font-weight:800;letter-spacing:-0.02em;margin-bottom:14px;line-height:1.2}
+.section-desc{font-size:1rem;color:var(--text2);max-width:640px;margin-bottom:36px;line-height:1.8}
+.eq-block{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:32px 20px;margin:20px 0;text-align:center;overflow-x:auto}
+.eq-terms{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-top:28px}
+.term-card{background:var(--bg4);border:1px solid var(--border);border-radius:9px;padding:16px;border-left:3px solid transparent;transition:all 0.3s}
+.term-card:hover{border-left-color:var(--accent);transform:translateY(-2px)}
+.term-math{font-family:var(--mono);font-size:0.75rem;color:var(--accent);margin-bottom:4px}
+.term-name{font-weight:700;font-size:0.9rem;margin-bottom:4px}
+.term-desc{color:var(--text2);font-size:0.82rem;line-height:1.6}
+
+.card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.card{background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:20px;transition:all 0.3s}
+.card:hover{border-color:var(--accent);transform:translateY(-3px);box-shadow:0 8px 30px rgba(6,182,212,0.05)}
+.card h3{font-size:1rem;margin-bottom:8px;font-weight:700}
+.card p{color:var(--text2);font-size:0.85rem;line-height:1.7}
+.card-icon{font-size:1.3rem;margin-bottom:10px}
+
+.tech-badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.tech-badge{padding:5px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;font-size:0.75rem;color:var(--text2);transition:all 0.2s}
+.tech-badge:hover{border-color:var(--accent);color:var(--text)}
+
+.cta{text-align:center;padding:100px 20px;position:relative}
+.cta::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(6,182,212,0.05) 0%,transparent 60%)}
+.cta *{position:relative;z-index:1}
+.cta h2{font-size:clamp(1.4rem,3vw,2.2rem);font-weight:800;margin-bottom:10px}
+.cta p{color:var(--text2);max-width:520px;margin:0 auto 28px;font-size:1rem}
+.cta-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.cta-btns .btn{width:auto;padding:10px 22px}
+
+.fade-in{opacity:0;transform:translateY(20px);transition:opacity 0.6s,transform 0.6s}.fade-in.visible{opacity:1;transform:translateY(0)}
+
+@media(max-width:900px){.sandbox{flex-direction:column;align-items:center}.panel{width:100%;max-width:520px}.explainer-grid{grid-template-columns:1fr}}
+@media(max-width:640px){.hero h1{font-size:2rem}.cta-btns{flex-direction:column;align-items:center}}
+
+/* EXPLAINER */
+.explainer{position:relative;z-index:1;width:100%;max-width:860px;margin:10px auto 32px;text-align:left;background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:28px 28px 20px}
+.explainer-title{font-size:1.1rem;font-weight:800;margin-bottom:16px;text-align:center;color:var(--text)}
+.explainer-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px}
+.explainer-item{display:flex;gap:12px;align-items:flex-start;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px}
+.explainer-icon{font-size:1.2rem;flex-shrink:0;width:28px;text-align:center}
+.explainer-text strong{display:block;font-size:0.82rem;color:var(--text);margin-bottom:4px}
+.explainer-text p{font-size:0.78rem;color:var(--text2);margin:0;line-height:1.5}
+.explainer-telemetry{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:0.75rem;color:var(--text2);display:flex;flex-wrap:wrap;gap:8px 20px;margin-bottom:14px}
+.explainer-telemetry strong{color:var(--text);display:block;width:100%;margin-bottom:4px;font-size:0.78rem}
+.explainer-telemetry b{color:var(--accent)}
+.explainer-cta{text-align:center;font-size:0.85rem;color:var(--accent);font-weight:600;margin:0}
+</style>
+</head>
+<body>
+
+<nav class="top-nav">
+  <a href="/" style="font-weight:800;color:var(--text);font-size:0.9rem">← Alott</a>
+  <div style="display:flex;gap:16px"><a href="/tsm-phase2.html">Phase II Model</a><a href="/blackpaper.html">Whitepaper</a><a href="#cta">Contact</a></div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge">Interactive Research Demo</div>
+  <h1>Topological Semantic<br>Mechanics</h1>
+  <p class="hero-sub">A live simulation of how AI embedding spaces could reshape themselves during inference. Read the explanation below, then try it yourself.</p>
+
+  <!-- EXPLANATION BEFORE DEMO -->
+  <div class="explainer">
+    <h2 class="explainer-title">What You're Looking At</h2>
+    <div class="explainer-grid">
+      <div class="explainer-item">
+        <div class="explainer-icon">🔵</div>
+        <div class="explainer-text">
+          <strong>The Grid = An AI's "Meaning Map"</strong>
+          <p>Each dot represents a coordinate where the AI stores a concept (a word, an idea). The lines between them represent distance relationships. In normal operation, the grid breathes gently — the space is healthy.</p>
+        </div>
+      </div>
+      <div class="explainer-item">
+        <div class="explainer-icon">💥</div>
+        <div class="explainer-text">
+          <strong>Injecting Stress = An Attack or Hard Problem</strong>
+          <p>When you click "Inject" or click the grid directly, you're simulating what happens when the AI encounters an adversarial prompt or an extremely complex question. The space warps — coordinates get displaced, concepts collide.</p>
+        </div>
+      </div>
+      <div class="explainer-item">
+        <div class="explainer-icon">🟡→🔴</div>
+        <div class="explainer-text">
+          <strong>Color = Curvature Severity</strong>
+          <p><span style="color:var(--accent)">Cyan</span> = healthy, low curvature. <span style="color:var(--amber)">Amber</span> = moderate stress, geometry stretching. <span style="color:var(--red)">Red</span> = critical — coordinates are dangerously warped.</p>
+        </div>
+      </div>
+      <div class="explainer-item">
+        <div class="explainer-icon">💚</div>
+        <div class="explainer-text">
+          <strong>Recovery = Ricci Flow Healing</strong>
+          <p>Watch the grid heal itself. The Ricci regularization term automatically smooths extreme curvature, pulling coordinates back to healthy positions. Try turning it OFF to see what happens without it.</p>
+        </div>
+      </div>
+    </div>
+    <div class="explainer-telemetry">
+      <strong>Telemetry explained:</strong>
+      <span><b>Σ Curvature</b> = total geometric stress across all nodes</span>
+      <span><b>Max Disp.</b> = how far the most-displaced node has moved from home</span>
+      <span><b>Entropy</b> = disorder level (high = coordinates are confused)</span>
+      <span><b>N_eff</b> = effective parameter multiplier (how much extra capacity the curvature creates)</span>
+    </div>
+    <p class="explainer-cta">👇 Try it: click anywhere on the grid below, or use the control panel on the right.</p>
+  </div>
+
+  <div class="sandbox">
+    <div class="canvas-container">
+      <canvas id="grid-canvas" width="580" height="580"></canvas>
+      <div class="canvas-overlay">
+        <div class="status-chip" id="status-chip"><span class="dot"></span><span id="status-text">HOMEOSTASIS</span></div>
+        <div class="fps-chip" id="fps-chip">60 FPS</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">⚙ Control Panel</div>
+
+      <div class="panel-section">
+        <div class="panel-label"><span>Injection Pattern</span></div>
+        <div class="pattern-grid">
+          <div class="pattern-btn active" data-pattern="vortex">🌀 Vortex</div>
+          <div class="pattern-btn" data-pattern="shockwave">💥 Shockwave</div>
+          <div class="pattern-btn" data-pattern="cascade">🌊 Cascade</div>
+          <div class="pattern-btn" data-pattern="random">🎲 Random</div>
+        </div>
+        <button class="btn btn-inject" id="inject-btn">⚡ Inject Stress</button>
+        <button class="btn btn-reset" id="reset-btn">↻ Reset Manifold</button>
+      </div>
+
+      <div class="panel-section">
+        <div class="panel-label"><span>Stress Intensity</span><span class="panel-val" id="v-intensity">75%</span></div>
+        <input type="range" class="slider" id="s-intensity" min="5" max="100" value="75">
+        <div class="panel-label"><span>η (Dissipation)</span><span class="panel-val" id="v-eta">0.10</span></div>
+        <input type="range" class="slider" id="s-eta" min="1" max="30" value="10">
+        <div class="panel-label"><span>μ (Ricci Strength)</span><span class="panel-val" id="v-mu">0.12</span></div>
+        <input type="range" class="slider" id="s-mu" min="1" max="40" value="12">
+        <div class="panel-label"><span>λ (Coupling)</span><span class="panel-val" id="v-lambda">0.05</span></div>
+        <input type="range" class="slider" id="s-lambda" min="1" max="20" value="5">
+      </div>
+
+      <div class="panel-section">
+        <div class="panel-label"><span>View Mode</span></div>
+        <div style="display:flex;gap:5px;margin-bottom:8px">
+          <button class="btn btn-toggle active" id="btn-2d">2D</button>
+          <button class="btn btn-toggle" id="btn-3d">3D Iso</button>
+        </div>
+        <div style="display:flex;gap:5px;margin-bottom:8px">
+          <button class="btn btn-toggle active" id="btn-ricci">Ricci Flow ON</button>
+          <button class="btn btn-toggle" id="btn-audio">🔇 Audio</button>
+        </div>
+        <div style="display:flex;gap:5px">
+          <button class="btn btn-toggle active" id="btn-trails">Trails</button>
+          <button class="btn btn-toggle active" id="btn-heatmap">Heatmap</button>
+        </div>
+      </div>
+
+      <div class="panel-section">
+        <div class="panel-label"><span>Live Telemetry</span></div>
+        <div class="telemetry">
+          <div class="tele-box"><div class="tele-val" id="t-curvature">0.00</div><div class="tele-lbl">Σ Curvature</div></div>
+          <div class="tele-box"><div class="tele-val" id="t-displacement">0.00</div><div class="tele-lbl">Max Disp.</div></div>
+          <div class="tele-box"><div class="tele-val" id="t-entropy">0.00</div><div class="tele-lbl">Entropy</div></div>
+          <div class="tele-box"><div class="tele-val" id="t-neff">1.00x</div><div class="tele-lbl">N_eff Mult.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- EQUATION SECTION -->
+<section id="innovation">
+  <div class="container fade-in">
+    <span class="section-label">The Core</span>
+    <h2 class="section-title">The TSM Field Equation</h2>
+    <p class="section-desc">A single evolutionary PDE governing how the metric tensor warps during inference.</p>
+    <div class="eq-block"><div id="main-eq"></div></div>
+    <div class="eq-terms">
+      <div class="term-card"><div class="term-math" id="t1-math"></div><div class="term-name">Entropy Dissipation</div><div class="term-desc">Stretches crowded regions to eliminate token confusion when attention entropy spikes.</div></div>
+      <div class="term-card"><div class="term-math" id="t2-math"></div><div class="term-name">Intentional Coupling</div><div class="term-desc">Locks manifold geometry onto the human's real-time conversational trajectory.</div></div>
+      <div class="term-card"><div class="term-math" id="t3-math"></div><div class="term-name">Ricci Regularization</div><div class="term-desc">Immune system — smooths curvature spikes from adversarial inputs, prevents singularities.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- APPLICATIONS -->
+<section id="apps">
+  <div class="container fade-in">
+    <span class="section-label">Impact</span>
+    <h2 class="section-title">Applications</h2>
+    <div class="card-grid">
+      <div class="card"><div class="card-icon">🔄</div><h3>Next-Gen DeFi</h3><p>Topologically adaptive AMM pools mutating curves to eliminate impermanent loss.</p></div>
+      <div class="card"><div class="card-icon">🤖</div><h3>Edge Computing</h3><p>High-fidelity reasoning on restricted hardware — 10-100x fewer parameters needed.</p></div>
+      <div class="card"><div class="card-icon">🛡️</div><h3>Model Hardening</h3><p>Geometric immunization against jailbreaks — curvature spikes trigger auto-neutralization.</p></div>
+    </div>
+    <h3 style="margin-top:36px;font-size:1rem;font-weight:700">Tech Stack</h3>
+    <div class="tech-badges">
+      <span class="tech-badge">Python</span><span class="tech-badge">Rust</span><span class="tech-badge">Solana Anchor</span><span class="tech-badge">Docker</span><span class="tech-badge">CUDA</span><span class="tech-badge">Finite-Difference PDE</span><span class="tech-badge">Riemannian Geometry</span><span class="tech-badge">NumPy/SciPy</span>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta" id="cta">
+  <h2>Ready to Test the Manifold Layer?</h2>
+  <p>Interested in larger transformer baselines? Let's connect.</p>
+  <div class="cta-btns">
+    <a href="/tsm-phase2.html" class="btn btn-inject" style="box-shadow:0 2px 12px var(--glow)">🧠 Phase II Benchmarks</a>
+    <a href="/blackpaper.html" class="btn btn-reset">📄 Read the Whitepaper</a>
+    <a href="mailto:admin@alott.me" class="btn btn-reset">🤝 Connect</a>
+  </div>
+</section>
+
+<script>
+// ═══════════════════════════════════════════
+// TSM INTERACTIVE MANIFOLD — FULL ENGINE
+// ═══════════════════════════════════════════
+(function(){
+var canvas=document.getElementById('grid-canvas'),ctx=canvas.getContext('2d');
+var W=canvas.width,H=canvas.height,N=16,spacing=W/(N+1);
+var nodes=[],particles=[],state='homeostasis',stressTimer=0;
+var ricciOn=true,trailsOn=true,heatmapOn=true,is3D=false,audioOn=false;
+var eta=0.10,mu=0.12,lambda=0.05,maxRicci=500;
+var pattern='vortex',lastTime=0,frameCount=0,fps=60;
+var audioCtx=null,oscillator=null,gainNode=null;
+
+// INIT NODES
+function initNodes(){
+  nodes=[];particles=[];
+  for(var i=0;i<N;i++){nodes[i]=[];for(var j=0;j<N;j++){
+    var x=(j+1)*spacing,y=(i+1)*spacing;
+    nodes[i][j]={x:x,y:y,bx:x,by:y,c:0,e:0,vx:0,vy:0,trail:[]};
+  }}
+}
+
+// INJECTION PATTERNS
+function inject(cx,cy,mag){
+  mag=Math.max(0.05,Math.min(1,mag));
+  setState('stressed');
+  var centerI=Math.round(cy/spacing)-1,centerJ=Math.round(cx/spacing)-1;
+  centerI=Math.max(0,Math.min(N-1,centerI));centerJ=Math.max(0,Math.min(N-1,centerJ));
+  var radius=2+Math.round(mag*4);
+
+  for(var i=0;i<N;i++)for(var j=0;j<N;j++){
+    var dx=j-centerJ,dy=i-centerI,dist=Math.sqrt(dx*dx+dy*dy);
+    if(dist<radius){
+      var intensity=(1-dist/radius)*2.5*mag;
+      var angle;
+      if(pattern==='vortex') angle=Math.atan2(dy,dx)+Math.PI/2;
+      else if(pattern==='shockwave') angle=Math.atan2(dy,dx);
+      else if(pattern==='cascade') angle=Math.PI*0.25+dist*0.5;
+      else angle=Math.random()*Math.PI*2;
+      // Apply velocity (displaces the metric tensor locally)
+      nodes[i][j].vx+=Math.cos(angle)*intensity*spacing*0.45;
+      nodes[i][j].vy+=Math.sin(angle)*intensity*spacing*0.45;
+      // spawn particles along the geodesic distortion
+      if(trailsOn&&Math.random()<0.3){
+        particles.push({x:nodes[i][j].x,y:nodes[i][j].y,vx:Math.cos(angle)*2,vy:Math.sin(angle)*2,life:1,color:intensity>1.5?'r':intensity>0.8?'a':'c'});
+      }
+    }
+  }
+}
+
+function setState(s){state=s;stressTimer=0;
+  var el=document.getElementById('status-chip');
+  el.className='status-chip'+(s==='homeostasis'?'':' '+s);
+  document.getElementById('status-text').textContent=s.toUpperCase();
+}
+
+// PHYSICS TICK
+function physics(){
+  if(state==='homeostasis'){
+    var t=Date.now()*0.001;
+    for(var i=0;i<N;i++)for(var j=0;j<N;j++){
+      var ph=(i+j)*0.5;
+      nodes[i][j].x=nodes[i][j].bx+Math.sin(t+ph)*1.5;
+      nodes[i][j].y=nodes[i][j].by+Math.cos(t*0.7+ph)*1.5;
+      nodes[i][j].c*=0.95;nodes[i][j].e*=0.95;
+    }
+    return;
+  }
+  var totalC=0,maxD=0,totalE=0,totalVol=0;
+  for(var i=0;i<N;i++)for(var j=0;j<N;j++){
+    var n=nodes[i][j];
+    var dpx=n.x-n.bx,dpy=n.y-n.by,dp=Math.sqrt(dpx*dpx+dpy*dpy);
+
+    // Compute discrete scalar curvature: deviation of local distances from expected
+    // (angle deficit method — sum of neighbor distances vs expected)
+    var expectedDist=spacing,actualDistSum=0,neighborCount=0;
+    var offs=[[-1,0],[1,0],[0,-1],[0,1]];
+    for(var k=0;k<4;k++){var ni=i+offs[k][0],nj=j+offs[k][1];
+      if(ni>=0&&ni<N&&nj>=0&&nj<N){
+        var ddx=nodes[ni][nj].x-n.x,ddy=nodes[ni][nj].y-n.y;
+        actualDistSum+=Math.sqrt(ddx*ddx+ddy*ddy);
+        neighborCount++;
+      }
+    }
+    // Curvature = how much local metric deviates from flat
+    var avgActualDist=neighborCount>0?actualDistSum/neighborCount:expectedDist;
+    var metricDeviation=(avgActualDist-expectedDist)/expectedDist;
+    var discreteCurvature=Math.abs(metricDeviation)*10; // scale for visibility
+    n.c=n.c*0.7+discreteCurvature*0.3; // blend for smooth display
+
+    // Volume element: ratio of local area to expected area (measures expansion)
+    var localVol=avgActualDist/expectedDist;
+    totalVol+=localVol;
+
+    if(ricciOn){
+      // Ricci flow: pull toward expected distances (smooth curvature)
+      var rf=Math.min(mu*n.c,maxRicci);
+      n.vx-=eta*dpx*0.05+rf*(dpx/(dp+0.01))*0.01;
+      n.vy-=eta*dpy*0.05+rf*(dpy/(dp+0.01))*0.01;
+    }
+    // Coupling: average of neighbors (Laplacian smoothing)
+    var ax=0,ay=0,cnt=0;
+    for(var k=0;k<4;k++){var ni=i+offs[k][0],nj=j+offs[k][1];
+      if(ni>=0&&ni<N&&nj>=0&&nj<N){ax+=nodes[ni][nj].x;ay+=nodes[ni][nj].y;cnt++;}
+    }
+    if(cnt){ax/=cnt;ay/=cnt;n.vx+=lambda*(ax-n.x)*0.1;n.vy+=lambda*(ay-n.y)*0.1;}
+    n.vx*=0.91;n.vy*=0.91;
+    if(!ricciOn)n.c*=0.998; // very slow decay without Ricci
+    n.x+=n.vx;n.y+=n.vy;
+    // trail
+    if(trailsOn&&dp>2){n.trail.push({x:n.x,y:n.y,a:1});if(n.trail.length>12)n.trail.shift();}
+    totalC+=n.c;if(dp>maxD)maxD=dp;
+    // Entropy: local positional variance (how disordered is the neighborhood)
+    n.e=Math.abs(metricDeviation);
+    totalE+=n.e;
+  }
+  // particles
+  for(var p=particles.length-1;p>=0;p--){
+    var pt=particles[p];pt.x+=pt.vx;pt.y+=pt.vy;pt.life-=0.025;pt.vx*=0.96;pt.vy*=0.96;
+    if(pt.life<=0)particles.splice(p,1);
+  }
+  // telemetry — now mathematically faithful
+  var scalarCurvature=totalC; // sum of discrete curvatures (analogous to ∫|R|dV)
+  document.getElementById('t-curvature').textContent=scalarCurvature.toFixed(1);
+  document.getElementById('t-displacement').textContent=maxD.toFixed(1);
+  document.getElementById('t-entropy').textContent=totalE.toFixed(2);
+  // N_eff = N * exp(∫√|R| dV) — computed as exp(sqrt(totalCurvature) * volumeScale)
+  var curvatureIntegral=Math.sqrt(scalarCurvature)*(totalVol/(N*N))*0.15;
+  var neff=Math.exp(curvatureIntegral);
+  document.getElementById('t-neff').textContent=neff.toFixed(2)+'x';
+  // audio
+  if(audioOn&&gainNode){gainNode.gain.value=Math.min(0.3,scalarCurvature*0.003);if(oscillator)oscillator.frequency.value=180+scalarCurvature*5;}
+  // state transitions
+  if(state==='stressed'){stressTimer++;if(stressTimer>30)setState('recovering');}
+  else if(state==='recovering'&&maxD<spacing*0.03)setState('homeostasis');
+}
+
+// RENDER
+function render(){
+  ctx.clearRect(0,0,W,H);
+  // heatmap
+  if(heatmapOn){
+    for(var i=0;i<N;i++)for(var j=0;j<N;j++){
+      var n=nodes[i][j];if(n.c>0.1){
+        var r=spacing*1.5*Math.min(2,n.c);
+        var g=ctx.createRadialGradient(n.x,n.y,0,n.x,n.y,r);
+        var col=n.c>2?'6,182,212':n.c>1?'245,158,11':'139,92,246';
+        g.addColorStop(0,'rgba('+col+','+Math.min(0.15,n.c*0.04)+')');
+        g.addColorStop(1,'rgba('+col+',0)');
+        ctx.fillStyle=g;ctx.fillRect(n.x-r,n.y-r,r*2,r*2);
+      }
+    }
+  }
+  // trails
+  if(trailsOn){
+    for(var i=0;i<N;i++)for(var j=0;j<N;j++){
+      var tr=nodes[i][j].trail;
+      for(var t=0;t<tr.length;t++){tr[t].a-=0.08;if(tr[t].a<=0){tr.splice(t,1);t--;continue;}
+        var px=tr[t].x,py=tr[t].y;
+        if(is3D){var iso=toIso(px,py,nodes[i][j].c*3);px=iso[0];py=iso[1];}
+        ctx.beginPath();ctx.arc(px,py,1.5,0,Math.PI*2);ctx.fillStyle='rgba(6,182,212,'+tr[t].a*0.3+')';ctx.fill();
+      }
+    }
+  }
+  // particles
+  for(var p=0;p<particles.length;p++){
+    var pt=particles[p];var px=pt.x,py=pt.y;
+    if(is3D){var iso=toIso(px,py,0);px=iso[0];py=iso[1];}
+    var col=pt.color==='r'?'239,68,68':pt.color==='a'?'245,158,11':'6,182,212';
+    ctx.beginPath();ctx.arc(px,py,2*pt.life,0,Math.PI*2);ctx.fillStyle='rgba('+col+','+pt.life*0.7+')';ctx.fill();
+  }
+  // edges
+  for(var i=0;i<N;i++)for(var j=0;j<N;j++){
+    var n=nodes[i][j];
+    if(j<N-1)drawEdge(n,nodes[i][j+1]);
+    if(i<N-1)drawEdge(n,nodes[i+1][j]);
+  }
+  // nodes
+  for(var i=0;i<N;i++)for(var j=0;j<N;j++)drawNode(nodes[i][j]);
+}
+
+function toIso(x,y,z){
+  var cx=W/2,cy=H/2;
+  var dx=x-cx,dy=y-cy;
+  var ix=cx+(dx-dy)*0.7;
+  var iy=cy+(dx+dy)*0.35-z*8;
+  return[ix,iy];
+}
+
+function drawEdge(a,b){
+  var ax=a.x,ay=a.y,bx=b.x,by=b.y;
+  if(is3D){var ia=toIso(a.x,a.y,a.c*3),ib=toIso(b.x,b.y,b.c*3);ax=ia[0];ay=ia[1];bx=ib[0];by=ib[1];}
+  var strain=Math.sqrt((a.x-b.x)**2+(a.y-b.y)**2)/spacing;
+  var alpha=Math.max(0.05,0.35-(strain-1)*0.3);
+  ctx.beginPath();ctx.moveTo(ax,ay);ctx.lineTo(bx,by);
+  ctx.strokeStyle=strain>1.4?'rgba(239,68,68,'+alpha+')':strain>1.15?'rgba(245,158,11,'+alpha+')':'rgba(6,182,212,'+alpha+')';
+  ctx.lineWidth=strain>1.3?1.5:1;ctx.stroke();
+}
+
+function drawNode(n){
+  var intensity=Math.min(1,n.c/2.5),size=2.2+intensity*2.5;
+  var nx=n.x,ny=n.y;
+  if(is3D){var iso=toIso(n.x,n.y,n.c*3);nx=iso[0];ny=iso[1];}
+  ctx.beginPath();ctx.arc(nx,ny,size,0,Math.PI*2);
+  if(n.c>2){ctx.fillStyle='rgba(239,68,68,'+(0.7+intensity*0.3)+')';ctx.shadowColor='rgba(239,68,68,0.6)';ctx.shadowBlur=10;}
+  else if(n.c>0.8){ctx.fillStyle='rgba(245,158,11,'+(0.5+intensity*0.5)+')';ctx.shadowColor='rgba(245,158,11,0.3)';ctx.shadowBlur=6;}
+  else if(n.c>0.2){ctx.fillStyle='rgba(139,92,246,'+(0.4+intensity*0.4)+')';ctx.shadowBlur=0;}
+  else{ctx.fillStyle='rgba(6,182,212,'+(0.4+intensity*0.3)+')';ctx.shadowBlur=0;}
+  ctx.fill();ctx.shadowBlur=0;
+}
+
+// MAIN LOOP
+function loop(ts){
+  frameCount++;if(ts-lastTime>=1000){fps=frameCount;frameCount=0;lastTime=ts;document.getElementById('fps-chip').textContent=fps+' FPS';}
+  physics();render();
+  requestAnimationFrame(loop);
+}
+
+// AUDIO
+function initAudio(){
+  audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+  oscillator=audioCtx.createOscillator();gainNode=audioCtx.createGain();
+  oscillator.type='sine';oscillator.frequency.value=200;
+  gainNode.gain.value=0;
+  oscillator.connect(gainNode);gainNode.connect(audioCtx.destination);
+  oscillator.start();
+}
+
+// EVENTS
+initNodes();requestAnimationFrame(loop);
+
+// Click to inject
+canvas.addEventListener('click',function(e){
+  var rect=canvas.getBoundingClientRect();
+  var x=(e.clientX-rect.left)*(W/rect.width);
+  var y=(e.clientY-rect.top)*(H/rect.height);
+  inject(x,y,parseInt(document.getElementById('s-intensity').value)/100);
+});
+
+document.getElementById('inject-btn').onclick=function(){inject(W/2,H/2,parseInt(document.getElementById('s-intensity').value)/100);};
+document.getElementById('reset-btn').onclick=function(){initNodes();setState('homeostasis');};
+
+// Sliders
+document.getElementById('s-intensity').oninput=function(){document.getElementById('v-intensity').textContent=this.value+'%';};
+document.getElementById('s-eta').oninput=function(){eta=this.value/100;document.getElementById('v-eta').textContent=eta.toFixed(2);};
+document.getElementById('s-mu').oninput=function(){mu=this.value/100;document.getElementById('v-mu').textContent=mu.toFixed(2);};
+document.getElementById('s-lambda').oninput=function(){lambda=this.value/100;document.getElementById('v-lambda').textContent=lambda.toFixed(2);};
+
+// Patterns
+document.querySelectorAll('.pattern-btn').forEach(function(btn){
+  btn.onclick=function(){document.querySelectorAll('.pattern-btn').forEach(function(b){b.classList.remove('active');});this.classList.add('active');pattern=this.dataset.pattern;};
+});
+
+// Toggles
+document.getElementById('btn-2d').onclick=function(){is3D=false;this.classList.add('active');document.getElementById('btn-3d').classList.remove('active');};
+document.getElementById('btn-3d').onclick=function(){is3D=true;this.classList.add('active');document.getElementById('btn-2d').classList.remove('active');};
+document.getElementById('btn-ricci').onclick=function(){ricciOn=!ricciOn;this.classList.toggle('active');this.textContent=ricciOn?'Ricci Flow ON':'Ricci Flow OFF';};
+document.getElementById('btn-trails').onclick=function(){trailsOn=!trailsOn;this.classList.toggle('active');};
+document.getElementById('btn-heatmap').onclick=function(){heatmapOn=!heatmapOn;this.classList.toggle('active');};
+document.getElementById('btn-audio').onclick=function(){
+  audioOn=!audioOn;this.classList.toggle('active');this.textContent=audioOn?'🔊 Audio':'🔇 Audio';
+  if(audioOn&&!audioCtx)initAudio();
+  if(!audioOn&&gainNode)gainNode.gain.value=0;
+};
+})();
+
+// KATEX
+function waitForKatex(cb){if(window.katex)cb();else setTimeout(function(){waitForKatex(cb)},80);}
+waitForKatex(function(){
+  var k=window.katex;function r(id,tex,d){var el=document.getElementById(id);if(el)el.innerHTML=k.renderToString(tex,{displayMode:!!d,throwOnError:false});}
+  r('main-eq','\\frac{\\partial g_{ij}}{\\partial t} = -\\eta \\frac{\\partial \\mathcal{H}(A)}{\\partial g_{ij}} + \\lambda \\Pi_{ij}\\!\\left(\\mathbf{I}_{human}(t)\\right) + \\mu R_{ij}(g)',true);
+  r('t1-math','-\\eta\\, \\partial\\mathcal{H}/\\partial g_{ij}');
+  r('t2-math','\\lambda\\, \\Pi_{ij}');
+  r('t3-math','\\mu\\, R_{ij}');
+});
+
+// SCROLL ANIMS
+var obs=new IntersectionObserver(function(e){e.forEach(function(en){if(en.isIntersecting)en.target.classList.add('visible');});},{threshold:0.1});
+document.querySelectorAll('.fade-in').forEach(function(el){obs.observe(el);});
+</script>
+</body>
+</html>

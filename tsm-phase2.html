@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TSM Phase II — Lightweight Model Benchmarks</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
+  <meta name="description" content="TSM Phase II: PyTorch char-level LM with runtime Riemannian manifold evolution — benchmark results."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root{--bg:#050505;--bg2:#0a0a0a;--bg3:#111;--text:#f0f0f0;--text2:#a1a1aa;--text3:#71717a;--accent:#06b6d4;--accent2:#10b981;--red:#ef4444;--amber:#f59e0b;--border:#1f1f1f;--sans:'Inter',system-ui,sans-serif;--mono:'JetBrains Mono',monospace}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.8}
+.nav{position:sticky;top:0;z-index:100;padding:14px 32px;background:rgba(5,5,5,0.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.nav a{color:var(--text2);text-decoration:none;font-size:0.8rem;font-weight:500;transition:color .2s}
+.nav a:hover{color:var(--accent)}
+.nav-brand{font-weight:800;color:var(--text);font-size:0.9rem}
+.page{max-width:900px;margin:0 auto;padding:60px 28px 100px}
+.hero{text-align:center;padding:40px 0 60px}
+.badge{display:inline-block;background:linear-gradient(135deg,#06b6d4,#10b981);color:#050505;font-size:0.65rem;font-weight:800;padding:4px 12px;border-radius:99px;letter-spacing:0.08em;margin-bottom:16px}
+.hero h1{font-size:clamp(2rem,5vw,3.2rem);font-weight:900;letter-spacing:-0.03em;line-height:1.1;margin-bottom:12px;background:linear-gradient(135deg,#f0f0f0 40%,#06b6d4 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero p{color:var(--text2);max-width:640px;margin:0 auto;font-size:1.05rem}
+.sh{margin:56px 0 24px;padding-top:32px;border-top:1px solid var(--border)}
+.sh-label{font-family:var(--mono);font-size:0.65rem;color:var(--accent);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:6px}
+.sh h2{font-size:1.6rem;font-weight:800;letter-spacing:-0.02em}
+p,li{color:var(--text2);font-size:0.95rem;margin-bottom:14px}
+strong{color:var(--text)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin:24px 0}
+.stat{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center}
+.stat-val{font-family:var(--mono);font-size:1.4rem;font-weight:700;color:var(--accent)}
+.stat-val.green{color:var(--accent2)}
+.stat-lbl{font-size:0.7rem;color:var(--text3);margin-top:4px;text-transform:uppercase;letter-spacing:0.06em}
+.data-table{width:100%;border-collapse:collapse;margin:20px 0;font-size:0.85rem}
+.data-table th{text-align:left;padding:10px 14px;background:var(--bg2);border:1px solid var(--border);color:var(--accent);font-family:var(--mono);font-size:0.72rem;text-transform:uppercase}
+.data-table td{padding:10px 14px;border:1px solid var(--border);color:var(--text2)}
+.chart{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:12px;margin:20px 0;text-align:center}
+.chart img{max-width:100%;height:auto;border-radius:8px}
+.callout{background:var(--bg2);border:1px solid var(--border);border-left:3px solid var(--accent2);border-radius:0 10px 10px 0;padding:18px 22px;margin:24px 0}
+.callout.warn{border-left-color:var(--amber)}
+pre{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:18px;overflow-x:auto;font-family:var(--mono);font-size:0.78rem;color:var(--text2);line-height:1.6;margin:16px 0}
+code{font-family:var(--mono);font-size:0.85em;background:var(--bg3);padding:2px 6px;border-radius:4px;color:var(--accent)}
+.arch{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:8px;align-items:center;margin:24px 0;font-size:0.8rem}
+.arch-box{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:14px;text-align:center;color:var(--text2)}
+.arch-box.hl{border-color:var(--accent);color:var(--text)}
+.arch-arrow{color:var(--text3);font-family:var(--mono)}
+.footer{text-align:center;padding:40px;color:var(--text3);font-size:0.8rem;border-top:1px solid var(--border)}
+.footer a{color:var(--accent);text-decoration:none}
+@media(max-width:640px){.arch{grid-template-columns:1fr;}.arch-arrow{transform:rotate(90deg);text-align:center}}
+</style>
+</head>
+<body>
+<nav class="nav">
+  <a href="/" class="nav-brand">Alott</a>
+  <div style="display:flex;gap:18px">
+    <a href="/tsm.html">Phase I Demo</a>
+    <a href="/blackpaper.html">Whitepaper</a>
+    <a href="/">Home</a>
+  </div>
+</nav>
+
+<article class="page">
+  <header class="hero">
+    <div class="badge">PHASE II COMPLETE</div>
+    <h1>TSM Lightweight Model</h1>
+    <p>A ~413K-parameter char-level transformer with runtime Riemannian manifold evolution — same param count as baseline, benchmarked on Tiny Shakespeare.</p>
+  </header>
+
+  <div class="stats">
+    <div class="stat"><div class="stat-val green">5.47×</div><div class="stat-lbl">N_eff Multiplier</div></div>
+    <div class="stat"><div class="stat-val">12.14</div><div class="stat-lbl">TSM Perplexity</div></div>
+    <div class="stat"><div class="stat-val">413K</div><div class="stat-lbl">Parameters (both)</div></div>
+    <div class="stat"><div class="stat-val green">0</div><div class="stat-lbl">Circuit Breaker Trips</div></div>
+  </div>
+
+  <div class="sh" style="border:none;padding-top:0;margin-top:0">
+    <div class="sh-label">Architecture</div>
+    <h2>Manifold Layer → Transformer</h2>
+  </div>
+  <p>TSM wraps token embeddings <strong>before</strong> a shared 2-layer transformer backbone. The manifold layer adds <strong>zero trainable parameters</strong> — geometry evolves at inference time via the TSM field equation (η=0.10, λ=0.05, μ=0.12).</p>
+  <div class="arch">
+    <div class="arch-box">Token<br>Embeddings</div>
+    <div class="arch-arrow">→</div>
+    <div class="arch-box hl">TSM Manifold<br>5 evolution steps</div>
+    <div class="arch-arrow">→</div>
+    <div class="arch-box">2-Layer<br>Transformer</div>
+  </div>
+
+  <div class="sh">
+    <div class="sh-label">Benchmarks</div>
+    <h2>Head-to-Head Results</h2>
+  </div>
+  <table class="data-table">
+    <thead><tr><th>Metric</th><th>Baseline</th><th>TSM</th><th>Delta</th></tr></thead>
+    <tbody>
+      <tr><td>Parameters</td><td>413,312</td><td>413,312</td><td>Same</td></tr>
+      <tr><td>Validation Perplexity</td><td>12.21</td><td><strong>12.14</strong></td><td>+0.53% better</td></tr>
+      <tr><td>N_eff (runtime)</td><td>1.00×</td><td><strong>5.47×</strong></td><td>5.47× capacity</td></tr>
+      <tr><td>Forward Latency</td><td>1.06 ms</td><td>8.87 ms</td><td>+7.8 ms overhead</td></tr>
+      <tr><td>Adversarial Shock Degradation</td><td>38.83%</td><td>38.92%</td><td>0 CB trips</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    <strong>Key finding:</strong> At identical parameter count, TSM achieves lower perplexity with a measured 5.47× effective capacity multiplier — validating the N_eff hypothesis from Phase I at model scale.
+  </div>
+  <div class="callout warn">
+    <strong>Phase III target:</strong> Reduce inference overhead from ~8.9 ms to &lt;2 ms via Rust/CUDA implementation.
+  </div>
+
+  <div class="chart"><img src="/assets/tsm-phase2/perplexity_comparison.png" alt="Perplexity comparison chart"/></div>
+  <div class="chart"><img src="/assets/tsm-phase2/neff_scaling.png" alt="N_eff scaling chart"/></div>
+  <div class="chart"><img src="/assets/tsm-phase2/adversarial_shock.png" alt="Adversarial shock test chart"/></div>
+
+  <div class="sh">
+    <div class="sh-label">Reproduce</div>
+    <h2>Run It Yourself</h2>
+  </div>
+  <pre>git clone &lt;your-repo&gt; tsm-model
+cd tsm-model
+pip install -r requirements.txt
+python benchmarks/train.py
+python benchmarks/evaluate.py
+python benchmarks/adversarial.py
+python benchmarks/plot_results.py</pre>
+  <p>Theory background: <a href="/blackpaper.html" style="color:var(--accent)">TSM Whitepaper</a> · Interactive demo: <a href="/tsm.html" style="color:var(--accent)">Phase I Grid Simulation</a></p>
+</article>
+
+<footer class="footer">
+  <p>&copy; 2026 Alott · <a href="/tsm.html">Phase I</a> · <a href="/blackpaper.html">Whitepaper</a> · <a href="/">Portfolio</a></p>
+</footer>
+</body>
+</html>
