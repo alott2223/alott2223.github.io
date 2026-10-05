@@ -196,11 +196,11 @@ footer{margin-top:64px;padding-top:20px;border-top:1px solid var(--line);font:12
   <section id="talk" class="talk" aria-labelledby="talk-h">
     <div class="head">
       <p class="eyebrow">Talk to Noggin</p>
-      <h2 id="talk-h">Phase 1 brain: pure gibberish</h2>
-      <p>Right now Noggin runs on tiny-gpt2: a 2 MB language model that was never trained. It has no idea what words mean, so it just babbles. The real brain comes in Phase 2.</p>
+      <h2 id="talk-h">Phase 1 brain: raised on copypasta</h2>
+      <p>Right now Noggin runs on GPT-2, fine-tuned on a pile of brain-in-a-jar shitposts. It doesn't understand you. It just rambles. The real brain comes in Phase 2.</p>
     </div>
     <div class="chat">
-      <div class="log" id="log" aria-live="polite"><p class="msg bot">blorp. ask me something. I will not understand it.</p></div>
+      <div class="log" id="log" aria-live="polite"><p class="msg bot">I am a brain. I live in a jar. ask me something.</p></div>
       <form class="say" id="say">
         <label for="msg" class="sr">Message</label>
         <input id="msg" type="text" maxlength="200" autocomplete="off" placeholder="say something to the brain">
@@ -374,7 +374,7 @@ const NOGGIN = {
   telegram: "",        // e.g. "https://t.me/nogginjar"
   treasuryVault: "",   // your Squads vault address
   logsUrl: "",         // public repo/folder with Noggin's logs
-  brainUrl: "https://perfume-continental-always-captured.trycloudflare.com"         // your Cloudflare tunnel URL for the GPT-2 brain, e.g. "https://xyz.trycloudflare.com"
+  brainUrl: "https://electrical-deferred-blank-links.trycloudflare.com"         // your Cloudflare tunnel URL for the GPT-2 brain, e.g. "https://xyz.trycloudflare.com"
 };
 (function(){
   var log=document.getElementById('log'), form=document.getElementById('say'), input=document.getElementById('msg'), state=document.getElementById('brainState');
