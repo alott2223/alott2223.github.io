@@ -1,0 +1,423 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="$NOGGIN: a fair-launch Solana memecoin run by an AI mascot with a budget cap. Every decision fingerprinted on-chain.">
+<meta property="og:title" content="$NOGGIN · a brain in a jar with a budget cap">
+<meta property="og:description" content="Fair launch. AI mascot with hard spending limits. Every decision fingerprinted on-chain.">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M12 34c-2-11 7-16 12-15 4-6 12-5 15-1 8-1 12 7 11 12 6 4 2 13-4 13-2 6-11 7-15 3-6 3-14 0-14-5-5-1-7-5-5-7z' fill='%23e0648c' stroke='%23b8436b' stroke-width='3'/%3E%3Ccircle cx='26' cy='32' r='3' fill='%23173b3a'/%3E%3Ccircle cx='38' cy='32' r='3' fill='%23173b3a'/%3E%3C/svg%3E">
+<style>html{-webkit-text-size-adjust:100%}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>$NOGGIN</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: a lab specimen sheet. Jar hero left, specimen label right; below, stacked "findings" in a two-column grid that folds to one. */
+:root{
+  --paper:#eef2ef; --card:#f8faf8; --ink:#173b3a; --muted:#5a706d; --line:#c9d6d2;
+  --brain:#e0648c; --brain-deep:#b8436b; --fluid:#cfe6dc; --ok:#2f7d5b; --warn:#a2581b;
+  --display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
+  --body:"Atkinson Hyperlegible",ui-sans-serif,system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#0f1c1c; --card:#152626; --ink:#dcebe6; --muted:#8fa8a3; --line:#2a3f3e;
+  --brain:#ef7fa2; --brain-deep:#f39ab6; --fluid:#1d3a34; --ok:#5cc196; --warn:#e2a067; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#0f1c1c; --card:#152626; --ink:#dcebe6; --muted:#8fa8a3; --line:#2a3f3e;
+  --brain:#ef7fa2; --brain-deep:#f39ab6; --fluid:#1d3a34; --ok:#5cc196; --warn:#e2a067; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font:16px/1.6 var(--body);padding-inline:20px;padding-block:0 64px}
+.wrap{max-width:1080px;margin:0 auto}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;line-height:1.05;margin:0}
+h2{font-size:clamp(28px,4vw,40px);font-weight:800;letter-spacing:-.02em}
+h3{font-size:19px;font-weight:700}
+p{margin:0;max-width:62ch}
+.eyebrow{font:600 12px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.mono{font-family:var(--mono)}
+nav{display:flex;justify-content:space-between;align-items:center;padding-block:20px;border-bottom:1px solid var(--line)}
+nav b{font:800 20px var(--display)}
+nav span{font:12px var(--mono);color:var(--warn)}
+
+/* hero */
+.hero{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:40px;align-items:center;padding-block:48px 56px}
+.hero h1{font-size:clamp(44px,7.5vw,92px);font-weight:800;letter-spacing:-.035em}
+.hero h1 em{font-style:normal;color:var(--brain)}
+.hero .lede{font-size:19px;margin-top:20px;color:var(--ink)}
+.cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px}
+.btn{font:700 15px var(--body);padding:12px 18px;border-radius:999px;border:2px solid var(--ink);color:var(--ink);text-decoration:none;background:transparent}
+.btn.primary{background:var(--ink);color:var(--paper)}
+.btn:focus-visible{outline:3px solid var(--brain);outline-offset:3px}
+.jarbox{position:relative;max-width:420px;width:100%;justify-self:center}
+.jarbox svg{width:100%;height:auto;display:block}
+.label{position:absolute;left:12%;right:12%;bottom:13%;background:var(--card);border:1.5px solid var(--ink);padding:10px 12px;font:11px/1.45 var(--mono);transform:rotate(-2deg)}
+.label strong{font:800 15px var(--display);display:block;letter-spacing:.02em}
+@keyframes bob{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-8px) rotate(2deg)}}
+@keyframes rise{from{transform:translateY(0);opacity:.8}to{transform:translateY(-230px);opacity:0}}
+.brain{transform-origin:200px 200px;transform-box:view-box;animation:bob 6s ease-in-out infinite}
+.bub{animation:rise 5s linear infinite}
+.bub:nth-of-type(2){animation-delay:1.6s}.bub:nth-of-type(3){animation-delay:3.1s}
+@media (prefers-reduced-motion:reduce){.brain,.bub{animation:none}}
+
+/* contract address */
+.buy{display:grid;gap:12px;padding-block:0 40px}
+.ca{display:flex;flex-wrap:wrap;gap:10px;align-items:center;background:var(--card);border:1.5px solid var(--ink);border-radius:10px;padding:12px 14px}
+.ca code{flex:1 1 260px;min-width:0;font:600 15px/1.4 var(--mono);word-break:break-all}
+.links{display:flex;flex-wrap:wrap;gap:10px}
+.btn{cursor:pointer}
+
+/* chat */
+.talk{padding-block:0 48px}
+.chat{background:var(--card);border:1.5px solid var(--ink);border-radius:12px;padding:14px;display:grid;gap:12px;max-width:720px}
+.log{display:grid;gap:8px;max-height:320px;overflow-y:auto;padding:4px}
+.msg{margin:0;padding:9px 13px;border-radius:14px;max-width:85%;line-height:1.45;overflow-wrap:anywhere}
+.msg.bot{background:var(--fluid);justify-self:start;border-bottom-left-radius:4px}
+.msg.me{background:var(--ink);color:var(--paper);justify-self:end;border-bottom-right-radius:4px}
+.msg.wait{opacity:.6;font-style:italic}
+.say{display:flex;gap:8px}
+.say input{flex:1;min-width:0;font:15px var(--body);padding:10px 12px;border:1.5px solid var(--line);border-radius:999px;background:var(--paper);color:var(--ink)}
+.say input:focus-visible{outline:3px solid var(--brain);outline-offset:1px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+/* specimen spec table */
+.spec{border-block:2px solid var(--ink);display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}
+.spec div{padding:18px 16px;border-right:1px solid var(--line)}
+.spec div:last-child{border-right:0}
+.spec dt{font:600 11px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.spec dd{margin:6px 0 0;font:800 26px var(--display);font-variant-numeric:tabular-nums}
+
+section{padding-block:64px 0}
+.head{display:grid;gap:12px;margin-bottom:28px}
+.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:24px;display:grid;gap:12px;align-content:start;min-width:0}
+.pill{display:inline-block;justify-self:start;font:600 11px var(--mono);letter-spacing:.1em;text-transform:uppercase;padding:5px 10px;border-radius:999px;margin:0}
+.pill.live{background:var(--ok);color:var(--card)}
+.pill.next{border:1.5px solid var(--muted);color:var(--muted)}
+ul.check{list-style:none;padding:0;margin:0;display:grid;gap:10px}
+ul.check li{display:grid;grid-template-columns:22px 1fr;gap:8px}
+ul.check li::before{content:"✓";font-weight:700;color:var(--ok)}
+ul.no li::before{content:"✕";color:var(--brain-deep)}
+
+/* mining split */
+.split{display:flex;height:56px;border:2px solid var(--ink);border-radius:8px;overflow:hidden;font:700 14px var(--mono)}
+.split .m{flex:80;background:var(--fluid);display:flex;align-items:center;padding-inline:14px}
+.split .c{flex:20;background:var(--brain);color:#fff;display:flex;align-items:center;justify-content:center}
+.flow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:20px}
+.flow div{border-top:3px solid var(--ink);padding-top:10px;font-size:15px}
+.flow b{display:block;font:700 13px var(--mono);color:var(--muted);margin-bottom:4px}
+.calc{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:end}
+.calc label{display:grid;gap:6px;font:600 12px var(--mono);text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.calc input{font:700 20px var(--mono);padding:10px 12px;border:1.5px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink);width:100%}
+.calc input:focus-visible{outline:3px solid var(--brain);outline-offset:1px}
+.out{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:4px}
+.out div{padding:14px;border-radius:8px;background:var(--paper)}
+.out dd{margin:4px 0 0;font:800 24px var(--display);font-variant-numeric:tabular-nums}
+.out dt{font:12px var(--mono);color:var(--muted)}
+.fine{font-size:13px;color:var(--muted)}
+
+/* guardrails table */
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--card)}
+table{border-collapse:collapse;width:100%;min-width:560px;font-size:15px}
+th,td{text-align:left;padding:14px 16px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:600 11px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+tr:last-child td{border-bottom:0}
+td.v{font:700 15px var(--mono);white-space:nowrap;color:var(--brain-deep)}
+
+pre{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;overflow-x:auto;font:13px/1.6 var(--mono);margin:0}
+.proof{display:grid;gap:14px}
+.result{font:13px/1.7 var(--mono)}
+.result .pass{color:var(--ok);font-weight:600}
+.warnbox{border:2px dashed var(--warn);border-radius:10px;padding:20px;display:grid;gap:10px}
+.warnbox h3{color:var(--warn)}
+footer{margin-top:64px;padding-top:20px;border-top:1px solid var(--line);font:12px var(--mono);color:var(--muted);display:flex;flex-wrap:wrap;gap:8px 24px;justify-content:space-between}
+
+@media (max-width:820px){
+  .hero,.two{grid-template-columns:minmax(0,1fr)}
+  .jarbox{max-width:240px}
+  .hero{gap:24px;padding-block:32px 40px}
+  .spec{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .spec div:nth-child(2){border-right:0}
+  .spec div:nth-child(-n+2){border-bottom:1px solid var(--line)}
+  .flow{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:440px){.calc,.out{grid-template-columns:minmax(0,1fr)}}
+</style>
+</head>
+<body>
+
+
+<div class="wrap">
+  <nav><b>$NOGGIN</b><span>PHASE 1 · PUMP.FUN</span></nav>
+
+  <header class="hero">
+    <div>
+      <p class="eyebrow">Specimen 001 · Solana</p>
+      <h1>A brain in a jar with a <em>budget cap.</em></h1>
+      <p class="lede">$NOGGIN is a fair-launch memecoin on pump.fun. Right now that's all it is. Creator fees pay to build its brain: an AI mascot with hard spending limits, and NOGGIN Mining, a staking pool whose creator fee is locked by code.</p>
+      <div class="cta">
+        <a class="btn primary" href="#phases">What's live now</a>
+        <a class="btn" href="#verify">Verify it yourself</a>
+      </div>
+    </div>
+    <div class="jarbox" aria-hidden="true">
+      <svg viewBox="0 0 400 460">
+        <rect x="120" y="18" width="160" height="34" rx="6" fill="var(--ink)"/>
+        <path d="M110 60 h180 q20 0 20 22 v300 q0 54 -54 54 h-112 q-54 0 -54 -54 v-300 q0 -22 20 -22z" fill="var(--fluid)" stroke="var(--ink)" stroke-width="4"/>
+        <circle class="bub" cx="150" cy="380" r="6" fill="none" stroke="var(--ink)" stroke-width="2"/>
+        <circle class="bub" cx="250" cy="390" r="4" fill="none" stroke="var(--ink)" stroke-width="2"/>
+        <circle class="bub" cx="205" cy="400" r="5" fill="none" stroke="var(--ink)" stroke-width="2"/>
+        <g class="brain">
+          <path d="M125 200 q-10 -60 45 -70 q20 -35 60 -15 q45 -10 55 35 q35 20 10 60 q5 40 -40 42 q-25 25 -60 5 q-45 10 -55 -22 q-30 -10 -15 -35z" fill="var(--brain)" stroke="var(--brain-deep)" stroke-width="4"/>
+          <path d="M200 125 q-12 40 4 70 q14 30 -4 70 M160 160 q25 5 30 30 M240 150 q-20 15 -16 40 M150 225 q25 -10 45 5 M245 230 q-20 -12 -40 2" fill="none" stroke="var(--brain-deep)" stroke-width="4" stroke-linecap="round"/>
+          <circle cx="180" cy="195" r="7" fill="var(--ink)"/><circle cx="225" cy="195" r="7" fill="var(--ink)"/>
+          <circle cx="182" cy="192" r="2.5" fill="var(--card)"/><circle cx="227" cy="192" r="2.5" fill="var(--card)"/>
+        </g>
+      </svg>
+      <div class="label"><strong>NOGGIN</strong>CONTENTS: 1 brain (artificial)<br>SPEND LIMIT: 0.5% / proposal<br>DO NOT SHAKE</div>
+    </div>
+  </header>
+
+  <section id="buy" class="buy" aria-labelledby="buy-h">
+    <p class="eyebrow" id="buy-h">Contract address</p>
+    <div class="ca">
+      <code id="ca">Posted here at launch. Ignore any address you see before then.</code>
+      <button type="button" class="btn" id="copy" hidden>Copy</button>
+    </div>
+    <div class="links" id="links">
+      <a class="btn primary" id="l-pump" hidden target="_blank" rel="noopener">Buy on pump.fun</a>
+      <a class="btn" id="l-x" hidden target="_blank" rel="noopener">X</a>
+      <a class="btn" id="l-tg" hidden target="_blank" rel="noopener">Telegram</a>
+      <a class="btn" id="l-vault" hidden target="_blank" rel="noopener">Treasury vault</a>
+      <a class="btn" id="l-logs" hidden target="_blank" rel="noopener">Noggin's brain log</a>
+    </div>
+  </section>
+
+  <section id="talk" class="talk" aria-labelledby="talk-h">
+    <div class="head">
+      <p class="eyebrow">Talk to Noggin</p>
+      <h2 id="talk-h">Phase 1 brain: pure gibberish</h2>
+      <p>Right now Noggin runs on tiny-gpt2: a 2 MB language model that was never trained. It has no idea what words mean, so it just babbles. The real brain comes in Phase 2.</p>
+    </div>
+    <div class="chat">
+      <div class="log" id="log" aria-live="polite"><p class="msg bot">blorp. ask me something. I will not understand it.</p></div>
+      <form class="say" id="say">
+        <label for="msg" class="sr">Message</label>
+        <input id="msg" type="text" maxlength="200" autocomplete="off" placeholder="say something to the brain">
+        <button class="btn primary" type="submit">Send</button>
+      </form>
+      <p class="fine" id="brainState"></p>
+    </div>
+  </section>
+
+  <dl class="spec">
+    <div><dt>Total supply</dt><dd>1,000,000,000</dd></div>
+    <div><dt>Minted to team</dt><dd>0%</dd></div>
+    <div><dt>Mint authority</dt><dd>None</dd></div>
+    <div><dt>Freeze authority</dt><dd>None</dd></div>
+  </dl>
+
+  <section id="phases">
+    <div class="head">
+      <p class="eyebrow">Launch plan</p>
+      <h2>Two phases, so the jar pays for itself</h2>
+      <p>Phase 1 is a plain memecoin. Its creator fees pay for Phase 2, which needs about 3 SOL to deploy. The code is written and tested; it is not audited yet.</p>
+    </div>
+    <div class="two">
+      <div class="panel">
+        <p class="pill live">Phase 1 · live now</p>
+        <h3>Fair launch on pump.fun</h3>
+        <ul class="check">
+          <li>Bonding-curve launch: no presale, no tokens minted to the team</li>
+          <li>Minting and freezing switched off by pump.fun at creation</li>
+          <li>Any tokens the creator buys are disclosed with the transaction</li>
+          <li>Creator fees fund Phase 2. Progress gets posted publicly</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <p class="pill next">Phase 2 · funded by creator fees</p>
+        <h3>The full NOGGIN program</h3>
+        <ul class="check">
+          <li>Noggin the AI: posts and proposes grants, every decision fingerprinted on-chain</li>
+          <li>Treasury in a multisig, so no single person can spend it</li>
+          <li>NOGGIN Mining staking pool, 20% creator fee locked by code</li>
+          <li>Treasury caps (1% per proposal, 3% per week) enforced by the program itself</li>
+          <li>48-hour timelock and guardian veto on-chain</li>
+          <li>AI picks validators with a 10% weekly cap on stake moved</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="mining">
+    <div class="head">
+      <p class="eyebrow">NOGGIN Mining · Phase 2</p>
+      <h2>Coming next: deposit SOL, earn real staking rewards</h2>
+      <p>Solana runs on staking, so "mining" here means your SOL gets staked with validators and earns the network's staking rewards. The pool is the official SPL Stake Pool program. The AI only chooses which validators to use.</p>
+    </div>
+    <div class="split" role="img" aria-label="Staking rewards split: 80 percent to miners, 20 percent creator fee">
+      <div class="m">80% to miners</div><div class="c">20%</div>
+    </div>
+    <div class="flow">
+      <div><b>1 · Deposit</b>You deposit SOL and receive pool tokens for your share.</div>
+      <div><b>2 · Stake</b>The AI delegates the pool's SOL across vetted validators.</div>
+      <div><b>3 · Earn</b>Each epoch (about 2 days) rewards land and your tokens grow in SOL value.</div>
+      <div><b>4 · Exit</b>Withdraw any time, as SOL from the pool's reserve or as a stake account. No deposit or withdrawal fee.</div>
+    </div>
+
+    <div class="two" style="margin-top:28px">
+      <div class="panel">
+        <h3>Rough earnings sketch</h3>
+        <form class="calc" id="calc" novalidate>
+          <label for="sol">SOL deposited<input id="sol" type="number" min="0" step="1" value="10" inputmode="decimal"></label>
+          <label for="apy">Staking APY %<input id="apy" type="number" min="0" max="20" step="0.1" value="6.5" inputmode="decimal"></label>
+        </form>
+        <dl class="out">
+          <div><dt>You, per year</dt><dd id="you">0.52 SOL</dd></div>
+          <div><dt>Creator fee, per year</dt><dd id="fee">0.13 SOL</dd></div>
+        </dl>
+        <p class="fine">Example math only. Network staking APY moves every epoch and nothing here is a promise of returns. Rewards are paid in SOL, and SOL's price can fall.</p>
+      </div>
+      <div class="panel">
+        <h3>Why the 20% can't creep up</h3>
+        <p>A normal stake pool has a manager key that can raise fees, and deposit-fee changes hit instantly. NOGGIN hands that manager role to its own program, which has no fee-changing instruction at all.</p>
+        <p>Before accepting the role, the program reads the pool and refuses unless the creator fee is exactly 20%, every other fee is zero, no fee change is queued, and deposits are open to everyone.</p>
+        <p class="fine">The AI also checks this every epoch and posts an alarm if anything is off.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="head">
+      <p class="eyebrow">The leash · Phase 2</p>
+      <h2>What the AI will be allowed to do</h2>
+    </div>
+    <div class="tbl">
+      <table>
+        <thead><tr><th>Rule</th><th>Limit</th><th>Before the program</th><th>After the program</th></tr></thead>
+        <tbody>
+          <tr><td>Largest single treasury proposal</td><td class="v">0.5% / 1%</td><td>AI policy + multisig vote</td><td>On-chain program</td></tr>
+          <tr><td>Wait before any spend executes</td><td class="v">48 hours</td><td>Squads time lock</td><td>On-chain program</td></tr>
+          <tr><td>Who approves a spend</td><td class="v">2 of 3 humans</td><td>Squads multisig</td><td>Guardian can veto</td></tr>
+          <tr><td>Proposals to wallets not on the grantee list</td><td class="v">Blocked</td><td>AI policy</td><td>AI policy</td></tr>
+          <tr><td>Proposals per day</td><td class="v">2</td><td>AI policy</td><td>AI policy</td></tr>
+          <tr><td>Links, price talk, "100x"</td><td class="v">Never posted</td><td>AI policy</td><td>AI policy</td></tr>
+          <tr><td>Mining fee changes</td><td class="v">Impossible</td><td>Not live yet</td><td>On-chain program</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="two" style="margin-top:20px">
+      <div class="panel">
+        <h3>The AI can</h3>
+        <ul class="check">
+          <li>Post as the mascot and answer the community</li>
+          <li>Propose small grants for art, tools, translations and audits</li>
+          <li>Choose validators for the mining pool (Phase 2)</li>
+          <li>Publish its full reasoning, hashed on-chain as proof</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h3>The AI cannot</h3>
+        <ul class="check no">
+          <li>Mint tokens or freeze anyone's wallet</li>
+          <li>Withdraw anyone's staked SOL</li>
+          <li>Change the mining fee</li>
+          <li>Move treasury tokens by itself: humans sign every spend</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="verify">
+    <div class="head">
+      <p class="eyebrow">Proof of brain</p>
+      <h2>Phase 2: don't trust the jar. Check it.</h2>
+      <p>Every decision the AI makes goes into a public log. The SHA-256 of each entry is written on-chain as a memo, so anyone can re-hash a log line and match it to the transaction.</p>
+    </div>
+    <div class="proof">
+      <pre class="result">Program log: Memo (len 135): "noggin:v1:proposal:5U3LDbwm…vjq6:400000:40ee2479…107c"</pre>
+      <p class="fine">Phase 1 memo format: noggin:v1:&lt;kind&gt;:…:&lt;sha256 of the log entry&gt;. Example from a local test run.</p>
+      <pre>npx tsx scripts/admin.ts verify-pool &lt;POOL_ADDRESS&gt;   # Phase 2</pre>
+      <pre class="result">{
+  "manager is NOGGIN lock PDA (fees frozen forever)": <span class="pass">true</span>,
+  "creator fee on rewards (%)": 20,
+  "pending fee changes": <span class="pass">false</span>,
+  "deposit fees (%)": [0, 0],
+  "withdrawal fees (%)": [0, 0],
+  "deposits open to everyone": <span class="pass">true</span>
+}
+reward split after 4 epochs on a local validator:
+  creatorPct: <span class="pass">'20.00%'</span>   creator raising fee to 90%: <span class="pass">rejected</span></pre>
+      <p class="fine">Output from the project's end-to-end test against the real SPL Stake Pool program. Mainnet addresses get listed here at launch; until then, any "NOGGIN" contract you see elsewhere is not this one.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="warnbox">
+      <h3>Read before aping</h3>
+      <p>This is a memecoin. It has no intrinsic value and can go to zero. In Phase 1 the treasury rules are enforced by a multisig and a time lock, not by code. The Phase 2 NOGGIN program has not been audited yet. Staking rewards vary and are not guaranteed. Nothing on this page is financial advice.</p>
+    </div>
+  </section>
+
+  <footer>
+    <span>$NOGGIN · fixed supply · 0% minted to team · Phase 1 live on pump.fun</span>
+    <span>Built on Solana</span>
+  </footer>
+</div>
+
+<script>
+/* ===== LAUNCH DAY: fill these in, then re-upload the site =====
+   Leave a value "" to hide its button. */
+const NOGGIN = {
+  mint: "7sEca2UXrWZdRxdEJzptT3A6xNfTdf7FYkAEfcUVpump",            // token address from pump.fun
+  x: "",               // e.g. "https://x.com/nogginjar"
+  telegram: "",        // e.g. "https://t.me/nogginjar"
+  treasuryVault: "",   // your Squads vault address
+  logsUrl: "",         // public repo/folder with Noggin's logs
+  brainUrl: "https://perfume-continental-always-captured.trycloudflare.com"         // your Cloudflare tunnel URL for the GPT-2 brain, e.g. "https://xyz.trycloudflare.com"
+};
+(function(){
+  var log=document.getElementById('log'), form=document.getElementById('say'), input=document.getElementById('msg'), state=document.getElementById('brainState');
+  function add(text,cls){var p=document.createElement('p');p.className='msg '+cls;p.textContent=text;log.appendChild(p);log.scrollTop=log.scrollHeight;return p}
+  if(!NOGGIN.brainUrl){input.disabled=true;form.querySelector('button').disabled=true;state.textContent="Noggin's brain is asleep right now. Check back soon.";}
+  form.addEventListener('submit',function(e){
+    e.preventDefault(); var m=input.value.trim(); if(!m||!NOGGIN.brainUrl) return;
+    add(m,'me'); input.value=''; var w=add('thinking (slowly)…','bot wait');
+    fetch(NOGGIN.brainUrl.replace(/\/$/,'')+'/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:m})})
+      .then(function(r){return r.json()}).then(function(d){w.className='msg bot';w.textContent=d.reply||'blub.'})
+      .catch(function(){w.className='msg bot';w.textContent="I can't reach my brain. The computer it lives on might be asleep."});
+  });
+})();
+(function(){
+  var $=function(id){return document.getElementById(id)};
+  var show=function(id,href){if(href){var a=$(id);a.href=href;a.hidden=false}};
+  if(NOGGIN.mint){
+    $('ca').textContent=NOGGIN.mint;
+    $('copy').hidden=false;
+    show('l-pump','https://pump.fun/coin/'+NOGGIN.mint);
+  }
+  show('l-x',NOGGIN.x); show('l-tg',NOGGIN.telegram);
+  if(NOGGIN.treasuryVault) show('l-vault','https://solscan.io/account/'+NOGGIN.treasuryVault);
+  show('l-logs',NOGGIN.logsUrl);
+  $('copy').addEventListener('click',function(){
+    var b=this, done=function(){b.textContent='Copied';setTimeout(function(){b.textContent='Copy'},1500)};
+    var sel=function(){var r=document.createRange();r.selectNodeContents($('ca'));var s=getSelection();s.removeAllRanges();s.addRange(r)};
+    try{navigator.clipboard.writeText(NOGGIN.mint).then(done,sel)}catch(e){sel()}
+  });
+})();
+(function(){
+  var sol=document.getElementById('sol'), apy=document.getElementById('apy');
+  var you=document.getElementById('you'), fee=document.getElementById('fee');
+  function fmt(n){return (n>=100?n.toFixed(0):n>=1?n.toFixed(2):n.toFixed(3))+' SOL'}
+  function run(){
+    var s=Math.max(0,parseFloat(sol.value)||0), a=Math.max(0,parseFloat(apy.value)||0)/100;
+    var gross=s*a; you.textContent=fmt(gross*0.8); fee.textContent=fmt(gross*0.2);
+  }
+  sol.addEventListener('input',run); apy.addEventListener('input',run);
+  document.getElementById('calc').addEventListener('submit',function(e){e.preventDefault()});
+  run();
+})();
+</script>
+
+</body>
+</html>
