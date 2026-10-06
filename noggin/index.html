@@ -196,8 +196,8 @@ footer{margin-top:64px;padding-top:20px;border-top:1px solid var(--line);font:12
   <section id="talk" class="talk" aria-labelledby="talk-h">
     <div class="head">
       <p class="eyebrow">Talk to Noggin</p>
-      <h2 id="talk-h">Phase 1 brain: raised on copypasta</h2>
-      <p>Right now Noggin runs on GPT-2, fine-tuned on a pile of brain-in-a-jar shitposts. It doesn't understand you. It just rambles. The real brain comes in Phase 2.</p>
+      <h2 id="talk-h">Talk to the brain in the jar</h2>
+      <p>Noggin runs on an open-source AI model on a single gaming PC. It's a mascot, not an oracle: it makes things up, and nothing it says is financial advice.</p>
     </div>
     <div class="chat">
       <div class="log" id="log" aria-live="polite"><p class="msg bot">I am a brain. I live in a jar. ask me something.</p></div>
@@ -377,14 +377,14 @@ const NOGGIN = {
   brainUrl: "https://electrical-deferred-blank-links.trycloudflare.com"         // your Cloudflare tunnel URL for the GPT-2 brain, e.g. "https://xyz.trycloudflare.com"
 };
 (function(){
-  var log=document.getElementById('log'), form=document.getElementById('say'), input=document.getElementById('msg'), state=document.getElementById('brainState');
+  var log=document.getElementById('log'), form=document.getElementById('say'), input=document.getElementById('msg'), state=document.getElementById('brainState'); var H=[];
   function add(text,cls){var p=document.createElement('p');p.className='msg '+cls;p.textContent=text;log.appendChild(p);log.scrollTop=log.scrollHeight;return p}
   if(!NOGGIN.brainUrl){input.disabled=true;form.querySelector('button').disabled=true;state.textContent="Noggin's brain is asleep right now. Check back soon.";}
   form.addEventListener('submit',function(e){
     e.preventDefault(); var m=input.value.trim(); if(!m||!NOGGIN.brainUrl) return;
     add(m,'me'); input.value=''; var w=add('thinking (slowly)…','bot wait');
-    fetch(NOGGIN.brainUrl.replace(/\/$/,'')+'/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:m})})
-      .then(function(r){return r.json()}).then(function(d){w.className='msg bot';w.textContent=d.reply||'blub.'})
+    fetch(NOGGIN.brainUrl.replace(/\/$/,'')+'/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:m,history:H.slice(-6)})})
+      .then(function(r){return r.json()}).then(function(d){w.className='msg bot';w.textContent=d.reply||'blub.';H.push({role:'user',content:m},{role:'assistant',content:w.textContent})})
       .catch(function(){w.className='msg bot';w.textContent="I can't reach my brain. The computer it lives on might be asleep."});
   });
 })();
