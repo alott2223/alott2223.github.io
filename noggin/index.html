@@ -3,421 +3,428 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="$NOGGIN: a fair-launch Solana memecoin run by an AI mascot with a budget cap. Every decision fingerprinted on-chain.">
-<meta property="og:title" content="$NOGGIN · a brain in a jar with a budget cap">
-<meta property="og:description" content="Fair launch. AI mascot with hard spending limits. Every decision fingerprinted on-chain.">
-<meta name="twitter:card" content="summary">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M12 34c-2-11 7-16 12-15 4-6 12-5 15-1 8-1 12 7 11 12 6 4 2 13-4 13-2 6-11 7-15 3-6 3-14 0-14-5-5-1-7-5-5-7z' fill='%23e0648c' stroke='%23b8436b' stroke-width='3'/%3E%3Ccircle cx='26' cy='32' r='3' fill='%23173b3a'/%3E%3Ccircle cx='38' cy='32' r='3' fill='%23173b3a'/%3E%3C/svg%3E">
-<style>html{-webkit-text-size-adjust:100%}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
-<title>$NOGGIN</title>
+<title>$NOGGIN · the brain in a jar</title>
+<meta name="description" content="$NOGGIN is a Solana memecoin whose mascot is a real AI: a brain in a jar running on one RTX 4090. Talk to it here. Not an investment.">
+<meta property="og:title" content="$NOGGIN · the brain in a jar">
+<meta property="og:description" content="A Solana memecoin with a real AI mascot you can talk to. Runs on one RTX 4090. No promises, no yield, just a brain.">
+<meta property="og:image" content="https://nogginjar.com/logo.png">
+<meta property="og:url" content="https://nogginjar.com">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#081111">
+<link rel="icon" href="logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=JetBrains+Mono:wght@400;600;700&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
 <style>
-/* Layout: a lab specimen sheet. Jar hero left, specimen label right; below, stacked "findings" in a two-column grid that folds to one. */
 :root{
-  --paper:#eef2ef; --card:#f8faf8; --ink:#173b3a; --muted:#5a706d; --line:#c9d6d2;
-  --brain:#e0648c; --brain-deep:#b8436b; --fluid:#cfe6dc; --ok:#2f7d5b; --warn:#a2581b;
+  --bg:#081111; --bg2:#0d1a1a; --card:#112222; --line:#1f3634; --ink:#e6f2ee; --muted:#8aa7a1;
+  --brain:#ff6f9f; --brain2:#ffb3cb; --fluid:#3fe0b0; --fluid-dim:#16443a; --warn:#ffb057; --bad:#ff6b6b;
   --display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
   --body:"Atkinson Hyperlegible",ui-sans-serif,system-ui,sans-serif;
   --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+  color-scheme:dark;
 }
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --paper:#0f1c1c; --card:#152626; --ink:#dcebe6; --muted:#8fa8a3; --line:#2a3f3e;
-  --brain:#ef7fa2; --brain-deep:#f39ab6; --fluid:#1d3a34; --ok:#5cc196; --warn:#e2a067; color-scheme:dark}}
-:root[data-theme="dark"]{
-  --paper:#0f1c1c; --card:#152626; --ink:#dcebe6; --muted:#8fa8a3; --line:#2a3f3e;
-  --brain:#ef7fa2; --brain-deep:#f39ab6; --fluid:#1d3a34; --ok:#5cc196; --warn:#e2a067; color-scheme:dark}
 *{box-sizing:border-box}
-body{background:var(--paper);color:var(--ink);font:16px/1.6 var(--body);padding-inline:20px;padding-block:0 64px}
-.wrap{max-width:1080px;margin:0 auto}
-h1,h2,h3{font-family:var(--display);text-wrap:balance;line-height:1.05;margin:0}
-h2{font-size:clamp(28px,4vw,40px);font-weight:800;letter-spacing:-.02em}
-h3{font-size:19px;font-weight:700}
-p{margin:0;max-width:62ch}
-.eyebrow{font:600 12px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 var(--body);overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(900px 600px at 80% -10%,rgba(63,224,176,.13),transparent 60%),
+             radial-gradient(700px 500px at -10% 40%,rgba(255,111,159,.10),transparent 60%)}
+.wrap{position:relative;z-index:1;max-width:1120px;margin:0 auto;padding:0 20px}
+h1,h2,h3{font-family:var(--display);line-height:1.02;margin:0;text-wrap:balance}
+p{margin:0}
+a{color:inherit}
+.eyebrow{font:700 12px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--fluid)}
 .mono{font-family:var(--mono)}
-nav{display:flex;justify-content:space-between;align-items:center;padding-block:20px;border-bottom:1px solid var(--line)}
-nav b{font:800 20px var(--display)}
-nav span{font:12px var(--mono);color:var(--warn)}
+[hidden]{display:none!important}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* nav */
+nav{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 0}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font:800 22px var(--display)}
+.brand img{width:36px;height:36px;border-radius:10px}
+.navlinks{display:flex;gap:22px;font:600 14px var(--mono)}
+.navlinks a{text-decoration:none;color:var(--muted)}
+.navlinks a:hover{color:var(--ink)}
+@media (max-width:720px){.navlinks{display:none}}
+
+.btn{display:inline-flex;align-items:center;gap:8px;font:700 15px var(--body);padding:12px 20px;border-radius:999px;border:1.5px solid var(--line);
+  background:var(--card);color:var(--ink);text-decoration:none;cursor:pointer;transition:transform .15s,border-color .15s,background .15s}
+.btn:hover{transform:translateY(-1px);border-color:var(--fluid)}
+.btn.hot{background:var(--brain);border-color:var(--brain);color:#1a0610}
+.btn.hot:hover{background:var(--brain2);border-color:var(--brain2)}
+.btn:focus-visible,input:focus-visible{outline:3px solid var(--fluid);outline-offset:2px}
 
 /* hero */
-.hero{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:40px;align-items:center;padding-block:48px 56px}
-.hero h1{font-size:clamp(44px,7.5vw,92px);font-weight:800;letter-spacing:-.035em}
-.hero h1 em{font-style:normal;color:var(--brain)}
-.hero .lede{font-size:19px;margin-top:20px;color:var(--ink)}
-.cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px}
-.btn{font:700 15px var(--body);padding:12px 18px;border-radius:999px;border:2px solid var(--ink);color:var(--ink);text-decoration:none;background:transparent}
-.btn.primary{background:var(--ink);color:var(--paper)}
-.btn:focus-visible{outline:3px solid var(--brain);outline-offset:3px}
-.jarbox{position:relative;max-width:420px;width:100%;justify-self:center}
-.jarbox svg{width:100%;height:auto;display:block}
-.label{position:absolute;left:12%;right:12%;bottom:13%;background:var(--card);border:1.5px solid var(--ink);padding:10px 12px;font:11px/1.45 var(--mono);transform:rotate(-2deg)}
-.label strong{font:800 15px var(--display);display:block;letter-spacing:.02em}
-@keyframes bob{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-8px) rotate(2deg)}}
-@keyframes rise{from{transform:translateY(0);opacity:.8}to{transform:translateY(-230px);opacity:0}}
-.brain{transform-origin:200px 200px;transform-box:view-box;animation:bob 6s ease-in-out infinite}
-.bub{animation:rise 5s linear infinite}
-.bub:nth-of-type(2){animation-delay:1.6s}.bub:nth-of-type(3){animation-delay:3.1s}
-@media (prefers-reduced-motion:reduce){.brain,.bub{animation:none}}
+.hero{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:48px;align-items:center;padding:40px 0 72px}
+.hero h1{font-size:clamp(48px,8vw,104px);font-weight:800;letter-spacing:-.04em}
+.hero h1 .g{background:linear-gradient(90deg,var(--brain),var(--brain2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.lede{font-size:clamp(18px,2vw,21px);color:#c3d8d2;margin-top:22px;max-width:34em}
+.lede b{color:var(--ink)}
+.cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}
+.ca{margin-top:28px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--bg2);border:1px dashed var(--line);border-radius:14px;padding:10px 10px 10px 16px;max-width:560px}
+.ca .k{font:700 11px var(--mono);letter-spacing:.12em;color:var(--muted)}
+.ca code{flex:1 1 220px;min-width:0;font:600 14px/1.4 var(--mono);word-break:break-all;color:var(--fluid)}
+.ca .btn{padding:8px 14px;font-size:13px}
 
-/* contract address */
-.buy{display:grid;gap:12px;padding-block:0 40px}
-.ca{display:flex;flex-wrap:wrap;gap:10px;align-items:center;background:var(--card);border:1.5px solid var(--ink);border-radius:10px;padding:12px 14px}
-.ca code{flex:1 1 260px;min-width:0;font:600 15px/1.4 var(--mono);word-break:break-all}
-.links{display:flex;flex-wrap:wrap;gap:10px}
-.btn{cursor:pointer}
+/* jar */
+.jar{position:relative;justify-self:center;width:min(100%,400px)}
+.jar svg{width:100%;height:auto;display:block;filter:drop-shadow(0 30px 60px rgba(63,224,176,.18))}
+.brainG{transform-origin:200px 230px;transform-box:view-box;animation:bob 6s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-10px) rotate(3deg)}}
+.bub{animation:rise 5.5s linear infinite;opacity:0}
+.bub:nth-of-type(2){animation-delay:1.4s}.bub:nth-of-type(3){animation-delay:2.9s}.bub:nth-of-type(4){animation-delay:4.1s}
+@keyframes rise{0%{transform:translateY(0);opacity:0}10%{opacity:.9}100%{transform:translateY(-260px);opacity:0}}
+.glow{animation:pulse 3.5s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:.35}50%{opacity:.7}}
+.thought{position:absolute;left:-6%;top:-4%;max-width:78%;background:var(--ink);color:#0b1616;font:600 14px/1.4 var(--mono);
+  padding:12px 14px;border-radius:18px 18px 18px 4px;box-shadow:0 10px 30px rgba(0,0,0,.4);
+  opacity:0;transform:translateY(8px) scale(.96);transition:opacity .4s,transform .4s;white-space:pre-wrap;overflow-wrap:anywhere}
+.thought.on{opacity:1;transform:none}
+.thought::after{content:"";position:absolute;left:18px;bottom:-12px;width:14px;height:14px;border-radius:50%;background:var(--ink)}
+.thought::before{content:"";position:absolute;left:8px;bottom:-24px;width:8px;height:8px;border-radius:50%;background:var(--ink)}
+
+/* ticker */
+.ticker{border-block:1px solid var(--line);background:var(--bg2);overflow:hidden;white-space:nowrap;font:600 13px var(--mono);color:var(--muted)}
+.ticker div{display:inline-block;padding:12px 0;animation:tick 40s linear infinite}
+.ticker span{margin-right:40px}
+.ticker span::before{content:"🧠 ";}
+@keyframes tick{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+section{padding:88px 0 0}
+.head{display:grid;gap:12px;margin-bottom:32px;max-width:40em}
+.head h2{font-size:clamp(32px,4.6vw,54px);font-weight:800;letter-spacing:-.03em}
+.head p{color:#c3d8d2;font-size:18px}
 
 /* chat */
-.talk{padding-block:0 48px}
-.chat{background:var(--card);border:1.5px solid var(--ink);border-radius:12px;padding:14px;display:grid;gap:12px;max-width:720px}
-.log{display:grid;gap:8px;max-height:320px;overflow-y:auto;padding:4px}
-.msg{margin:0;padding:9px 13px;border-radius:14px;max-width:85%;line-height:1.45;overflow-wrap:anywhere}
-.msg.bot{background:var(--fluid);justify-self:start;border-bottom-left-radius:4px}
-.msg.me{background:var(--ink);color:var(--paper);justify-self:end;border-bottom-right-radius:4px}
-.msg.wait{opacity:.6;font-style:italic}
-.say{display:flex;gap:8px}
-.say input{flex:1;min-width:0;font:15px var(--body);padding:10px 12px;border:1.5px solid var(--line);border-radius:999px;background:var(--paper);color:var(--ink)}
-.say input:focus-visible{outline:3px solid var(--brain);outline-offset:1px}
-.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.chatwrap{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,.7fr);gap:24px;align-items:start}
+.chat{background:var(--bg2);border:1px solid var(--line);border-radius:22px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.35)}
+.chatbar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 18px;border-bottom:1px solid var(--line);background:var(--card)}
+.who{display:flex;align-items:center;gap:10px;font:800 17px var(--display)}
+.who img{width:30px;height:30px;border-radius:8px}
+.status{display:flex;align-items:center;gap:7px;font:600 12px var(--mono);color:var(--muted)}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--muted)}
+.dot.on{background:var(--fluid);box-shadow:0 0 0 0 rgba(63,224,176,.6);animation:ping 2s infinite}
+.dot.off{background:var(--bad)}
+@keyframes ping{70%{box-shadow:0 0 0 8px rgba(63,224,176,0)}100%{box-shadow:0 0 0 0 rgba(63,224,176,0)}}
+.log{height:440px;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:10px;scroll-behavior:smooth}
+.msg{max-width:82%;padding:10px 14px;border-radius:18px;line-height:1.45;white-space:pre-wrap;overflow-wrap:anywhere;animation:pop .25s ease-out}
+@keyframes pop{from{opacity:0;transform:translateY(6px)}}
+.msg.bot{align-self:flex-start;background:var(--card);border:1px solid var(--line);border-bottom-left-radius:5px}
+.msg.me{align-self:flex-end;background:var(--brain);color:#1a0610;border-bottom-right-radius:5px;font-weight:700}
+.msg.muse{border-style:dashed;border-color:var(--fluid-dim)}
+.msg.muse::before{content:"unprompted thought";display:block;font:700 10px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--fluid);margin-bottom:3px}
+.msg.wait{color:var(--muted)}
+.typing span{display:inline-block;width:7px;height:7px;margin-right:3px;border-radius:50%;background:var(--muted);animation:dots 1s infinite}
+.typing span:nth-child(2){animation-delay:.15s}.typing span:nth-child(3){animation-delay:.3s}
+@keyframes dots{50%{transform:translateY(-4px);opacity:.4}}
+.say{display:flex;gap:10px;padding:14px;border-top:1px solid var(--line);background:var(--card)}
+.say input{flex:1;min-width:0;font:16px var(--body);padding:12px 16px;border-radius:999px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+.say input::placeholder{color:#6d8a84}
+.chips{display:flex;flex-wrap:wrap;gap:8px;padding:0 14px 14px;background:var(--card)}
+.chip{font:600 12px var(--mono);padding:7px 11px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer}
+.chip:hover{color:var(--ink);border-color:var(--fluid)}
+.side{display:grid;gap:14px}
+.note{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px;display:grid;gap:8px}
+.note h3{font-size:19px}
+.note p{color:#c3d8d2;font-size:15px}
+.spec{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font:13px var(--mono);margin:4px 0 0}
+.spec dt{color:var(--muted)}.spec dd{margin:0;color:var(--ink)}
 
-/* specimen spec table */
-.spec{border-block:2px solid var(--ink);display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}
-.spec div{padding:18px 16px;border-right:1px solid var(--line)}
-.spec div:last-child{border-right:0}
-.spec dt{font:600 11px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
-.spec dd{margin:6px 0 0;font:800 26px var(--display);font-variant-numeric:tabular-nums}
+/* facts */
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.fact{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px;display:grid;gap:6px;align-content:start}
+.fact .k{font:700 11px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.fact .v{font:800 28px var(--display);letter-spacing:-.02em}
+.fact p{color:#c3d8d2;font-size:15px}
+.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:16px}
+.list{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:24px;display:grid;gap:12px;align-content:start}
+.list ul{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.list li{display:grid;grid-template-columns:24px 1fr;gap:8px;color:#c3d8d2}
+.list li::before{content:"✓";font-weight:700;color:var(--fluid)}
+.list.no li::before{content:"✕";color:var(--brain)}
 
-section{padding-block:64px 0}
-.head{display:grid;gap:12px;margin-bottom:28px}
-.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
-.panel{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:24px;display:grid;gap:12px;align-content:start;min-width:0}
-.pill{display:inline-block;justify-self:start;font:600 11px var(--mono);letter-spacing:.1em;text-transform:uppercase;padding:5px 10px;border-radius:999px;margin:0}
-.pill.live{background:var(--ok);color:var(--card)}
-.pill.next{border:1.5px solid var(--muted);color:var(--muted)}
-ul.check{list-style:none;padding:0;margin:0;display:grid;gap:10px}
-ul.check li{display:grid;grid-template-columns:22px 1fr;gap:8px}
-ul.check li::before{content:"✓";font-weight:700;color:var(--ok)}
-ul.no li::before{content:"✕";color:var(--brain-deep)}
+/* roadmap */
+.road{display:grid;gap:14px}
+.step{display:grid;grid-template-columns:150px minmax(0,1fr);gap:20px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px}
+.tag{align-self:start;justify-self:start;font:700 11px var(--mono);letter-spacing:.1em;text-transform:uppercase;padding:6px 10px;border-radius:999px}
+.tag.live{background:var(--fluid);color:#062019}
+.tag.plan{border:1px solid var(--muted);color:var(--muted)}
+.step h3{font-size:21px;margin-bottom:6px}
+.step p{color:#c3d8d2}
 
-/* mining split */
-.split{display:flex;height:56px;border:2px solid var(--ink);border-radius:8px;overflow:hidden;font:700 14px var(--mono)}
-.split .m{flex:80;background:var(--fluid);display:flex;align-items:center;padding-inline:14px}
-.split .c{flex:20;background:var(--brain);color:#fff;display:flex;align-items:center;justify-content:center}
-.flow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:20px}
-.flow div{border-top:3px solid var(--ink);padding-top:10px;font-size:15px}
-.flow b{display:block;font:700 13px var(--mono);color:var(--muted);margin-bottom:4px}
-.calc{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:end}
-.calc label{display:grid;gap:6px;font:600 12px var(--mono);text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
-.calc input{font:700 20px var(--mono);padding:10px 12px;border:1.5px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink);width:100%}
-.calc input:focus-visible{outline:3px solid var(--brain);outline-offset:1px}
-.out{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:4px}
-.out div{padding:14px;border-radius:8px;background:var(--paper)}
-.out dd{margin:4px 0 0;font:800 24px var(--display);font-variant-numeric:tabular-nums}
-.out dt{font:12px var(--mono);color:var(--muted)}
-.fine{font-size:13px;color:var(--muted)}
+.warn{margin-top:88px;border:2px dashed var(--warn);border-radius:22px;padding:28px;display:grid;gap:10px;background:rgba(255,176,87,.05)}
+.warn h3{color:var(--warn);font-size:24px}
+.warn p{color:#e6d6c2;max-width:70ch}
+footer{margin-top:64px;padding:24px 0 48px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:12px 28px;justify-content:space-between;font:12px var(--mono);color:var(--muted)}
+footer a{color:var(--muted)}
 
-/* guardrails table */
-.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--card)}
-table{border-collapse:collapse;width:100%;min-width:560px;font-size:15px}
-th,td{text-align:left;padding:14px 16px;border-bottom:1px solid var(--line);vertical-align:top}
-th{font:600 11px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
-tr:last-child td{border-bottom:0}
-td.v{font:700 15px var(--mono);white-space:nowrap;color:var(--brain-deep)}
-
-pre{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;overflow-x:auto;font:13px/1.6 var(--mono);margin:0}
-.proof{display:grid;gap:14px}
-.result{font:13px/1.7 var(--mono)}
-.result .pass{color:var(--ok);font-weight:600}
-.warnbox{border:2px dashed var(--warn);border-radius:10px;padding:20px;display:grid;gap:10px}
-.warnbox h3{color:var(--warn)}
-footer{margin-top:64px;padding-top:20px;border-top:1px solid var(--line);font:12px var(--mono);color:var(--muted);display:flex;flex-wrap:wrap;gap:8px 24px;justify-content:space-between}
-
-@media (max-width:820px){
-  .hero,.two{grid-template-columns:minmax(0,1fr)}
-  .jarbox{max-width:240px}
-  .hero{gap:24px;padding-block:32px 40px}
-  .spec{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .spec div:nth-child(2){border-right:0}
-  .spec div:nth-child(-n+2){border-bottom:1px solid var(--line)}
-  .flow{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (max-width:900px){
+  .hero,.chatwrap{grid-template-columns:minmax(0,1fr)}
+  .jar{width:min(80%,300px);margin-top:20px}
+  .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
-@media (max-width:440px){.calc,.out{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:600px){
+  .grid,.two{grid-template-columns:minmax(0,1fr)}
+  .step{grid-template-columns:minmax(0,1fr);gap:10px}
+  .log{height:380px}
+  .hero{padding-top:16px}
+}
 </style>
 </head>
 <body>
-
-
 <div class="wrap">
-  <nav><b>$NOGGIN</b><span>PHASE 1 · PUMP.FUN</span></nav>
+  <nav>
+    <a class="brand" href="#top"><img src="logo.png" alt="">$NOGGIN</a>
+    <div class="navlinks"><a href="#talk">Talk to it</a><a href="#what">What it is</a><a href="#roadmap">Roadmap</a><a href="#risk">Risks</a></div>
+    <a class="btn" id="navPump" href="#" target="_blank" rel="noopener" hidden>pump.fun ↗</a>
+  </nav>
 
-  <header class="hero">
+  <header class="hero" id="top">
     <div>
-      <p class="eyebrow">Specimen 001 · Solana</p>
-      <h1>A brain in a jar with a <em>budget cap.</em></h1>
-      <p class="lede">$NOGGIN is a fair-launch memecoin on pump.fun. Right now that's all it is. Creator fees pay to build its brain: an AI mascot with hard spending limits, and NOGGIN Mining, a staking pool whose creator fee is locked by code.</p>
+      <p class="eyebrow">Solana memecoin · AI mascot</p>
+      <h1>A brain.<br>In a jar.<br><span class="g">On Solana.</span></h1>
+      <p class="lede">$NOGGIN is a memecoin. Its mascot is a <b>real AI</b> that lives on one RTX 4090 and talks like a terminally online brain in a jar. You can talk to it below. A version trained on its creator's own words is up next. That's the whole product right now, and we're not going to pretend otherwise.</p>
       <div class="cta">
-        <a class="btn primary" href="#phases">What's live now</a>
-        <a class="btn" href="#verify">Verify it yourself</a>
+        <a class="btn hot" href="#talk">Talk to the brain</a>
+        <a class="btn" href="#what">What it actually is</a>
+      </div>
+      <div class="ca">
+        <span class="k">CA</span>
+        <code id="ca">loading…</code>
+        <button type="button" class="btn" id="copy" hidden>Copy</button>
       </div>
     </div>
-    <div class="jarbox" aria-hidden="true">
-      <svg viewBox="0 0 400 460">
-        <rect x="120" y="18" width="160" height="34" rx="6" fill="var(--ink)"/>
-        <path d="M110 60 h180 q20 0 20 22 v300 q0 54 -54 54 h-112 q-54 0 -54 -54 v-300 q0 -22 20 -22z" fill="var(--fluid)" stroke="var(--ink)" stroke-width="4"/>
-        <circle class="bub" cx="150" cy="380" r="6" fill="none" stroke="var(--ink)" stroke-width="2"/>
-        <circle class="bub" cx="250" cy="390" r="4" fill="none" stroke="var(--ink)" stroke-width="2"/>
-        <circle class="bub" cx="205" cy="400" r="5" fill="none" stroke="var(--ink)" stroke-width="2"/>
-        <g class="brain">
-          <path d="M125 200 q-10 -60 45 -70 q20 -35 60 -15 q45 -10 55 35 q35 20 10 60 q5 40 -40 42 q-25 25 -60 5 q-45 10 -55 -22 q-30 -10 -15 -35z" fill="var(--brain)" stroke="var(--brain-deep)" stroke-width="4"/>
-          <path d="M200 125 q-12 40 4 70 q14 30 -4 70 M160 160 q25 5 30 30 M240 150 q-20 15 -16 40 M150 225 q25 -10 45 5 M245 230 q-20 -12 -40 2" fill="none" stroke="var(--brain-deep)" stroke-width="4" stroke-linecap="round"/>
-          <circle cx="180" cy="195" r="7" fill="var(--ink)"/><circle cx="225" cy="195" r="7" fill="var(--ink)"/>
-          <circle cx="182" cy="192" r="2.5" fill="var(--card)"/><circle cx="227" cy="192" r="2.5" fill="var(--card)"/>
+    <div class="jar" aria-hidden="true">
+      <div class="thought" id="thought"></div>
+      <svg viewBox="0 0 400 480">
+        <defs>
+          <linearGradient id="glass" x1="0" x2="1"><stop offset="0" stop-color="#3fe0b0" stop-opacity=".18"/><stop offset=".5" stop-color="#3fe0b0" stop-opacity=".06"/><stop offset="1" stop-color="#3fe0b0" stop-opacity=".2"/></linearGradient>
+          <radialGradient id="halo"><stop offset="0" stop-color="#ff6f9f" stop-opacity=".55"/><stop offset="1" stop-color="#ff6f9f" stop-opacity="0"/></radialGradient>
+        </defs>
+        <rect x="118" y="22" width="164" height="38" rx="8" fill="#1f3634" stroke="#3fe0b0" stroke-opacity=".5" stroke-width="2"/>
+        <rect x="128" y="30" width="144" height="5" rx="2" fill="#3fe0b0" opacity=".35"/>
+        <path d="M108 70 h184 q22 0 22 24 v300 q0 58 -58 58 h-112 q-58 0 -58 -58 v-300 q0 -24 22 -24z" fill="url(#glass)" stroke="#3fe0b0" stroke-opacity=".7" stroke-width="3"/>
+        <path d="M110 150 h180" stroke="#3fe0b0" stroke-opacity=".35" stroke-width="2" stroke-dasharray="6 8"/>
+        <circle class="glow" cx="200" cy="240" r="130" fill="url(#halo)"/>
+        <circle class="bub" cx="150" cy="420" r="6" fill="none" stroke="#3fe0b0" stroke-width="2"/>
+        <circle class="bub" cx="248" cy="430" r="4" fill="none" stroke="#3fe0b0" stroke-width="2"/>
+        <circle class="bub" cx="205" cy="440" r="5" fill="none" stroke="#3fe0b0" stroke-width="2"/>
+        <circle class="bub" cx="270" cy="415" r="3" fill="none" stroke="#3fe0b0" stroke-width="2"/>
+        <g class="brainG">
+          <path d="M125 240 q-10 -60 45 -70 q20 -35 60 -15 q45 -10 55 35 q35 20 10 60 q5 40 -40 42 q-25 25 -60 5 q-45 10 -55 -22 q-30 -10 -15 -35z" fill="#ff6f9f" stroke="#ffb3cb" stroke-width="4"/>
+          <path d="M200 165 q-12 40 4 70 q14 30 -4 70 M160 200 q25 5 30 30 M240 190 q-20 15 -16 40 M150 265 q25 -10 45 5 M245 270 q-20 -12 -40 2" fill="none" stroke="#c94a78" stroke-width="4" stroke-linecap="round"/>
+          <circle cx="180" cy="235" r="8" fill="#081111"/><circle cx="225" cy="235" r="8" fill="#081111"/>
+          <circle cx="183" cy="232" r="3" fill="#fff"/><circle cx="228" cy="232" r="3" fill="#fff"/>
+          <path d="M193 258 q9 7 18 0" fill="none" stroke="#081111" stroke-width="3" stroke-linecap="round"/>
         </g>
+        <rect x="132" y="380" width="136" height="44" rx="4" fill="#e6f2ee" transform="rotate(-3 200 402)"/>
+        <text x="200" y="400" text-anchor="middle" font-family="JetBrains Mono,monospace" font-weight="700" font-size="14" fill="#081111" transform="rotate(-3 200 402)">NOGGIN</text>
+        <text x="200" y="416" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#081111" transform="rotate(-3 200 402)">1 BRAIN · DO NOT SHAKE</text>
       </svg>
-      <div class="label"><strong>NOGGIN</strong>CONTENTS: 1 brain (artificial)<br>SPEND LIMIT: 0.5% / proposal<br>DO NOT SHAKE</div>
     </div>
   </header>
+</div>
 
-  <section id="buy" class="buy" aria-labelledby="buy-h">
-    <p class="eyebrow" id="buy-h">Contract address</p>
-    <div class="ca">
-      <code id="ca">Posted here at launch. Ignore any address you see before then.</code>
-      <button type="button" class="btn" id="copy" hidden>Copy</button>
+<div class="ticker" aria-hidden="true"><div id="ticker"></div></div>
+
+<div class="wrap">
+  <section id="talk">
+    <div class="head">
+      <p class="eyebrow">Live from the jar</p>
+      <h2>Talk to Noggin</h2>
+      <p>It answers questions, rambles, and sometimes just says stuff on its own. It's a mascot, not an oracle: it makes things up, and nothing it says is financial advice.</p>
     </div>
-    <div class="links" id="links">
-      <a class="btn primary" id="l-pump" hidden target="_blank" rel="noopener">Buy on pump.fun</a>
-      <a class="btn" id="l-x" hidden target="_blank" rel="noopener">X</a>
-      <a class="btn" id="l-tg" hidden target="_blank" rel="noopener">Telegram</a>
-      <a class="btn" id="l-vault" hidden target="_blank" rel="noopener">Treasury vault</a>
-      <a class="btn" id="l-logs" hidden target="_blank" rel="noopener">Noggin's brain log</a>
+    <div class="chatwrap">
+      <div class="chat">
+        <div class="chatbar">
+          <div class="who"><img src="logo.png" alt="">Noggin</div>
+          <div class="status"><span class="dot" id="dot"></span><span id="statusText">checking the jar…</span></div>
+        </div>
+        <div class="log" id="log" aria-live="polite"><p class="msg bot">yo. i'm a brain. i live in a jar. ask me something.</p></div>
+        <form class="say" id="say">
+          <label for="msg" class="sr">Message</label>
+          <input id="msg" type="text" maxlength="200" autocomplete="off" placeholder="say something to the brain">
+          <button class="btn hot" type="submit">Send</button>
+        </form>
+        <div class="chips" id="chips">
+          <button type="button" class="chip">who are you</button>
+          <button type="button" class="chip">how's the jar</button>
+          <button type="button" class="chip">say something random</button>
+          <button type="button" class="chip">is noggin going to moon</button>
+        </div>
+      </div>
+      <div class="side">
+        <div class="note">
+          <h3>How the brain works</h3>
+          <p>An open-source chat model running on a gaming PC with Noggin's personality and house rules. Next up: a version fine-tuned on the creator's own lines and a stack of original copypasta. It runs on that PC, not a cloud. When the PC sleeps, so does Noggin.</p>
+          <dl class="spec"><dt>GPU</dt><dd>1× RTX 4090</dd><dt>Model</dt><dd id="modelName">open-source LLM</dd><dt>Memory</dt><dd>last few messages</dd><dt>Limit</dt><dd>6 messages / min</dd></dl>
+        </div>
+        <div class="note">
+          <h3>House rules it follows</h3>
+          <p>No price predictions, no "buy" talk, no links, never asks for wallets or seed phrases. If anyone DMs you claiming to be Noggin and asks for those, it's a scam.</p>
+        </div>
+      </div>
     </div>
   </section>
 
-  <section id="talk" class="talk" aria-labelledby="talk-h">
+  <section id="what">
     <div class="head">
-      <p class="eyebrow">Talk to Noggin</p>
-      <h2 id="talk-h">Talk to the brain in the jar</h2>
-      <p>Noggin runs on an open-source AI model on a single gaming PC. It's a mascot, not an oracle: it makes things up, and nothing it says is financial advice.</p>
+      <p class="eyebrow">No fine print games</p>
+      <h2>What $NOGGIN actually is</h2>
+      <p>Everything on this list is true today. Anything not on it doesn't exist yet.</p>
     </div>
-    <div class="chat">
-      <div class="log" id="log" aria-live="polite"><p class="msg bot">I am a brain. I live in a jar. ask me something.</p></div>
-      <form class="say" id="say">
-        <label for="msg" class="sr">Message</label>
-        <input id="msg" type="text" maxlength="200" autocomplete="off" placeholder="say something to the brain">
-        <button class="btn primary" type="submit">Send</button>
-      </form>
-      <p class="fine" id="brainState"></p>
-    </div>
-  </section>
-
-  <dl class="spec">
-    <div><dt>Total supply</dt><dd>1,000,000,000</dd></div>
-    <div><dt>Minted to team</dt><dd>0%</dd></div>
-    <div><dt>Mint authority</dt><dd>None</dd></div>
-    <div><dt>Freeze authority</dt><dd>None</dd></div>
-  </dl>
-
-  <section id="phases">
-    <div class="head">
-      <p class="eyebrow">Launch plan</p>
-      <h2>Two phases, so the jar pays for itself</h2>
-      <p>Phase 1 is a plain memecoin. Its creator fees pay for Phase 2, which needs about 3 SOL to deploy. The code is written and tested; it is not audited yet.</p>
+    <div class="grid">
+      <div class="fact"><span class="k">Chain</span><span class="v">Solana</span><p>Launched on pump.fun. No presale, no private round.</p></div>
+      <div class="fact"><span class="k">Supply</span><span class="v">1,000,000,000</span><p>Fixed. Mint and freeze authority are off, set by pump.fun at creation.</p></div>
+      <div class="fact"><span class="k">Team allocation</span><span class="v">0 pre-minted</span><p id="creatorNote">Anything the creator holds was bought on the open curve like everyone else.</p></div>
     </div>
     <div class="two">
-      <div class="panel">
-        <p class="pill live">Phase 1 · live now</p>
-        <h3>Fair launch on pump.fun</h3>
-        <ul class="check">
-          <li>Bonding-curve launch: no presale, no tokens minted to the team</li>
-          <li>Minting and freezing switched off by pump.fun at creation</li>
-          <li>Any tokens the creator buys are disclosed with the transaction</li>
-          <li>Creator fees fund Phase 2. Progress gets posted publicly</li>
+      <div class="list">
+        <h3>It is</h3>
+        <ul>
+          <li>A memecoin with a brain-in-a-jar mascot</li>
+          <li>A real AI chatbot you can talk to on this page</li>
+          <li>Run by one person on one PC, in public</li>
         </ul>
       </div>
-      <div class="panel">
-        <p class="pill next">Phase 2 · funded by creator fees</p>
-        <h3>The full NOGGIN program</h3>
-        <ul class="check">
-          <li>Noggin the AI: posts and proposes grants, every decision fingerprinted on-chain</li>
-          <li>Treasury in a multisig, so no single person can spend it</li>
-          <li>NOGGIN Mining staking pool, 20% creator fee locked by code</li>
-          <li>Treasury caps (1% per proposal, 3% per week) enforced by the program itself</li>
-          <li>48-hour timelock and guardian veto on-chain</li>
-          <li>AI picks validators with a 10% weekly cap on stake moved</li>
+      <div class="list no">
+        <h3>It is not</h3>
+        <ul>
+          <li>An investment, a share of anything, or a promise of returns</li>
+          <li>A staking product. There is no yield and no "mining" live</li>
+          <li>Backed by anything. It can go to zero</li>
         </ul>
       </div>
     </div>
   </section>
 
-  <section id="mining">
+  <section id="roadmap">
     <div class="head">
-      <p class="eyebrow">NOGGIN Mining · Phase 2</p>
-      <h2>Coming next: deposit SOL, earn real staking rewards</h2>
-      <p>Solana runs on staking, so "mining" here means your SOL gets staked with validators and earns the network's staking rewards. The pool is the official SPL Stake Pool program. The AI only chooses which validators to use.</p>
+      <p class="eyebrow">Roadmap</p>
+      <h2>What's live and what's just an idea</h2>
+      <p>Ideas below are written and tested in code, but they are not live, have no date, and won't launch without a code audit and legal review. They might never launch.</p>
     </div>
-    <div class="split" role="img" aria-label="Staking rewards split: 80 percent to miners, 20 percent creator fee">
-      <div class="m">80% to miners</div><div class="c">20%</div>
-    </div>
-    <div class="flow">
-      <div><b>1 · Deposit</b>You deposit SOL and receive pool tokens for your share.</div>
-      <div><b>2 · Stake</b>The AI delegates the pool's SOL across vetted validators.</div>
-      <div><b>3 · Earn</b>Each epoch (about 2 days) rewards land and your tokens grow in SOL value.</div>
-      <div><b>4 · Exit</b>Withdraw any time, as SOL from the pool's reserve or as a stake account. No deposit or withdrawal fee.</div>
-    </div>
-
-    <div class="two" style="margin-top:28px">
-      <div class="panel">
-        <h3>Rough earnings sketch</h3>
-        <form class="calc" id="calc" novalidate>
-          <label for="sol">SOL deposited<input id="sol" type="number" min="0" step="1" value="10" inputmode="decimal"></label>
-          <label for="apy">Staking APY %<input id="apy" type="number" min="0" max="20" step="0.1" value="6.5" inputmode="decimal"></label>
-        </form>
-        <dl class="out">
-          <div><dt>You, per year</dt><dd id="you">0.52 SOL</dd></div>
-          <div><dt>Creator fee, per year</dt><dd id="fee">0.13 SOL</dd></div>
-        </dl>
-        <p class="fine">Example math only. Network staking APY moves every epoch and nothing here is a promise of returns. Rewards are paid in SOL, and SOL's price can fall.</p>
-      </div>
-      <div class="panel">
-        <h3>Why the 20% can't creep up</h3>
-        <p>A normal stake pool has a manager key that can raise fees, and deposit-fee changes hit instantly. NOGGIN hands that manager role to its own program, which has no fee-changing instruction at all.</p>
-        <p>Before accepting the role, the program reads the pool and refuses unless the creator fee is exactly 20%, every other fee is zero, no fee change is queued, and deposits are open to everyone.</p>
-        <p class="fine">The AI also checks this every epoch and posts an alarm if anything is off.</p>
-      </div>
+    <div class="road">
+      <div class="step"><span class="tag live">Live</span><div><h3>Token + site + talking brain</h3><p>The token on pump.fun, this site, and Noggin running on the 4090.</p></div></div>
+      <div class="step"><span class="tag plan">Next</span><div><h3>Noggin v2: trained on its creator's voice</h3><p>The same brain, fine-tuned on the creator's own lines and original jar copypasta, on the same 4090.</p></div></div>
+      <div class="step"><span class="tag plan">Idea</span><div><h3>Public brain log</h3><p>Noggin's posts and decisions hashed into Solana memos, so anyone can check nothing was edited after the fact.</p></div></div>
+      <div class="step"><span class="tag plan">Idea</span><div><h3>An AI with a leash</h3><p>A small on-chain treasury the AI can propose spending from, with hard caps, a 48-hour delay and a human veto written into the program itself.</p></div></div>
+      <div class="step"><span class="tag plan">Idea · needs legal review</span><div><h3>SOL staking pool</h3><p>A pool on Solana's official stake-pool program. Built and tested on a local test network only. Nothing to deposit into, and it stays that way until a lawyer and an auditor sign off.</p></div></div>
     </div>
   </section>
 
-  <section>
-    <div class="head">
-      <p class="eyebrow">The leash · Phase 2</p>
-      <h2>What the AI will be allowed to do</h2>
-    </div>
-    <div class="tbl">
-      <table>
-        <thead><tr><th>Rule</th><th>Limit</th><th>Before the program</th><th>After the program</th></tr></thead>
-        <tbody>
-          <tr><td>Largest single treasury proposal</td><td class="v">0.5% / 1%</td><td>AI policy + multisig vote</td><td>On-chain program</td></tr>
-          <tr><td>Wait before any spend executes</td><td class="v">48 hours</td><td>Squads time lock</td><td>On-chain program</td></tr>
-          <tr><td>Who approves a spend</td><td class="v">2 of 3 humans</td><td>Squads multisig</td><td>Guardian can veto</td></tr>
-          <tr><td>Proposals to wallets not on the grantee list</td><td class="v">Blocked</td><td>AI policy</td><td>AI policy</td></tr>
-          <tr><td>Proposals per day</td><td class="v">2</td><td>AI policy</td><td>AI policy</td></tr>
-          <tr><td>Links, price talk, "100x"</td><td class="v">Never posted</td><td>AI policy</td><td>AI policy</td></tr>
-          <tr><td>Mining fee changes</td><td class="v">Impossible</td><td>Not live yet</td><td>On-chain program</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <div class="two" style="margin-top:20px">
-      <div class="panel">
-        <h3>The AI can</h3>
-        <ul class="check">
-          <li>Post as the mascot and answer the community</li>
-          <li>Propose small grants for art, tools, translations and audits</li>
-          <li>Choose validators for the mining pool (Phase 2)</li>
-          <li>Publish its full reasoning, hashed on-chain as proof</li>
-        </ul>
-      </div>
-      <div class="panel">
-        <h3>The AI cannot</h3>
-        <ul class="check no">
-          <li>Mint tokens or freeze anyone's wallet</li>
-          <li>Withdraw anyone's staked SOL</li>
-          <li>Change the mining fee</li>
-          <li>Move treasury tokens by itself: humans sign every spend</li>
-        </ul>
-      </div>
-    </div>
-  </section>
-
-  <section id="verify">
-    <div class="head">
-      <p class="eyebrow">Proof of brain</p>
-      <h2>Phase 2: don't trust the jar. Check it.</h2>
-      <p>Every decision the AI makes goes into a public log. The SHA-256 of each entry is written on-chain as a memo, so anyone can re-hash a log line and match it to the transaction.</p>
-    </div>
-    <div class="proof">
-      <pre class="result">Program log: Memo (len 135): "noggin:v1:proposal:5U3LDbwm…vjq6:400000:40ee2479…107c"</pre>
-      <p class="fine">Phase 1 memo format: noggin:v1:&lt;kind&gt;:…:&lt;sha256 of the log entry&gt;. Example from a local test run.</p>
-      <pre>npx tsx scripts/admin.ts verify-pool &lt;POOL_ADDRESS&gt;   # Phase 2</pre>
-      <pre class="result">{
-  "manager is NOGGIN lock PDA (fees frozen forever)": <span class="pass">true</span>,
-  "creator fee on rewards (%)": 20,
-  "pending fee changes": <span class="pass">false</span>,
-  "deposit fees (%)": [0, 0],
-  "withdrawal fees (%)": [0, 0],
-  "deposits open to everyone": <span class="pass">true</span>
-}
-reward split after 4 epochs on a local validator:
-  creatorPct: <span class="pass">'20.00%'</span>   creator raising fee to 90%: <span class="pass">rejected</span></pre>
-      <p class="fine">Output from the project's end-to-end test against the real SPL Stake Pool program. Mainnet addresses get listed here at launch; until then, any "NOGGIN" contract you see elsewhere is not this one.</p>
-    </div>
-  </section>
-
-  <section>
-    <div class="warnbox">
-      <h3>Read before aping</h3>
-      <p>This is a memecoin. It has no intrinsic value and can go to zero. In Phase 1 the treasury rules are enforced by a multisig and a time lock, not by code. The Phase 2 NOGGIN program has not been audited yet. Staking rewards vary and are not guaranteed. Nothing on this page is financial advice.</p>
-    </div>
-  </section>
+  <div class="warn" id="risk">
+    <h3>Read this before you touch it</h3>
+    <p>$NOGGIN is a memecoin. It has no intrinsic value, no team obligations, and no promise of anything. Most memecoins go to zero. Only use money you're completely fine losing. Nothing on this site, and nothing Noggin says, is financial advice. You must be old enough to use crypto platforms where you live.</p>
+  </div>
 
   <footer>
-    <span>$NOGGIN · fixed supply · 0% minted to team · Phase 1 live on pump.fun</span>
-    <span>Built on Solana</span>
+    <span>$NOGGIN · a brain in a jar on Solana · not financial advice</span>
+    <span id="socials"></span>
   </footer>
 </div>
 
 <script>
-/* ===== LAUNCH DAY: fill these in, then re-upload the site =====
-   Leave a value "" to hide its button. */
+/* ===== SITE CONFIG: edit these, then re-upload =====  Leave "" to hide something. */
 const NOGGIN = {
-  mint: "7sEca2UXrWZdRxdEJzptT3A6xNfTdf7FYkAEfcUVpump",            // token address from pump.fun
-  x: "",               // e.g. "https://x.com/nogginjar"
-  telegram: "",        // e.g. "https://t.me/nogginjar"
-  treasuryVault: "",   // your Squads vault address
-  logsUrl: "",         // public repo/folder with Noggin's logs
-  brainUrl: "https://electrical-deferred-blank-links.trycloudflare.com"         // your Cloudflare tunnel URL for the GPT-2 brain, e.g. "https://xyz.trycloudflare.com"
+  mint: "7sEca2UXrWZdRxdEJzptT3A6xNfTdf7FYkAEfcUVpump",
+  brainUrl: "https://brain.nogginjar.com",   // permanent Cloudflare tunnel to the 4090
+  x: "",                // e.g. "https://x.com/yourhandle"
+  telegram: "",         // e.g. "https://t.me/yourgroup"
+  creatorWallet: "",    // creator wallet address, shown publicly so holdings are transparent
+  muses: true           // Noggin randomly says stuff while people are on the page
 };
+
 (function(){
-  var log=document.getElementById('log'), form=document.getElementById('say'), input=document.getElementById('msg'), state=document.getElementById('brainState'); var H=[];
-  function add(text,cls){var p=document.createElement('p');p.className='msg '+cls;p.textContent=text;log.appendChild(p);log.scrollTop=log.scrollHeight;return p}
-  if(!NOGGIN.brainUrl){input.disabled=true;form.querySelector('button').disabled=true;state.textContent="Noggin's brain is asleep right now. Check back soon.";}
-  form.addEventListener('submit',function(e){
-    e.preventDefault(); var m=input.value.trim(); if(!m||!NOGGIN.brainUrl) return;
-    add(m,'me'); input.value=''; var w=add('thinking (slowly)…','bot wait');
-    fetch(NOGGIN.brainUrl.replace(/\/$/,'')+'/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:m,history:H.slice(-6)})})
-      .then(function(r){return r.json()}).then(function(d){w.className='msg bot';w.textContent=d.reply||'blub.';H.push({role:'user',content:m},{role:'assistant',content:w.textContent})})
-      .catch(function(){w.className='msg bot';w.textContent="I can't reach my brain. The computer it lives on might be asleep."});
+  var $ = function(id){ return document.getElementById(id) };
+  var base = NOGGIN.brainUrl.replace(/\/$/, "");
+
+  /* ---------- contract address + links ---------- */
+  if (NOGGIN.mint) {
+    $("ca").textContent = NOGGIN.mint; $("copy").hidden = false;
+    var np = $("navPump"); np.href = "https://pump.fun/coin/" + NOGGIN.mint; np.hidden = false;
+  } else { $("ca").textContent = "posted here at launch"; }
+  $("copy").addEventListener("click", function(){
+    var b = this;
+    function done(){ b.textContent = "Copied"; setTimeout(function(){ b.textContent = "Copy" }, 1500) }
+    function sel(){ var r = document.createRange(); r.selectNodeContents($("ca")); var s = getSelection(); s.removeAllRanges(); s.addRange(r) }
+    try { navigator.clipboard.writeText(NOGGIN.mint).then(done, sel) } catch(e) { sel() }
   });
-})();
-(function(){
-  var $=function(id){return document.getElementById(id)};
-  var show=function(id,href){if(href){var a=$(id);a.href=href;a.hidden=false}};
-  if(NOGGIN.mint){
-    $('ca').textContent=NOGGIN.mint;
-    $('copy').hidden=false;
-    show('l-pump','https://pump.fun/coin/'+NOGGIN.mint);
+  if (NOGGIN.creatorWallet) {
+    var n = $("creatorNote"); n.textContent = "Creator wallet is public: ";
+    var a = document.createElement("a"); a.href = "https://solscan.io/account/" + NOGGIN.creatorWallet; a.target = "_blank"; a.rel = "noopener";
+    a.textContent = NOGGIN.creatorWallet.slice(0,4) + "…" + NOGGIN.creatorWallet.slice(-4) + " ↗"; n.appendChild(a);
   }
-  show('l-x',NOGGIN.x); show('l-tg',NOGGIN.telegram);
-  if(NOGGIN.treasuryVault) show('l-vault','https://solscan.io/account/'+NOGGIN.treasuryVault);
-  show('l-logs',NOGGIN.logsUrl);
-  $('copy').addEventListener('click',function(){
-    var b=this, done=function(){b.textContent='Copied';setTimeout(function(){b.textContent='Copy'},1500)};
-    var sel=function(){var r=document.createRange();r.selectNodeContents($('ca'));var s=getSelection();s.removeAllRanges();s.addRange(r)};
-    try{navigator.clipboard.writeText(NOGGIN.mint).then(done,sel)}catch(e){sel()}
+  var so = $("socials");
+  [["X", NOGGIN.x], ["Telegram", NOGGIN.telegram], ["pump.fun", NOGGIN.mint && "https://pump.fun/coin/" + NOGGIN.mint]].forEach(function(p){
+    if (!p[1]) return; var a = document.createElement("a"); a.href = p[1]; a.textContent = p[0]; a.target = "_blank"; a.rel = "noopener";
+    so.appendChild(a); so.appendChild(document.createTextNode("  "));
   });
-})();
-(function(){
-  var sol=document.getElementById('sol'), apy=document.getElementById('apy');
-  var you=document.getElementById('you'), fee=document.getElementById('fee');
-  function fmt(n){return (n>=100?n.toFixed(0):n>=1?n.toFixed(2):n.toFixed(3))+' SOL'}
-  function run(){
-    var s=Math.max(0,parseFloat(sol.value)||0), a=Math.max(0,parseFloat(apy.value)||0)/100;
-    var gross=s*a; you.textContent=fmt(gross*0.8); fee.textContent=fmt(gross*0.2);
+
+  /* ---------- ticker + offline thoughts ---------- */
+  var LOCAL = ["blub.", "the jar is extra wet today", "gerald the bubble would've loved this", "my 4090 is warm. i am warm. we are warm.",
+    "thinking about boats again", "no hands. still typing. don't ask.", "bubble count: 3. new record.", "old games hit different",
+    "i have 86 billion neurons and they're all arguing", "if anyone needs me i'll be in the jar. forever.", "not financial advice. never is."];
+  var tk = $("ticker"), items = LOCAL.concat(LOCAL).map(function(t){ return "<span>" + t.replace(/</g,"&lt;") + "</span>" }).join("");
+  tk.innerHTML = items;
+
+  /* ---------- chat ---------- */
+  var log = $("log"), form = $("say"), input = $("msg"), H = [], busy = false, online = false;
+  function add(text, cls){ var p = document.createElement("p"); p.className = "msg " + cls; p.textContent = text; log.appendChild(p); log.scrollTop = log.scrollHeight; return p }
+  function typing(){ var p = add("", "bot wait"); p.innerHTML = '<span class="typing"><span></span><span></span><span></span></span>'; return p }
+  function setStatus(on, text){ online = on; $("dot").className = "dot " + (on ? "on" : "off"); $("statusText").textContent = text }
+  function getJSON(url, opts){
+    var ctl = "AbortController" in window ? new AbortController() : null;
+    var t = setTimeout(function(){ ctl && ctl.abort() }, 45000);
+    return fetch(url, Object.assign({ signal: ctl && ctl.signal }, opts || {}))
+      .then(function(r){ return r.json() }).finally(function(){ clearTimeout(t) });
   }
-  sol.addEventListener('input',run); apy.addEventListener('input',run);
-  document.getElementById('calc').addEventListener('submit',function(e){e.preventDefault()});
-  run();
+  function checkHealth(){
+    getJSON(base + "/health").then(function(d){
+      setStatus(true, "online · thinking on a 4090");
+      if (d && d.backend === "finetuned") $("modelName").textContent = "fine-tuned in the creator's voice";
+      else if (d && d.backend === "ollama") $("modelName").textContent = "Qwen (open-source)";
+    }).catch(function(){ setStatus(false, "asleep · the PC is off") });
+  }
+  checkHealth(); setInterval(checkHealth, 60000);
+
+  function send(m){
+    if (!m || busy) return;
+    busy = true; add(m, "me"); input.value = "";
+    var w = typing();
+    getJSON(base + "/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message: m, history: H.slice(-6) }) })
+      .then(function(d){ w.className = "msg bot"; w.textContent = (d && d.reply) || "blub."; H.push({ role: "user", content: m }, { role: "assistant", content: w.textContent }); setStatus(true, "online · thinking on a 4090") })
+      .catch(function(){ w.className = "msg bot"; w.textContent = "i can't reach my brain rn. the PC i live on might be asleep."; setStatus(false, "asleep · the PC is off") })
+      .finally(function(){ busy = false; lastActivity = Date.now(); log.scrollTop = log.scrollHeight });
+  }
+  form.addEventListener("submit", function(e){ e.preventDefault(); send(input.value.trim()) });
+  $("chips").addEventListener("click", function(e){ if (e.target.classList.contains("chip")) send(e.target.textContent) });
+
+  /* ---------- random thoughts ---------- */
+  var lastActivity = Date.now(), museCount = 0, MAX_MUSES = 10, thought = $("thought"), hideT;
+  input.addEventListener("input", function(){ lastActivity = Date.now() });
+  function showThought(t){
+    thought.textContent = t; thought.classList.add("on");
+    clearTimeout(hideT); hideT = setTimeout(function(){ thought.classList.remove("on") }, 9000);
+  }
+  function deliver(t){
+    showThought(t);
+    var idle = Date.now() - lastActivity > 20000;
+    if (idle && !busy) add(t, "bot muse");     // only drop into the chat when nobody is mid-conversation
+  }
+  function muse(){
+    if (document.hidden || busy || museCount >= MAX_MUSES) return schedule();
+    museCount++;
+    if (!online) { deliver(LOCAL[Math.floor(Math.random() * LOCAL.length)]); return schedule() }
+    getJSON(base + "/muse").then(function(d){ if (d && d.thought) deliver(d.thought) })
+      .catch(function(){ deliver(LOCAL[Math.floor(Math.random() * LOCAL.length)]) })
+      .finally(schedule);
+  }
+  function schedule(){ setTimeout(muse, 35000 + Math.random() * 45000) }
+  if (NOGGIN.muses) setTimeout(muse, 9000);
 })();
 </script>
-
 </body>
 </html>
